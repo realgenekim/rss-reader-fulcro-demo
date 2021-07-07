@@ -37,7 +37,8 @@
    :router-targets      [LandingPage ItemForm InvoiceForm InvoiceList AccountList AccountForm AccountInvoices
                          sales-report/SalesReport InventoryReport
                          sales-report/RealSalesReport
-                         stories/StoriesListReport stories/StoryReport  stories/StoriesCustom
+                         ;stories/StoriesListReport stories/StoryReport
+                         stories/StoriesCustom
                          ; stories/Root7
                          dashboard/Dashboard
                          mdetail/AccountList]}
@@ -92,7 +93,7 @@
                    (ui-dropdown-item {:onClick (fn [] (rroute/route-to! this mdetail/AccountList {}))} "Master Detail")))
                (ui-dropdown {:className "item" :text "Gene"}
                  (ui-dropdown-menu {}
-                   (ui-dropdown-item {:onClick (fn [] (rroute/route-to! this stories/StoriesListReport {}))} "Stories")
+                   ;(ui-dropdown-item {:onClick (fn [] (rroute/route-to! this stories/StoriesListReport {}))} "Stories")
                    (ui-dropdown-item {:onClick (fn [] (rroute/route-to! this stories/StoriesCustom {}))} "defsc"))))))
 
 
