@@ -33,8 +33,8 @@
   {ao/identities                                                   #{:account/id}
    ao/required?                                                    true
    ao/schema                                                       :production
-   :com.fulcrologic.rad.database-adapters.datomic/attribute-schema {:db/unique :db.unique/value}
-   })
+   :com.fulcrologic.rad.database-adapters.datomic/attribute-schema {:db/unique :db.unique/value}})
+
 
 
 (defattr active? :account/active? :boolean

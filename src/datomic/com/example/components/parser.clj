@@ -10,6 +10,7 @@
     [com.example.model.account :as account]
     [com.example.model.invoice :as invoice]
     [com.example.model.timezone :as timezone]
+    [com.example.model.story-list :as story-list]
     [com.fulcrologic.rad.attributes :as attr]
     [com.fulcrologic.rad.blob :as blob]
     [com.fulcrologic.rad.database-adapters.datomic :as datomic]
@@ -20,7 +21,8 @@
     [com.example.model.item :as item]
     [com.wsscode.pathom.core :as p]
     [com.fulcrologic.rad.type-support.date-time :as dt]
-    [com.wsscode.pathom.connect :as pc]))
+    [com.wsscode.pathom.connect :as pc]
+    [com.example.model.mutations :as m]))
 
 (pc/defresolver index-explorer [{::pc/keys [indexes]} _]
                 {::pc/input  #{:com.wsscode.pathom.viz.index-explorer/id}
@@ -54,4 +56,7 @@
      item/resolvers
      sales/resolvers
      timezone/resolvers
-     index-explorer]))
+     story-list/resolvers
+     index-explorer
+     m/mutations]))
+

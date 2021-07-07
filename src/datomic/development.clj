@@ -16,9 +16,34 @@
     [taoensso.timbre :as log]
     [datomic.api :as d]
     [com.fulcrologic.rad.attributes :as attr]
-    [com.fulcrologic.rad.type-support.date-time :as dt]))
+    [com.fulcrologic.rad.type-support.date-time :as dt]
+    [com.example.model.mutations :as m]))
 
 (set-refresh-dirs "src/main" "src/datomic" "src/dev" "src/shared")
+
+(def myparse (partial com.example.components.parser/parser com.example.components.config/config))
+
+(comment
+  (go)
+  (myparse [:story-list/all-stories])
+  (com.example.components.parser/parser com.example.components.config/config
+                                        {:account/email "tony@example.com"})
+  (com.example.components.parser/parser com.example.components.config/config
+                                        [:story-list/all-stories])
+  (com.example.components.parser/parser com.example.components.config/config
+                                        [{[:story-list/id "K3Y7GLlRfaBDsUWYD0WuXjH/byGbQnwaMWp+PEBoUZw=_13ef0cdbc18:15c0fac:70d63bab"]
+                                          [:story/author :story/id :story/title]}])
+
+  (com.example.components.parser/parser com.example.components.config/config
+                                        [{[:full-story/id "K3Y7GLlRfaBDsUWYD0WuXjH/byGbQnwaMWp+PEBoUZw=_13ef0cdbc18:15c0fac:70d63bab"]
+                                          [:story/author :story/content :story/id :story/title]}])
+
+  (com.example.components.parser/parser com.example.components.config/config
+                                        [{[:full-story/id "K3Y7GLlRfaBDsUWYD0WuXjH/byGbQnwaMWp+PEBoUZw=_13ef0cdbc18:15c0fac:70d63bab"]
+                                          [:full-story/id :full-story/author
+                                           :full-story/title :full-story/content]}])
+
+  ,,)
 
 (comment
   (let [db (d/db (:main datomic-connections))]

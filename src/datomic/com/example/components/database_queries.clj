@@ -3,7 +3,8 @@
     [com.fulcrologic.rad.database-adapters.datomic :as datomic]
     [datomic.api :as d]
     [taoensso.timbre :as log]
-    [taoensso.encore :as enc]))
+    [taoensso.encore :as enc]
+    [feedly :as f]))
 
 (defn get-all-accounts
   [env query-params]
@@ -18,6 +19,147 @@
                       ['?dbid :account/id '?uuid]] db))]
       (mapv (fn [id] {:account/id id}) ids))
     (log/error "No database atom for production schema!")))
+
+(comment
+  (get-all-accounts)
+  {:account/role #:db{:id 17592186045421},
+   :password/salt "��u`sY���l�EDq",
+   :account/id #uuid"ffffffff-ffff-ffff-ffff-000000000100",
+   :time-zone/zone-id #:db{:id 17592186045972},
+   :password/iterations 100,
+   :account/active? true,
+   :password/hashed-value "ZozfrISsrVeNl8Tiknfvlg4u6RmgSJ3+goV5FFpGGulbBMVSrytlIzAvq4XjOD4Cb06jdAVtevyd/kqQ+0iiyg==",
+   :account/email "tony@example.com",
+   :account/addresses [{:db/id 17592186046078,
+                        :address/id #uuid"ffffffff-ffff-ffff-ffff-000000000001",
+                        :address/street "111 Main St.",
+                        :address/city "Sacramento",
+                        :address/state #:db{:id 17592186045426},
+                        :address/zip "99999"}],
+   :db/id 17592186046079,
+   :account/primary-address {:db/id 17592186046080,
+                             :address/id #uuid"ffffffff-ffff-ffff-ffff-000000000300",
+                             :address/street "222 Other",
+                             :address/city "Sacramento",
+                             :address/state #:db{:id 17592186045426},
+                             :address/zip "99999"},
+   :account/name "Tony"}
+  ,)
+
+
+; https://stackoverflow.com/questions/43722091/clojure-programmatically-namespace-map-keys
+(defn map->nsmap
+  "Apply the string n to the supplied structure m as a namespace."
+  [m n]
+  (clojure.walk/postwalk
+    (fn [x]
+      (if (keyword? x)
+        (keyword n (name x))
+        x))
+    m))
+
+
+(def stories (f/read-file))
+
+(defn get-all-stories
+  [env query-params]
+  (log/warn "*** get-all-stories!")
+  (->> stories
+       (take 10)
+       (map #(select-keys % [:id :author :title :published]))
+       (map (fn [m]
+              (map->nsmap m "story-list")))))
+
+
+(comment
+  (->> stories
+       (filter #(= (:id %)
+                   "K3Y7GLlRfaBDsUWYD0WuXjH/byGbQnwaMWp+PEBoUZw=_13ef0cdbc18:15c0fac:70d63bab")))
+
+  ,)
+
+(defn get-story-by-id
+  [env story-id]
+  (log/warn "*** get-story! " story-id)
+  (let [retval (->> stories
+                    (filter #(= (:id %) story-id))
+                    (map #(select-keys % [:id :author :title :published :content]))
+                    (map (fn [m]
+                           (assoc m :content
+                                    (-> m :content :content))))
+                    (map (fn [m]
+                           (map->nsmap m "story"))))]
+    ;(println "*** " retval)
+    (first retval)))
+
+(defn get-full-story-by-id
+  [env story-id]
+  (log/warn "*** get-full-story! " story-id)
+  (let [retval (->> stories
+                    (filter #(= (:id %) story-id))
+                    (map #(select-keys % [:id :author :title :published :content]))
+                    (map (fn [m]
+                           (assoc m :content
+                                    (-> m :content :content))))
+                    (map (fn [m]
+                           (map->nsmap m "full-story"))))]
+    ;(println "*** " retval)
+    (first retval)))
+
+
+;(if-let [db (some-> (get-in env [::datomic/databases :production]) deref)]
+;  (d/q '[:find ?account-uuid .
+;         :in $ ?invoice-uuid
+;         :where
+;         [?i :invoice/id ?invoice-uuid]
+;         [?i :invoice/customer ?c]
+;         [?c :account/id ?account-uuid]] db story-id)
+;  (log/error "No database atom for production schema!")))
+
+
+
+
+(comment
+  (get-all-stories)
+
+  (->> (take 3 stories)
+       (map #(select-keys % [:id :author :title :published :content]))
+       (map (fn [m]
+              (assoc m :content
+                       (-> m :content :content))))
+       (map (fn [m]
+              (map->nsmap m "story-list"))))
+
+
+  (clojure.set/rename-keys m {:id :story-list/id
+                              :author :story-list/author
+                              :title :story-list/author
+                              :published :story-list/published})
+
+  (merge
+    (map (fn [x]
+           {(keyword "story-list" id) ;(name (first x)))
+            (second x)})
+         ;{(keyword "story-list" (first x))
+         ; (second x))
+         m))
+
+  (defattr all-stories :story-list/all-stories :ref
+           {ao/target     :story/id
+            ao/pc-output  [{:story-list/all-stories [:story-list/id]}]
+            ao/pc-resolve (fn [{:keys [query-params] :as env} _]
+                            (:clj
+                             {:story-list/all-stories (queries/get-all-stories env query-params)}))})
+
+  (def k1 :id)
+  (->> k1
+       (name)
+       ((fn [k] (keyword "story-list" k))))
+  (def k2 *1)
+  (def k3 :story-list/id)
+  (= k2 k3)
+
+  ,)
 
 (defn get-all-items
   [env {:category/keys [id]}]

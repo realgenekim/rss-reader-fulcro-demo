@@ -13,6 +13,7 @@
     [com.example.ui.sales-report :as sales-report]
     [com.example.ui.dashboard :as dashboard]
     [com.example.ui.master-detail :as mdetail]
+    [com.example.ui.stories-forms :as stories]
     [com.fulcrologic.fulcro.application :as app]
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
     [com.fulcrologic.fulcro.dom.html-entities :as ent]
@@ -36,6 +37,8 @@
    :router-targets      [LandingPage ItemForm InvoiceForm InvoiceList AccountList AccountForm AccountInvoices
                          sales-report/SalesReport InventoryReport
                          sales-report/RealSalesReport
+                         stories/StoriesListReport stories/StoryReport  stories/StoriesCustom
+                         ; stories/Root7
                          dashboard/Dashboard
                          mdetail/AccountList]}
   ;; Normal Fulcro code to show a loader on slow route change (assuming Semantic UI here, should
@@ -86,7 +89,12 @@
                  (ui-dropdown-menu {}
                    (ui-dropdown-item {:onClick (fn [] (rroute/route-to! this dashboard/Dashboard {}))} "Dashboard")
                    (ui-dropdown-item {:onClick (fn [] (rroute/route-to! this sales-report/RealSalesReport {}))} "Sales Report")
-                   (ui-dropdown-item {:onClick (fn [] (rroute/route-to! this mdetail/AccountList {}))} "Master Detail"))))))
+                   (ui-dropdown-item {:onClick (fn [] (rroute/route-to! this mdetail/AccountList {}))} "Master Detail")))
+               (ui-dropdown {:className "item" :text "Gene"}
+                 (ui-dropdown-menu {}
+                   (ui-dropdown-item {:onClick (fn [] (rroute/route-to! this stories/StoriesListReport {}))} "Stories")
+                   (ui-dropdown-item {:onClick (fn [] (rroute/route-to! this stories/StoriesCustom {}))} "defsc"))))))
+
 
         (div :.right.menu
           (div :.item

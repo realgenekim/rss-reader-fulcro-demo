@@ -59,9 +59,9 @@
   (auth/start! app [LoginForm] {:after-session-check `fix-route})
   (app/mount! app Root "app" {:initialize-state? false}))
 
-(comment
+(comment)
 
-  )
+
 
 (defonce performance-stats (tufte/add-accumulating-handler! {}))
 
