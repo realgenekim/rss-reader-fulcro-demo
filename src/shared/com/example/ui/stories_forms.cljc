@@ -19,12 +19,14 @@
 (declare-mutation set-story 'com.example.model.mutations/set-story)
 (declare-mutation get-story 'com.example.model.mutations/get-story)
 
+
+
 (comp/defsc FullStory [_ {:full-story/keys [id author title content]
                           :as props}]
-  {:query [:full-story/id :full-story/author :full-story/content  :full-story/title]
+  {:query [:full-story/id :full-story/author :full-story/content :full-story/title :full-story/pos]
    :ident :full-story/id}
-  (println "FullStory: props: " props)
-  (println "FullStory: content: " content)
+  ;(println "FullStory: props: " props)
+  ;(println "FullStory: content: " content)
   (dom/div :.ui.segment
     (dom/h2 "Full Current Story: ")
     (dom/h3 author)
@@ -40,46 +42,41 @@
 #?(:cljs
    (def format goog.string.format))
 
-(defn select-story!
-  [this story-id]
-  (println "select-story! id: " story-id)
-  (df/load! this [:full-story/id story-id]
+
+(defn save-current-story-pos!
+  [this {:story-list/keys [id pos]
+         :as story}]
+  (println "save-current-story-pos! story:" story)
+  (let [state* (->> com.example.client/app
+                    (:com.fulcrologic.fulcro.application/state-atom))]
+    (reset! state* (assoc-in @state* [:ui/current-position] pos))))
+
+(defn load-full-story!
+  [this {:story-list/keys [id pos]
+         :as story}]
+  (println "load-full-story! story: " story)
+  (df/load! this [:full-story/id id]
             FullStory {:target [:current-story]}))
+
 
 (comp/defsc Story [this {:story-list/keys [id author title pos]
                          :as params}]
-       {:query [:story-list/id :story-list/author :story-list/title :story-list/pos]
-        :ident :story-list/id}
-       (dom/div :.ui.segment
-         (println pos)
-         (dom/h3
-           (dom/a {:href "#!"
-                   :onClick (fn [x]
-                              (println "Story: link: id: " id)
-                              (select-story! this id))}
-             (format "Story: %d. %s" pos title)))
-         (dom/ul
-           (dom/li author)
-           (dom/li title))
-         ;(dom/p (str params))
-         (dom/button {:type    "button"
-                      :onClick (fn [x]
-                                 (println "Story: button: id: " id)
-                                 (select-story! this id))}
-                 "Set Current Story")))
+  {:query [:story-list/id :story-list/author :story-list/title :story-list/pos]
+   :ident :story-list/id}
+  (dom/li
+    (println params)
+    (dom/a {:href "#!"
+            :onClick (fn [x]
+                       (println "Story: link: id: " id)
+                       (load-full-story! this params)
+                       (save-current-story-pos! this params))}
+      (format "%d. %s (%s)" pos title author))))
 
 (def ui-story (comp/factory Story {:keyfn :story-list/id}))
 
 (comment
-  (df/load! com.example.client/app [{[:full-story/id "K3Y7GLlRfaBDsUWYD0WuXjH/byGbQnwaMWp+PEBoUZw=_13ef0cdbc18:15c0fac:70d63bab"]
-                                     [:story/author :story/content :story/id :story/title]}]
-            SelectedStory {:target [:current-story]})
-
-  (def state (->> com.example.client/app
-                  (:com.fulcrologic.fulcro.application/state-atom)
-                  (deref)
-                  :current-story))
-  state
+  (reset! state)
+  (reset! state* (assoc-in @state* [:ui/current-position] 5))
 
   (fdn/db->tree SelectedStory {:a [:b 1]})
   (fdn/db->tree  [:story-list/id] state state)
@@ -125,25 +122,22 @@
    ro/run-on-mount?    true
    ro/route            "stories"}
   (dom/div
-    (dom/div)
     (dom/div
-      (println current-rows)
-      (println "current story: " (:current-story props))
+      (dom/p "Current story: " (:current-story-pos/pos props)))
+    (dom/div
+      ;(println current-rows)
+      ;(println "current story: " (:current-story props))
       (println "props: " props)
-      (dom/p "Hello 2")
-      (println (keys props))
+      ;(println (keys props))
       (println this))
 
     (dom/div :.ui.grid
       (div :.row
         (div :.eight.wide.column
-          (map ui-story current-rows))
+          (dom/ul :.ui.segment
+            (map ui-story current-rows)))
         (div :.eight.wide.column
           (ui-full-story (:current-story props)))))))
-
-
-
-
 
 
 (comment
