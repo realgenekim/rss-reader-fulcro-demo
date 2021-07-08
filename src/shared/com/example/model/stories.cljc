@@ -5,7 +5,8 @@
     [com.fulcrologic.fulcro.components :refer [defsc]]
     #?(:clj [com.example.components.database-queries :as queries])
     [com.fulcrologic.rad.report-options :as ro]
-    [com.wsscode.pathom.connect :as pc]))
+    [com.wsscode.pathom.connect :as pc]
+    [taoensso.timbre :as log]))
 
 
 (defattr id :story/id :string
@@ -23,13 +24,10 @@
   {ao/required?                                          true
    ao/identities                                         #{:story/id}})
 
+(defattr pos :story/pos :number
+  {ao/required?                                          true
+   ao/identities                                         #{:story/id}})
 
-(defattr all-stories :story-list/all-stories :ref
-  {ao/target     :story/id
-   ao/pc-output  [{:story-list/all-stories [:story-list/id]}]
-   ao/pc-resolve (fn [{:keys [query-params] :as env} _]
-                   #?(:clj
-                      {:story-list/all-stories (queries/get-all-stories env query-params)}))})
 
-(def attributes [id title author content all-stories])
+(def attributes [id title author content])
 

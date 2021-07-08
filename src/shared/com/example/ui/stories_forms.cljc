@@ -25,7 +25,7 @@
    :ident :full-story/id}
   (println "FullStory: props: " props)
   (println "FullStory: content: " content)
-  (dom/div
+  (dom/div :.ui.segment
     (dom/h2 "Full Current Story: ")
     (dom/h3 author)
     (dom/h3 title)
@@ -37,19 +37,36 @@
 
 (def ui-full-story (comp/factory FullStory {:keyfn :story/id}))
 
-(comp/defsc Story [this {:story-list/keys [id author title]
+#?(:cljs
+   (def format goog.string.format))
+
+(defn select-story!
+  [this story-id]
+  (println "select-story! id: " story-id)
+  (df/load! this [:full-story/id story-id]
+            FullStory {:target [:current-story]}))
+
+(comp/defsc Story [this {:story-list/keys [id author title pos]
                          :as params}]
-       {:query [:story-list/id :story-list/author :story-list/title]
+       {:query [:story-list/id :story-list/author :story-list/title :story-list/pos]
         :ident :story-list/id}
-       (dom/div (dom/h2 "Story: " title)
-            (dom/p (str author title))
-            ;(dom/p (str params))
-            (dom/button {:type    "button"
-                         :onClick (fn [x]
-                                    (println "Story: button: id: " id)
-                                    (df/load! com.example.client/app [:full-story/id id]
-                                              FullStory {:target [:current-story]}))}
-                    "Set Current Story")))
+       (dom/div :.ui.segment
+         (println pos)
+         (dom/h3
+           (dom/a {:href "#!"
+                   :onClick (fn [x]
+                              (println "Story: link: id: " id)
+                              (select-story! this id))}
+             (format "Story: %d. %s" pos title)))
+         (dom/ul
+           (dom/li author)
+           (dom/li title))
+         ;(dom/p (str params))
+         (dom/button {:type    "button"
+                      :onClick (fn [x]
+                                 (println "Story: button: id: " id)
+                                 (select-story! this id))}
+                 "Set Current Story")))
 
 (def ui-story (comp/factory Story {:keyfn :story-list/id}))
 
@@ -103,7 +120,7 @@
    ro/query-inclusions [{[:current-story '_] (comp/get-query FullStory)}]
    ;ro/query-inclusions [{:current-story (comp/get-query FullStory)}]
    ro/row-pk           story-list/id
-   ro/columns          [story-list/id story-list/author story-list/title]
+   ro/columns          [story-list/id story-list/author story-list/title story-list/pos]
 
    ro/run-on-mount?    true
    ro/route            "stories"}

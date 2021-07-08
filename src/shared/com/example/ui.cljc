@@ -114,7 +114,8 @@
             (div :.ui.item
               (dom/button :.ui.primary.button {:onClick #(auth/authenticate! this :local nil)}
                 "Login")))))
-      (div :.ui.container.segment
+      ;(div :.ui.container.segment
+      (div :.ui.segment
         (ui-authenticator authenticator)
         (ui-main-router router)))))
 
