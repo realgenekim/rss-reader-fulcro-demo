@@ -20,8 +20,8 @@
 #?(:cljs
    (def format goog.string.format))
 
-(declare-mutation set-story 'com.example.model.mutations/set-story)
-(declare-mutation get-story 'com.example.model.mutations/get-story)
+(declare-mutation bottom-story 'com.example.model.mutations/bottom-story)
+(declare-mutation top-story 'com.example.model.mutations/top-story)
 
 (comp/defsc FullStory [_ {:story/keys [id author title content]
                           :as props}]
@@ -155,14 +155,15 @@
    :route-segment     ["Stories"]
    :componentDidMount (fn [this]
                         (df/load! this :story/all-stories Story
-                                  {:target [:component/id ::StoriesCustom :ui/all-stories]}))}
+                                  {:target [:component/id ::StoriesCustom :ui/all-stories]
+                                   :post-mutation 'com.example.model.mutations/top-story}))}
   (dom/div
     (dom/p "Current story number: ")
     (dom/div
       ; (ui-current-position props)
       (dom/div :.ui.grid
         (dom/div :.row
-          (dom/div :.eight.wide.column
+          (dom/div :.four.wide.column
             (dom/ul :.ui.selection.list
               (map (fn [story]
                      (ui-story story
@@ -186,7 +187,7 @@
                                   (df/load! this [:story/id story-id] FullStory
                                             {:target [:component/id ::StoriesCustom :ui/current-story]}))
                                 :selected current-story})) all-stories)))
-          (dom/div :.eight.wide.column
+          (dom/div :.twelve.wide.column
               (when current-story
                    (ui-full-story current-story))))))))
 

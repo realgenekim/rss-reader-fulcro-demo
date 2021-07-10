@@ -88,6 +88,32 @@
                  (when-let [prev-story-ident (first pair-of-interest)]
                    (df/load! app prev-story-ident
                              (rc/nc [:story/id :story/author :story/content :story/title])
+                             {:target (conj ident :ui/current-story)})))))
+
+     (defmutation top-story
+       [params]
+       (action [{:keys [app state]}]
+               (let [ident       [:component/id :com.example.ui.stories-forms/StoriesCustom]
+                     props       (get-in @state ident)
+                     {:ui/keys [all-stories current-story]} props
+                     target-ident (first all-stories)]
+                 (println "top-story: " target-ident)
+                 (when target-ident
+                   (df/load! app target-ident
+                             (rc/nc [:story/id :story/author :story/content :story/title])
+                             {:target (conj ident :ui/current-story)})))))
+
+     (defmutation bottom-story
+       [params]
+       (action [{:keys [app state]}]
+               (let [ident [:component/id :com.example.ui.stories-forms/StoriesCustom]
+                     props (get-in @state ident)
+                     {:ui/keys [all-stories current-story]} props
+                     target-ident (last all-stories)]
+                 (println "bottom-story: " target-ident)
+                 (when target-ident
+                   (df/load! app target-ident
+                             (rc/nc [:story/id :story/author :story/content :story/title])
                              {:target (conj ident :ui/current-story)})))))))
 
 

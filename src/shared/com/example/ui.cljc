@@ -71,9 +71,9 @@
                    ;:router        (comp/get-initial-state MainRouter {})
                    :authenticator {}
                    :ui/number2    5}}
-  (let [logged-in? (or true (= :success (some-> authorization :local ::auth/status)))
+  (let [logged-in? (= :success (some-> authorization :local ::auth/status))
         busy?      (seq active-remotes)
-        username   (or "No one" (some-> authorization :local :account/name))]
+        username   (some-> authorization :local :account/name)]
     (dom/div
       (div :.ui.top.menu
         (div :.ui.item "Demo")

@@ -50,8 +50,6 @@
   (comp/refresh-dynamic-queries! app)
   (app/mount! app Root "app"))
 
-(m/declare-mutation next-story 'com.example.model.mutations/next-story)
-(m/declare-mutation previous-story 'com.example.model.mutations/previous-story)
 
 (comment
   (let [state (app/current-state app)]
@@ -59,11 +57,20 @@
       (comp/get-query Root) state state))
   ,)
 
+(m/declare-mutation next-story 'com.example.model.mutations/next-story)
+(m/declare-mutation previous-story 'com.example.model.mutations/previous-story)
+(m/declare-mutation top-story 'com.example.model.mutations/top-story)
+(m/declare-mutation bottom-story 'com.example.model.mutations/bottom-story)
+
 (defn init-keyboard-bindings []
   (.bind js/Mousetrap "h" #(js/alert "keyboard shortcut!"))
   ; (comp/transact! this '[(get-story {:story/id 1})])
   (.bind js/Mousetrap "j" #(comp/transact! app [(next-story {})]))
-  (.bind js/Mousetrap "k" #(comp/transact! app [(previous-story {})])))
+  (.bind js/Mousetrap "k" #(comp/transact! app [(previous-story {})]))
+  (.bind js/Mousetrap "^" #(comp/transact! app [(top-story {})]))
+  (.bind js/Mousetrap "t" #(comp/transact! app [(top-story {})]))
+  (.bind js/Mousetrap "b" #(comp/transact! app [(bottom-story {})]))
+  (.bind js/Mousetrap "$" #(comp/transact! app [(bottom-story {})])))
 
 (defn init []
   (log/merge-config! {:output-fn prefix-output-fn
