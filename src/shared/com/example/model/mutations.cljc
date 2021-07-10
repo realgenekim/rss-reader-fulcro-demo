@@ -12,6 +12,8 @@
          [com.fulcrologic.fulcro.components :as comp]])
          ;[com.example.ui.stories-forms :as s]])
     [clojure.pprint :as pp]
+    [com.example.ui.stories-forms :as stories]
+    [com.fulcrologic.fulcro.algorithms.merge :as merge]
     [taoensso.timbre :as log]))
 
 #?(:clj
@@ -56,9 +58,18 @@
                                                           current-story))
                                                      story-pairs)))]
            (when-let [next-story-ident (second pair-of-interest)]
-             (df/load! app next-story-ident
-                       (rc/nc [:story/id :story/author :story/content :story/title])
-                       {:target (conj ident :ui/current-story)})))))
+             (let [new-story-id (second next-story-ident)]
+              ; [:story/id [:story/id "K3Y7GLlRfaBDsUWYD0Wu … 70d2:ae3a36:ad5391a1" ]]
+               (log/spy :warn pair-of-interest)
+               (log/spy :warn (->> pair-of-interest second))
+               (println "story-id: " new-story-id)
+               (merge/merge-component!
+                 app
+                 stories/StoriesCustom
+                 {:ui/current-story [:story/id new-story-id]}))))))
+               ;(df/load! app next-story-ident
+               ;          (rc/nc [:story/id :story/author :story/content :story/title])
+               ;          {:target (conj ident :ui/current-story)})))))
 
 
      (defmutation previous-story

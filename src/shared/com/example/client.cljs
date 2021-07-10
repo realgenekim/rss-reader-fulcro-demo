@@ -21,6 +21,7 @@
     [com.fulcrologic.fulcro.mutations :as mutation]
     [com.fulcrologic.fulcro.components :as comp]
     [com.fulcrologic.fulcro.rendering.keyframe-render2]
+    [com.example.model.mutations]
     ["mousetrap" :as mousetrap]))
 
 (defonce stats-accumulator
