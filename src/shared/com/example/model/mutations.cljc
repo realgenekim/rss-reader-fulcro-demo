@@ -60,16 +60,16 @@
            (when-let [next-story-ident (second pair-of-interest)]
              (let [new-story-id (second next-story-ident)]
               ; [:story/id [:story/id "K3Y7GLlRfaBDsUWYD0Wu … 70d2:ae3a36:ad5391a1" ]]
-               (log/spy :warn pair-of-interest)
-               (log/spy :warn (->> pair-of-interest second))
-               (println "story-id: " new-story-id)
-               (merge/merge-component!
-                 app
-                 stories/StoriesCustom
-                 {:ui/current-story [:story/id new-story-id]}))))))
-               ;(df/load! app next-story-ident
-               ;          (rc/nc [:story/id :story/author :story/content :story/title])
-               ;          {:target (conj ident :ui/current-story)})))))
+              ; (log/spy :warn pair-of-interest)
+              ; (log/spy :warn (->> pair-of-interest second))
+               (println "next story: story-id: " new-story-id)
+               #_(merge/merge-component!
+                   app
+                   stories/StoriesCustom
+                   {:ui/current-story [:story/id new-story-id]})
+               (df/load! app next-story-ident
+                         (rc/nc [:story/id :story/author :story/content :story/title])
+                         {:target (conj ident :ui/current-story)}))))))
 
 
      (defmutation previous-story
@@ -110,93 +110,8 @@
                           (with-out-str (pp/pprint retval)))
                  (reset! state (assoc @state :current-story retval)))))
      (remote [env] true)))
-;(remote [env] true) ; see client/app definitions for remotes
-;(remote [env] (m/returning env :fulcro.fulcro-exercises/Story))))
-;(let [retval (m/returning env SaveYouTubePlaylistComponent)]
-;  (println "mutation: retval: " retval)
-;  retval)) ; see client/app definitioons for remotes
-;#_ (my-custom-remote [env] (do-whatever)))
 
-
-
-
-;
-; set-story
-;
-
-#?(:clj
-   (pc/defmutation set-story
-     [env params]
-     {::pc/input [:story/id]}
-     {::pc/output [:story/id :story/title :story/author :story/content]}
-     (do
-       (println "set-story: params: " params)
-       (let [ret (db/get-story-by-id env (:story/id params))]
-         (println "ret: " (assoc ret :story/content "xxx"))
-         ret))))
-
-     ;  (let [retval (com.example.components.parser/parser com.example.components.config/config
-     ;                                                     [{[:story/id "K3Y7GLlRfaBDsUWYD0WuXjH/byGbQnwaMWp+PEBoUZw=_13ef0cdbc18:15c0fac:70d63bab"]
-     ;                                                       [:story/author :story/content :story/id :story/title]}])]
-     ;    (println retval)
-     ;    #:story{:id 1 :title "abc" :author "Gene" :content "AAAA"}))))
-
-#?(:cljs
-    (comp/defsc FullStory [_ params]
-                {:query [:story/id :story/id :story/content :story/title :story/author]
-                 :ident :story/id}))
-                ;(println "FullStory: current-story: " current-story)
-                ;(println "FullStory: params: " params)
-                ;(dom/div (dom/h2 "Full Current Story: " (:story/content params)
-                ;                           (dom/p (str (:story/id params)
-                ;                                       (:story/author params)
-                ;                                       (:story/title params)
-                ;                                       (:story/content params)))
-                ;                           (dom/div {:dangerouslySetInnerHTML {:__html "<strong> hello! </strong"}})))))
-#?(:cljs
-    (defmutation set-story
-      [params]
-      (action [{:keys [app state]}]
-              (do
-                (println "mutation: set-story: params"
-                         (with-out-str (pp/pprint params)))))
-                ;(println "mutation: set-story: state"
-                ;         (with-out-str (pp/pprint @state)))
-                ;(reset! state (assoc @state :current-story
-                ;                            #:story{:id (:story/id params)
-                ;                                    :title (:story/title params)
-                ;                                    :author (:story/author params)
-                ;                                    :content "AAAA"}))))
-      (remote [env]
-              (do
-                ;(println "set-story: remote:" env)
-                true))))
-              ;(do
-              ;  (println "ENV: " env)
-              ;  (-> env
-              ;      (m/with-target [:current-story])
-              ;      (m/returning FullStory (assoc params :story/content "XXXXXXX")))))))
-
-;#?(:cljs
-;   (pc/defmutation get-stories [{:keys [orgnr]}]
-;               (action [{:keys [app state ref]}
-;                        (df/set-load-marker! app :simulate-bill-run :loading)])
-;               (remote [env] (m/returning env (doto (comp/registry-key->class :minbedrift.ui.kostnadsdeling.ui/SimulateBillRun) (assert))))
-;               (refresh [_] [:tem-organization/organization-number orgnr])
-;               (ok-action [{:keys [app state]}] (df/remove-load-marker! app :simulate-bill-run))
-;               (error-action [{:keys [app state]}](df/set-load-marker! app :simulate-bill-run :failed)))
-;   :clj
-;   (pc/defmutation simulate-bill-run [env {:keys [orgnr]}]
-;     {;::pc/params [:orgnr]
-;      ::pc/output [:tem-organization/organization-number :bill-run/logs]}
-;     (assert orgnr "orgnr is required")
-;     (let [logs
-;           (:logs (kostnadsdeling-data/simulate-bill-run
-;                    (doto (get-in env [:com.fulcrologic.rad.database-adapters.sql/connection-pools :minbedrift]) (assert "Missing MB DB"))
-;                    orgnr))]
-;       {:tem-organization/organization-number orgnr
-;        :bill-run/logs (vec logs)})))
 
 
 (def resolvers [])
-(def mutations [set-story])
+(def mutations [])

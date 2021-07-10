@@ -14,13 +14,14 @@
     [com.fulcrologic.fulcro.data-fetch :as df]
     [com.fulcrologic.fulcro.algorithms.denormalize :as fdn]
     [com.fulcrologic.fulcro.algorithms.merge :as merge]
-    [com.fulcrologic.fulcro.application :as app]))
+    [com.fulcrologic.fulcro.application :as app]
+    #?(:cljs [goog.string :as gstring])))
 
+#?(:cljs
+   (def format goog.string.format))
 
 (declare-mutation set-story 'com.example.model.mutations/set-story)
 (declare-mutation get-story 'com.example.model.mutations/get-story)
-
-
 
 (comp/defsc FullStory [_ {:story/keys [id author title content]
                           :as props}]
@@ -40,28 +41,27 @@
 
 (def ui-full-story (comp/factory FullStory {:keyfn :story/id}))
 
-#?(:cljs
-   (def format goog.string.format))
 
-
-(comp/defsc Story [this {:story/keys [id author title content]
+(comp/defsc Story [this {:story/keys [id author title]
                          :as params}
                    ; computed-factory: adds third argument
                    ; otherwise, component will disappear if you don't re-render parent
                    {:keys [on-select selected]}]
   ; change all to :story/id
-  {:query [:story/id :story/author :story/title :story/content]
+  {:query [:story/id :story/author :story/title]
    :ident :story/id}
-  (dom/li :.item {:classes [(when (= id (:story/id selected))
-                              "right triangle icon")]}
+  (dom/li :.item #_{:classes [(when (= id (:story/id selected))
+                                "right triangle icon")]}
     ;(println params)
     (dom/a {:href "#!"
             :onClick (fn [_]
                        (when on-select
                          (on-select id)))}
-           (if (= id (:story/id selected))
-             (dom/i {:classes ["right triangle icon"]}))
-           (format "%s (%s)" title author))))
+           (let [text (format "%s (%s)" title author)]
+             (if (= id (:story/id selected))
+               (dom/strong text)
+               text)))))
+
 
 (def ui-story (comp/computed-factory Story {:keyfn :story/id}))
 
@@ -172,10 +172,10 @@
                                   ; it's what triggers the resolver, it's how you access
                                   ; local client database
                                   (println "on-select: triggered: " story-id)
-                                  (merge/merge-component!
-                                    this
-                                    StoriesCustom
-                                    {:ui/current-story [:story/id story-id]}))
+                                  #_(merge/merge-component!
+                                      this
+                                      StoriesCustom
+                                      {:ui/current-story [:story/id story-id]})
                                     ;:append [:teams])
                                   ;(merge/merge!
                                   ;  this
@@ -183,8 +183,8 @@
                                   ;  [:component/id ::StoriesCustom]))
                                   ;(app/schedule-render! this))
                                   ;  (comp/get-query FullStory))
-                                  ;(df/load! this [:story/id story-id] FullStory
-                                  ;          {:target [:component/id ::StoriesCustom :ui/current-story]}))
+                                  (df/load! this [:story/id story-id] FullStory
+                                            {:target [:component/id ::StoriesCustom :ui/current-story]}))
                                 :selected current-story})) all-stories)))
           (dom/div :.eight.wide.column
               (when current-story

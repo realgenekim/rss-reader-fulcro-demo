@@ -17,7 +17,16 @@
     [datomic.api :as d]
     [com.fulcrologic.rad.attributes :as attr]
     [com.fulcrologic.rad.type-support.date-time :as dt]
-    [com.example.model.mutations :as m]))
+    [com.example.model.mutations :as m]
+    [portal.api :as p]))
+
+(comment
+  (p/open)
+  (add-tap #'p/submit)
+
+  (tap> gsr/srs)
+
+  ,)
 
 (set-refresh-dirs "src/main" "src/datomic" "src/dev" "src/shared")
 

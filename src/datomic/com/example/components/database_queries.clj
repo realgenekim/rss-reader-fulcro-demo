@@ -65,7 +65,7 @@
   [env query-params]
   (log/warn "*** get-all-stories!")
   (->> stories
-       ;(take 50)
+       ;(take 2000)
        (map #(select-keys % [:id]))
        (map (fn [m]
               (map->nsmap m "story")))))
@@ -78,23 +78,10 @@
 
   ,)
 
-(defn get-story-by-id
-  [env story-id]
-  (log/warn "*** get-story! " story-id)
-  (let [retval (->> stories
-                    (filter #(= (:id %) story-id))
-                    (map #(select-keys % [:id :author :title :published]))
-                    (map (fn [m]
-                           (assoc m :content
-                                    (-> m :content :content))))
-                    (map (fn [m]
-                           (map->nsmap m "story"))))]
-    ;(println "*** " retval)
-    (first retval)))
 
 (defn get-full-story-by-id
   [env story-id]
-  (log/warn "*** get-full-story! " story-id)
+  ;(log/warn "*** get-full-story! " story-id)
   (let [retval (->> stories
                     (filter #(= (:id %) story-id))
                     (map #(select-keys % [:id :author :title :published :content]))
@@ -105,6 +92,20 @@
                            (map->nsmap m "story"))))]
     ;(println "*** " retval)
     (first retval)))
+
+(defn get-story-by-id-shaped
+  " wrapper around get-full-story-by-id, but only retain the specified keys "
+  [env story-id output-keys]
+  (let [retval  (get-full-story-by-id env story-id)
+        trimmed (select-keys retval output-keys)]
+    ;(log/warn trimmed)
+    trimmed))
+
+(comment
+  (get-story-by-id nil "K3Y7GLlRfaBDsUWYD0WuXjH/byGbQnwaMWp+PEBoUZw=_13ef0cdbc18:15c0fac:70d63bab")
+  (get-story-by-id-shaped nil "K3Y7GLlRfaBDsUWYD0WuXjH/byGbQnwaMWp+PEBoUZw=_13ef0cdbc18:15c0fac:70d63bab"
+                          [:story/id :story/author])
+  ,)
 
 
 ;(if-let [db (some-> (get-in env [::datomic/databases :production]) deref)]

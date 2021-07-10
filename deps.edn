@@ -42,10 +42,10 @@
                        :extra-deps  {com.datomic/datomic-free           {:mvn/version "0.9.5697" :exclusions [org.slf4j/slf4j-nop]}
                                      com.fulcrologic/fulcro-rad-datomic {:mvn/version "1.0.9"}}}
            :crux      {:extra-paths ["src/crux" "src/crux-tests"]
-                       :extra-deps {juxt/crux-core           {:mvn/version "21.02-1.15.0-beta"}
-                                    juxt/crux-rocksdb        {:mvn/version "21.02-1.15.0-beta"}
-                                    juxt/crux-jdbc           {:mvn/version "21.02-1.15.0-beta"}
-                                    roterski/fulcro-rad-crux {:mvn/version "0.0.1-alpha-1"}}}
+                       :extra-deps  {juxt/crux-core           {:mvn/version "21.02-1.15.0-beta"}
+                                     juxt/crux-rocksdb        {:mvn/version "21.02-1.15.0-beta"}
+                                     juxt/crux-jdbc           {:mvn/version "21.02-1.15.0-beta"}
+                                     roterski/fulcro-rad-crux {:mvn/version "0.0.1-alpha-1"}}}
            :run-tests {:main-opts  ["-m" "kaocha.runner"]
                        :extra-deps {lambdaisland/kaocha {:mvn/version "1.0.732"}}}
 
@@ -53,4 +53,5 @@
                        :extra-deps  {thheller/shadow-cljs                {:mvn/version "2.14.5"}
                                      com.fulcrologic/semantic-ui-wrapper {:mvn/version "2.0.1"}
                                      binaryage/devtools                  {:mvn/version "1.0.0"}
-                                     org.clojure/tools.namespace         {:mvn/version "1.0.0"}}}}}
+                                     org.clojure/tools.namespace         {:mvn/version "1.0.0"}
+                                     djblue/portal                       {:mvn/version "0.12.0"}}}}}
