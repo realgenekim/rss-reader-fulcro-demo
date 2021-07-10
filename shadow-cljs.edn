@@ -16,7 +16,7 @@
 
                                      "js-joda"
                                      {:target :npm
-                                      :require "@js-joda/core" }
+                                      :require "@js-joda/core"}
                                      ;; Make js-joda-timezone a reasonable build size
                                      "js-joda-timezone"
                                      {:target  :npm

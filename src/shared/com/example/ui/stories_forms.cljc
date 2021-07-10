@@ -13,7 +13,8 @@
     [com.example.model.mutations :as m]
     [com.fulcrologic.fulcro.data-fetch :as df]
     [com.fulcrologic.fulcro.algorithms.denormalize :as fdn]
-    [com.fulcrologic.fulcro.algorithms.merge :as merge]))
+    [com.fulcrologic.fulcro.algorithms.merge :as merge]
+    [com.fulcrologic.fulcro.application :as app]))
 
 
 (declare-mutation set-story 'com.example.model.mutations/set-story)
@@ -21,10 +22,10 @@
 
 
 
-(comp/defsc FullStory [_ {:full-story/keys [id author title content]
+(comp/defsc FullStory [_ {:story/keys [id author title content]
                           :as props}]
-  {:query [:full-story/id :full-story/author :full-story/content :full-story/title :full-story/pos]
-   :ident :full-story/id}
+  {:query [:story/id :story/author :story/content :story/title]
+   :ident :story/id}
   ;(println "FullStory: props: " props)
   ;(println "FullStory: content: " content)
   (dom/div :.ui.segment
@@ -43,101 +44,159 @@
    (def format goog.string.format))
 
 
+
 (defn save-current-story-pos!
-  [this {:story-list/keys [id pos]
-         :as story}]
+  [this {:keys [:story/id :story/pos]
+         :as   story}]
   (println "save-current-story-pos! story:" story)
-  (let [state* (->> com.example.client/app
+  (let [state* (->> nil ; com.example.client/app
                     (:com.fulcrologic.fulcro.application/state-atom))]
     (reset! state* (assoc-in @state* [:ui/current-position] pos))))
 
 (defn load-full-story!
-  [this {:story-list/keys [id pos]
-         :as story}]
+  [this {:keys [:story/id :story/pos]
+         :as   story}]
   (println "load-full-story! story: " story)
-  (df/load! this [:full-story/id id]
+  (df/load! this [:story/id id]
             FullStory {:target [:current-story]}))
 
 
-(comp/defsc Story [this {:story-list/keys [id author title pos]
-                         :as params}]
-  {:query [:story-list/id :story-list/author :story-list/title :story-list/pos]
-   :ident :story-list/id}
-  (dom/li
+(comp/defsc Story [this {:story/keys [id author title]
+                         :as params}
+                   ; computed-factory: adds third argument
+                   ; otherwise, component will disappear if you don't re-render parent
+                   {:keys [on-select selected]}]
+  ; change all to :story/id
+  {:query [:story/id :story/author :story/title :story/pos]
+   :ident :story/id}
+  (dom/li :.item {:classes [(when (= id (:story/id selected))
+                              "right triangle icon")]}
+
     (println params)
     (dom/a {:href "#!"
-            :onClick (fn [x]
-                       (println "Story: link: id: " id)
-                       (load-full-story! this params)
-                       (save-current-story-pos! this params))}
-      (format "%d. %s (%s)" pos title author))))
+            :onClick (fn [_]
+                       (when on-select
+                         (on-select id)))}
+                       ;(load-full-story! this params)
+                       ;(save-current-story-pos! this params))}
+           (if (= id (:story/id selected))
+             (dom/i {:classes ["right triangle icon"]}))
+           (format "%s (%s)" title author))))
 
-(def ui-story (comp/factory Story {:keyfn :story-list/id}))
+(def ui-story (comp/computed-factory Story {:keyfn :story/id}))
 
 (comment
   (reset! state)
   (reset! state* (assoc-in @state* [:ui/current-position] 5))
 
   (fdn/db->tree SelectedStory {:a [:b 1]})
-  (fdn/db->tree  [:story-list/id] state state)
-  (fdn/db->tree  [:story-list/id :story-list/author] state state)
+  (fdn/db->tree [:story/id] state state)
+  (fdn/db->tree [:story/id :story/author] state state)
 
   (merge/merge!
     com.example.client/app
-    {:current-story {:full-story/id      "abc"
-                     :full-story/author  "Gene"
-                     :full-story/title   "title"
-                     :full-story/content "XXS"}}
+    {:current-story {:story/id      "abc"
+                     :story/author  "Gene"
+                     :story/title   "title"
+                     :story/content "XXS"}}
     (comp/get-query FullStory))
 
   (merge/merge!
     com.example.client/app
-    {:current-story [{[:full-story/id "K3Y7GLlRfaBDsUWYD0WuXjH/byGbQnwaMWp+PEBoUZw=_13ef0cdbc18:15c0fac:70d63bab"]
+    {:current-story [{[:story/id "K3Y7GLlRfaBDsUWYD0WuXjH/byGbQnwaMWp+PEBoUZw=_13ef0cdbc18:15c0fac:70d63bab"]
                       [:story/id :story/author :story]}]}
     (comp/get-query FullStory))
 
-  ; these work!  setting the :full-story/id triggers all the pathom resolvers!
+  ; these work!  setting the :story/id triggers all the pathom resolvers!
 
-  (df/load! com.example.client/app [:full-story/id "K3Y7GLlRfaBDsUWYD0WuXjH/byGbQnwaMWp+PEBoUZw=_13ef0cdbc18:15c0fac:70d63bab"]
+  (df/load! com.example.client/app [:story/id "K3Y7GLlRfaBDsUWYD0WuXjH/byGbQnwaMWp+PEBoUZw=_13ef0cdbc18:15c0fac:70d63bab"]
             FullStory {:target [:current-story]})
-  (df/load! com.example.client/app [:full-story/id "K3Y7GLlRfaBDsUWYD0WuXjH/byGbQnwaMWp+PEBoUZw=_16f2e23f4d5:155f3ef:69b9f616"]
+  (df/load! com.example.client/app [:story/id "K3Y7GLlRfaBDsUWYD0WuXjH/byGbQnwaMWp+PEBoUZw=_16f2e23f4d5:155f3ef:69b9f616"]
             FullStory {:target [:current-story]})
 
 
   ,)
 
-
-
-
-(report/defsc-report StoriesCustom [this {:ui/keys [current-rows parameters]
-                                          :as props}]
-  {ro/title            "Stories List"
-   ro/source-attribute :story-list/all-stories
-   ; this is a link query
-   ro/query-inclusions [{[:current-story '_] (comp/get-query FullStory)}]
-   ;ro/query-inclusions [{:current-story (comp/get-query FullStory)}]
-   ro/row-pk           story-list/id
-   ro/columns          [story-list/id story-list/author story-list/title story-list/pos]
-
-   ro/run-on-mount?    true
-   ro/route            "stories"}
+(comp/defsc CurrentPosition
+  [this {:ui/keys [current-position]
+         :as params}]
+  {:query         [:ui/current-position]
+   :initial-state {:ui/current-position 0}}
   (dom/div
-    (dom/div
-      (dom/p "Current story: " (:current-story-pos/pos props)))
-    (dom/div
-      ;(println current-rows)
-      ;(println "current story: " (:current-story props))
-      (println "props: " props)
-      ;(println (keys props))
-      (println this))
+    ;(println "CurrentPosition: params: " params)
+    (println "CurrentPosition: current-position: " current-position)
+    (dom/p "Current story number: " current-position)))
 
-    (dom/div :.ui.grid
-      (div :.row
-        (div :.eight.wide.column
-          (dom/ul :.ui.segment
-            (map ui-story current-rows)))
-        (div :.eight.wide.column
-          (ui-full-story (:current-story props)))))))
+(def ui-current-position (comp/factory CurrentPosition))
+
+#_(report/defsc-report StoriesCustom [this {:ui/keys [current-rows parameters]
+                                            :as props}]
+    {ro/title            "Stories List"
+     ro/source-attribute :story/all-stories
+     ; this is a link query
+     ro/query-inclusions [
+                          ;{[:current-story '_] (comp/get-query FullStory)}
+                          ;{[:ui/current-position '_] (comp/get-query CurrentPosition)}
+                          :ui/current-position]
+
+     ;ro/query-inclusions [{:current-story (comp/get-query FullStory)}]
+     ro/row-pk           story-list/id
+     ro/columns          [story-list/id story-list/author story-list/title story-list/pos]
+
+     ro/run-on-mount?    true
+     ro/route            "stories"}
+    ;(let [state* @(->> com.example.client/app (:com.fulcrologic.fulcro.application/state-atom))])
+    (dom/div
+      (ui-current-position props)
+      ;(dom/div
+      ;  (println "StoriesCustom: state*: " state*)
+      ;  (dom/p "Current story: " (:ui/current-position state*)))
+      (dom/div
+        ;(println current-rows)
+        ;(println "current story: " (:current-story props))
+        (println "StoriesCustom: props: " props))
+      ;(println (keys props))
+
+      (dom/div :.ui.grid
+               (div :.row
+                    (div :.eight.wide.column
+                         (dom/ul :.ui.segment
+                                 (map ui-story current-rows)))
+                    (div :.eight.wide.column
+                         (ui-full-story (:current-story props)))))))
+
+(comp/defsc StoriesCustom
+  [this {:ui/keys [all-stories current-story]
+         :as props}]
+  {:query             [{:ui/all-stories (comp/get-query Story)}
+                       {:ui/current-story (comp/get-query FullStory)}]
+   :ident             (fn [x] [:component/id ::StoriesCustom])
+   :initial-state     {:ui/all-stories []}
+   :route-segment     ["Stories"]
+   :componentDidMount (fn [this]
+                        (df/load! this :story/all-stories Story
+                                  {:target [:component/id ::StoriesCustom :ui/all-stories]}))}
+  (dom/div
+    (dom/p "Current story number: ")
+    (dom/div
+      ; (ui-current-position props)
+      (dom/div :.ui.grid
+        (dom/div :.row
+          (dom/div :.eight.wide.column
+            (dom/ul :.ui.selection.list
+              (map (fn [story]
+                     (ui-story story {:on-select (fn [story-id]
+                                                   ; ; ident: [:story/id story-id]
+                                                   ; it's what triggers the resolver, it's how you access
+                                                   ; local client database
+                                                   (df/load! this [:story/id story-id] FullStory
+                                                             {:target [:component/id ::StoriesCustom :ui/current-story]}))
+                                      :selected current-story})) all-stories)))
+          (dom/div :.eight.wide.column
+              (when current-story
+                   (ui-full-story current-story))))))))
+
+
 
 
 (comment
@@ -146,29 +205,109 @@
 
   ,)
 
+(mutation/defmutation bump-number [ignored]
+  (action [{:keys [state]}]
+          ;(do
+          ;  (println "bump-number")
+          (swap! state update :ui/number2 inc)))
+
+(mutation/defmutation bump-number2 [{:keys [field]}]
+  ; field: e.g., :ui/number2
+  (action [{:keys [ref state]}]
+          ; ref is the ident of the component that invoked the mutation
+          ; => [:component/id ::Root8]
+          (let [path (conj ref field)]
+          ;(do
+            (println "bump-number2")
+            (swap! state update-in path inc))))
+
+
+(comp/defsc Root7
+  [this {number2 :ui/number2
+         ;:ui/keys [number]
+         ;stories :stories
+         ;stories :stories
+         ;number :ui/number
+         ;current-story :current-story
+         :as     props}]
+  {:query [
+           ;{:stories (comp/get-query Story)}
+           ;{:current-story (comp/get-query FullStory)}
+           :ui/number2]
+           ;[df/marker-table :teams]]
+   :ident         (fn [] [:component/id ::LandingPage2])
+   :initial-state {:ui/number2 0}
+   :route-segment ["root77"]}
+  (dom/div
+    (println "number: " number2)
+    (println "props: " props)
+    (dom/button {:onClick #(comp/transact! this [(bump-number {})])}
+                "You've clicked this button " number2 " times.")))
+    ;(dom/button {:type    "button"
+    ;             :onClick (fn [x]
+    ;                        (println "df/load! the data from here")
+    ;                        (comp/transact! this '[(get-story {:story/id 1})])
+    ;                        (df/load! this :current-story Story {:story/id 1}))}
+    ;        "Load Mutation...")))
+    ;(let [loading? (get props [df/marker-table :teams])]                                  ; scaffolding for TASK 5
+    ;  (cond
+    ;    loading? (dom/p "Loading...")
+    ;    ;; ...
+    ;    :else
+    ;    (comp/fragment (dom/p ""))))))
+
+    ;(map ui-story stories)))
+
+    ;(ui-full-story current-story)))
+
+(comp/defsc Button1
+  [this {:button/keys [value]}]
+  {:query [:button/id :button/value]
+   :ident :button/id
+   :initial-state {:button/id :param/id
+                   :button/value :param/value}}
+  (dom/button {:onClick #(comp/transact! this [(bump-number2 {:field :button/value})])}
+              "You've clicked this button " value " times."))
+
+(def ui-button1 (comp/factory Button1 {:keyfn :button/id}))
 
 
 
-;(comp/defsc Root7 [this {stories :stories
-;                         current-story :current-story
-;                         :as props}]
-;       {:query [{:stories (comp/get-query Story)}
-;                {:current-story (comp/get-query FullStory)}
-;                [df/marker-table :teams]]}
-;       (dom/div
-;         (dom/button {:type    "button"
-;                      :onClick (fn [x]
-;                                 (println "df/load! the data from here")
-;                                 (comp/transact! this '[(get-story {:story/id 1})])
-;                                 (df/load! this :current-story Story {:story-list/id 1}))}
-;                 "Load Mutation...")
-;         (let [loading? (get props [df/marker-table :teams])]                                  ; scaffolding for TASK 5
-;           (cond
-;             loading? (dom/p "Loading...")
-;             ;; ...
-;             :else
-;             (comp/fragment (dom/p ""))))
-;
-;         (map ui-story stories)
-;
-;         (ui-full-story current-story)))
+#_(comp/defsc Root8
+    [this {:ui/keys [number2] :as props}]
+    {:query [:ui/number2]
+     :initial-state {:ui/number2 3}
+     :route-segment ["root8"]
+     ;:ident :ui/number2}
+     ;:ident         (fn [] [:component/id ::Root8])
+     :ident         (fn [] [:component/id ::Root8])}
+     ;:ident         (fn [] [:ui/number2])}
+    (dom/div
+      (dom/h4 "This is an example of modifying a value associated with this component ident: :component/id ::Root8.")
+      (println "Root8: props: " props)
+      (dom/button {:onClick #(comp/transact! this [(bump-number2 {:field :ui/number2})])}
+                  "You've clicked this button " number2 " times.")
+      (dom/button {:onClick #(comp/transact! this [(bump-number2 {:field :ui/number2})])}
+                  "You've clicked this button " number2 " times.")))
+
+(comp/defsc Root8
+  [this {:ui/keys [buttons] :as props}]
+  {:query         [{:ui/buttons (comp/get-query Button1)}]
+   :initial-state {:ui/buttons [{:id 1 :value 1}
+                                {:id 2 :value 2}
+                                {:id 2 :value 2}]}
+   :route-segment ["root8"]
+   ;:ident :ui/number2}
+   ;:ident         (fn [] [:component/id ::Root8])
+   :ident         (fn [] [:component/id ::Root8])}
+  ;:ident         (fn [] [:ui/number2])}
+  (dom/div
+    (dom/h4 "This is an example of modifying a value associated with this component ident: :component/id ::Root8.")
+    (println "ButtonTest1: props: " props)
+    (map ui-button1 buttons)))
+
+
+
+(comment
+  (comp/get-query Root7)
+  ,)

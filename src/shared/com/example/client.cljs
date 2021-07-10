@@ -17,7 +17,11 @@
     [com.fulcrologic.rad.routing.html5-history :as hist5 :refer [html5-history]]
     [com.fulcrologic.rad.routing.history :as history]
     [com.fulcrologic.rad.routing :as routing]
-    [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]))
+    [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
+    [com.fulcrologic.fulcro.mutations :as mutation]
+    [com.fulcrologic.fulcro.components :as comp]
+    [com.fulcrologic.fulcro.rendering.keyframe-render2]
+    ["mousetrap" :as mousetrap]))
 
 (defonce stats-accumulator
   (tufte/add-accumulating-handler! {:ns-pattern "*"}))
@@ -36,6 +40,7 @@
   (report/install-formatter! app :boolean :affirmation (fn [_ value] (if value "yes" "no"))))
 
 (defonce app (rad-app/fulcro-rad-app {}))
+; (defonce app (rad-app/fulcro-rad-app {:optimized-render! com.fulcrologic.fulcro.rendering.keyframe-render2/render!}))
 
 (defn refresh []
   ;; hot code reload of installed controls
@@ -43,6 +48,21 @@
   (setup-RAD app)
   (comp/refresh-dynamic-queries! app)
   (app/mount! app Root "app"))
+
+(m/declare-mutation next-story 'com.example.model.mutations/next-story)
+(m/declare-mutation previous-story 'com.example.model.mutations/previous-story)
+
+(comment
+  (let [state (app/current-state app)]
+    (com.fulcrologic.fulcro.algorithms.denormalize/db->tree
+      (comp/get-query Root) state state))
+  ,)
+
+(defn init-keyboard-bindings []
+  (.bind js/Mousetrap "h" #(js/alert "keyboard shortcut!"))
+  ; (comp/transact! this '[(get-story {:story/id 1})])
+  (.bind js/Mousetrap "j" #(comp/transact! app [(next-story {})]))
+  (.bind js/Mousetrap "k" #(comp/transact! app [(previous-story {})])))
 
 (defn init []
   (log/merge-config! {:output-fn prefix-output-fn
@@ -57,6 +77,7 @@
   (dr/change-route! app ["landing-page"])
   (history/install-route-history! app (html5-history))
   (auth/start! app [LoginForm] {:after-session-check `fix-route})
+  (init-keyboard-bindings)
   (app/mount! app Root "app" {:initialize-state? false}))
 
 (comment)
@@ -70,3 +91,6 @@
   []
   (let [stats (not-empty @performance-stats)]
     (println (tufte/format-grouped-pstats stats))))
+
+
+

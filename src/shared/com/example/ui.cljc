@@ -32,6 +32,7 @@
   (dom/div "Welcome to the Demo. Please log in."))
 
 ;; This will just be a normal router...but there can be many of them.
+;    builds initial-state
 (defrouter MainRouter [this {:keys [current-state route-factory route-props]}]
   {:always-render-body? true
    :router-targets      [LandingPage ItemForm InvoiceForm InvoiceList AccountList AccountForm AccountInvoices
@@ -39,7 +40,7 @@
                          sales-report/RealSalesReport
                          ;stories/StoriesListReport stories/StoryReport
                          stories/StoriesCustom
-                         ; stories/Root7
+                         stories/Root7 stories/Root8
                          dashboard/Dashboard
                          mdetail/AccountList]}
   ;; Normal Fulcro code to show a loader on slow route change (assuming Semantic UI here, should
@@ -57,13 +58,19 @@
 
 (defsc Root [this {::auth/keys [authorization]
                    ::app/keys  [active-remotes]
-                   :keys       [authenticator router]}]
+                   :keys       [authenticator router]
+                   :as props}]
   {:query         [{:authenticator (comp/get-query Authenticator)}
                    {:router (comp/get-query MainRouter)}
+                   ;{:ui/number2 [(comp/get-query stories/Root8)]}
+                   :ui/number2
                    ::app/active-remotes
                    ::auth/authorization]
    :initial-state {:router        {}
-                   :authenticator {}}}
+                   ; ^^^^ macro magic happening here: associating it with MainRounter, from the :query
+                   ;:router        (comp/get-initial-state MainRouter {})
+                   :authenticator {}
+                   :ui/number2    5}}
   (let [logged-in? (= :success (some-> authorization :local ::auth/status))
         busy?      (seq active-remotes)
         username   (some-> authorization :local :account/name)]
@@ -71,6 +78,8 @@
       (div :.ui.top.menu
         (div :.ui.item "Demo")
         (when logged-in?
+          (println "Root: ui/number2: " (:ui/number2 props))
+          (println "Root: ui/number2: " {:ui/number2 (:ui/number2 props)})
           #?(:cljs
              (comp/fragment
                (ui-dropdown {:className "item" :text "Account"}
@@ -93,8 +102,9 @@
                    (ui-dropdown-item {:onClick (fn [] (rroute/route-to! this mdetail/AccountList {}))} "Master Detail")))
                (ui-dropdown {:className "item" :text "Gene"}
                  (ui-dropdown-menu {}
-                   ;(ui-dropdown-item {:onClick (fn [] (rroute/route-to! this stories/StoriesListReport {}))} "Stories")
-                   (ui-dropdown-item {:onClick (fn [] (rroute/route-to! this stories/StoriesCustom {}))} "defsc"))))))
+                   (ui-dropdown-item {:onClick (fn [] (rroute/route-to! this stories/StoriesCustom {}))} "RAD Report")
+                   (ui-dropdown-item {:onClick (fn [] (rroute/route-to! this stories/Root7 {}))} "Root7")
+                   (ui-dropdown-item {:onClick (fn [] (rroute/route-to! this stories/Root8 {:ui/number2 (:ui/number2 props)}))} "Root8"))))))
 
 
         (div :.right.menu

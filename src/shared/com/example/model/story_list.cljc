@@ -9,50 +9,48 @@
     [taoensso.timbre :as log]))
 
 
-(defattr id :story-list/id :string
+(defattr id :story/id :string
   {ao/identity? true})
 
-(defattr title :story-list/title :string
+(defattr title :story/title :string
   {ao/required?                                          true
-   ao/identities                                         #{:story-list/id}})
+   ao/identities                                         #{:story/id}})
 
-(defattr author :story-list/author :string
+(defattr author :story/author :string
   {ao/required?                                          true
-   ao/identities                                         #{:story-list/id}})
+   ao/identities                                         #{:story/id}})
 
-(defattr content :story-list/content :string
+(defattr content :story/content :string
   {ao/required?                                          true
-   ao/identities                                         #{:story-list/id}})
+   ao/identities                                         #{:story/id}})
 
-(defattr pos :story-list/pos :number
+(defattr pos :story/pos :number
   {ao/required?                                          true
-   ao/identities                                         #{:story-list/id}})
+   ao/identities                                         #{:story/id}})
 
-(defattr all-stories :story-list/all-stories :ref
+(defattr all-stories :story/all-stories :ref
   {ao/target     :story/id
-   ao/pc-output  [{:story-list/all-stories [:story-list/id]}]
+   ao/pc-output  [{:story/all-stories [:story/id]}]
    ao/pc-resolve (fn [{:keys [query-params] :as env} _]
                    #?(:clj
-                      (let [stories (->> (queries/get-all-stories env query-params)
-                                         (map-indexed (fn [idx itm]
-                                                        (assoc itm :story-list/pos idx))))]
-                        (log/warn ":story-list/all-stories" stories)
+                      (let [stories (->> (queries/get-all-stories env query-params))]
+                        (log/warn ":story/all-stories" stories)
                         (log/warn stories)
-                        {:story-list/all-stories stories})))})
+                        {:story/all-stories stories})))})
 
 #?(:clj
    (do
-     (pc/defresolver story-id-resolver [env {:story-list/keys [id]}]
-       {::pc/input  #{:story-list/id}
-        ::pc/output [:story/id :story/author :story/content]}
-       (println "*** story-id-resolver: ")
-       (dissoc (queries/get-story-by-id env id)
-               :content))
+     ;(pc/defresolver story-id-resolver [env {:story/keys [id]}]
+     ;  {::pc/input  #{:story/id}
+     ;   ::pc/output [:story/id :story/author :story/content]}
+     ;  (println "*** story-id-resolver: ")
+     ;  (dissoc (queries/get-story-by-id env id)
+     ;          :content))
 
-     (pc/defresolver full-story-resolver [env {:full-story/keys [id]}]
-       {::pc/input  #{:full-story/id}
-        ::pc/output [:full-story/id :full-story/author :full-story/content :full-story/title]}
-       (println "*** full-story-resolver: ")
+     (pc/defresolver story-resolver [env {:story/keys [id]}]
+       {::pc/input  #{:story/id}
+        ::pc/output [:story/id :story/author :story/content :story/title]}
+       (println "*** story-resolver: ")
        (let [retval (queries/get-full-story-by-id env id)]
          (println retval)
          retval))))
@@ -61,4 +59,4 @@
 (def attributes [id title author content pos all-stories])
 
 #?(:clj
-   (def resolvers [story-id-resolver full-story-resolver]))
+   (def resolvers [story-resolver])) ;full-story-resolver]))

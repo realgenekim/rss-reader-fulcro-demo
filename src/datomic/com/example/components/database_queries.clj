@@ -66,9 +66,9 @@
   (log/warn "*** get-all-stories!")
   (->> stories
        (take 10)
-       (map #(select-keys % [:id :author :title :published]))
+       (map #(select-keys % [:id]))
        (map (fn [m]
-              (map->nsmap m "story-list")))))
+              (map->nsmap m "story")))))
 
 
 (comment
@@ -102,7 +102,7 @@
                            (assoc m :content
                                     (-> m :content :content))))
                     (map (fn [m]
-                           (map->nsmap m "full-story"))))]
+                           (map->nsmap m "story"))))]
     ;(println "*** " retval)
     (first retval)))
 
@@ -131,10 +131,10 @@
               (map->nsmap m "story-list"))))
 
 
-  (clojure.set/rename-keys m {:id :story-list/id
-                              :author :story-list/author
-                              :title :story-list/author
-                              :published :story-list/published})
+  (clojure.set/rename-keys m {:id        :story/id
+                              :author    :story/author
+                              :title     :story/author
+                              :published :story/published})
 
   (merge
     (map (fn [x]
@@ -144,19 +144,19 @@
          ; (second x))
          m))
 
-  (defattr all-stories :story-list/all-stories :ref
+  (defattr all-stories :story/all-stories :ref
            {ao/target     :story/id
-            ao/pc-output  [{:story-list/all-stories [:story-list/id]}]
+            ao/pc-output  [{:story/all-stories [:story/id]}]
             ao/pc-resolve (fn [{:keys [query-params] :as env} _]
                             (:clj
-                             {:story-list/all-stories (queries/get-all-stories env query-params)}))})
+                             {:story/all-stories (queries/get-all-stories env query-params)}))})
 
   (def k1 :id)
   (->> k1
        (name)
        ((fn [k] (keyword "story-list" k))))
   (def k2 *1)
-  (def k3 :story-list/id)
+  (def k3 :story/id)
   (= k2 k3)
 
   ,)

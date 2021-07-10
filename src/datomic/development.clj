@@ -25,23 +25,23 @@
 
 (comment
   (go)
-  (myparse [:story-list/all-stories])
+  (myparse [:story/all-stories])
   (com.example.components.parser/parser com.example.components.config/config
                                         {:account/email "tony@example.com"})
   (com.example.components.parser/parser com.example.components.config/config
-                                        [:story-list/all-stories])
+                                        [:story/all-stories])
   (com.example.components.parser/parser com.example.components.config/config
-                                        [{[:story-list/id "K3Y7GLlRfaBDsUWYD0WuXjH/byGbQnwaMWp+PEBoUZw=_13ef0cdbc18:15c0fac:70d63bab"]
+                                        [{[:story/id "K3Y7GLlRfaBDsUWYD0WuXjH/byGbQnwaMWp+PEBoUZw=_13ef0cdbc18:15c0fac:70d63bab"]
                                           [:story/author :story/id :story/title]}])
 
   (com.example.components.parser/parser com.example.components.config/config
-                                        [{[:full-story/id "K3Y7GLlRfaBDsUWYD0WuXjH/byGbQnwaMWp+PEBoUZw=_13ef0cdbc18:15c0fac:70d63bab"]
+                                        [{[:story/id "K3Y7GLlRfaBDsUWYD0WuXjH/byGbQnwaMWp+PEBoUZw=_13ef0cdbc18:15c0fac:70d63bab"]
                                           [:story/author :story/content :story/id :story/title]}])
 
   (com.example.components.parser/parser com.example.components.config/config
-                                        [{[:full-story/id "K3Y7GLlRfaBDsUWYD0WuXjH/byGbQnwaMWp+PEBoUZw=_13ef0cdbc18:15c0fac:70d63bab"]
-                                          [:full-story/id :full-story/author
-                                           :full-story/title :full-story/content]}])
+                                        [{[:story/id "K3Y7GLlRfaBDsUWYD0WuXjH/byGbQnwaMWp+PEBoUZw=_13ef0cdbc18:15c0fac:70d63bab"]
+                                          [:story/id :story/author
+                                           :story/title :story/content]}])
 
   ,,)
 

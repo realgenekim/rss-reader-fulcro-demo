@@ -1,6 +1,8 @@
 (ns com.example.model.mutations
   (:require
     [com.wsscode.pathom.connect :as pc :refer [defresolver]]
+    [com.fulcrologic.fulcro.raw.components :as rc]
+    [com.fulcrologic.fulcro.data-fetch :as df]
     #?@(:clj
         [[com.wsscode.pathom.connect :as pc :refer [defmutation]]
          ;[com.example.components.parser :as p]]
@@ -9,7 +11,8 @@
         [[com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
          [com.fulcrologic.fulcro.components :as comp]])
          ;[com.example.ui.stories-forms :as s]])
-    [clojure.pprint :as pp]))
+    [clojure.pprint :as pp]
+    [taoensso.timbre :as log]))
 
 #?(:clj
    (defn read-file []
@@ -35,6 +38,47 @@
     {:stories [#:story{:id 1, :title "abc", :author "Gene"}
                #:story{:id 2, :title "def", :author "Jez"}]}))
 
+#?(:cljs
+   (do
+     ; (comp/transact! app '[next-story])
+     ;
+     (defmutation next-story
+       [params]
+       (action [{:keys [app state]}]
+         (let [ident [:component/id :com.example.ui.stories-forms/StoriesCustom]
+               props (get-in @state ident)
+               ; if you want the denormalized props, use db->tree to get maps of maps,
+               ; like in UI
+               {:ui/keys [all-stories current-story]} props
+               story-pairs (partition 2 1 all-stories)
+               pair-of-interest (first (filter (fn [x]
+                                                 (= (first x)
+                                                    current-story))
+                                               story-pairs))]
+           (when-let [next-story-ident (second pair-of-interest)]
+             (df/load! app next-story-ident
+                       (rc/nc [:story/id :story/author :story/content :story/title])
+                       {:target (conj ident :ui/current-story)})))))
+
+
+     (defmutation previous-story
+       [params]
+       (action [{:keys [app state]}]
+               (let [ident [:component/id :com.example.ui.stories-forms/StoriesCustom]
+                     props (get-in @state ident)
+                     ; if you want the denormalized props, use db->tree to get maps of maps,
+                     ; like in UI
+                     {:ui/keys [all-stories current-story]} props
+                     story-pairs (log/spy :info (partition 2 1 all-stories))
+                     pair-of-interest (first (filter (fn [x]
+                                                       (= (second x)
+                                                          current-story))
+                                                     story-pairs))]
+                 (when-let [prev-story-ident (first pair-of-interest)]
+                   (df/load! app prev-story-ident
+                             (rc/nc [:story/id :story/author :story/content :story/title])
+                             {:target (conj ident :ui/current-story)})))))))
+
 
 
 
@@ -47,9 +91,9 @@
                         (with-out-str (pp/pprint params)))
                (println "mutation: get-story: state"
                         (with-out-str (pp/pprint @state)))
-               (let [retval #:story{:id (:story-list/id params)
-                                    :title (:story-list/title params)
-                                    :author (:story-list/author params)
+               (let [retval #:story{:id (:story/id params)
+                                    :title (:story/title params)
+                                    :author (:story/author params)
                                     :content "AAAA"}]
                  (println "mutation: new current-story: state"
                           (with-out-str (pp/pprint retval)))
@@ -72,24 +116,24 @@
 #?(:clj
    (pc/defmutation set-story
      [env params]
-     {::pc/input [:story-list/id]}
+     {::pc/input [:story/id]}
      {::pc/output [:story/id :story/title :story/author :story/content]}
      (do
        (println "set-story: params: " params)
-       (let [ret (db/get-story-by-id env (:story-list/id params))]
+       (let [ret (db/get-story-by-id env (:story/id params))]
          (println "ret: " (assoc ret :story/content "xxx"))
          ret))))
 
      ;  (let [retval (com.example.components.parser/parser com.example.components.config/config
-     ;                                                     [{[:story-list/id "K3Y7GLlRfaBDsUWYD0WuXjH/byGbQnwaMWp+PEBoUZw=_13ef0cdbc18:15c0fac:70d63bab"]
+     ;                                                     [{[:story/id "K3Y7GLlRfaBDsUWYD0WuXjH/byGbQnwaMWp+PEBoUZw=_13ef0cdbc18:15c0fac:70d63bab"]
      ;                                                       [:story/author :story/content :story/id :story/title]}])]
      ;    (println retval)
      ;    #:story{:id 1 :title "abc" :author "Gene" :content "AAAA"}))))
 
 #?(:cljs
     (comp/defsc FullStory [_ params]
-                {:query [:story-list/id :story/id :story/content :story/title :story/author]
-                 :ident :story-list/id}))
+                {:query [:story/id :story/id :story/content :story/title :story/author]
+                 :ident :story/id}))
                 ;(println "FullStory: current-story: " current-story)
                 ;(println "FullStory: params: " params)
                 ;(dom/div (dom/h2 "Full Current Story: " (:story/content params)
@@ -108,9 +152,9 @@
                 ;(println "mutation: set-story: state"
                 ;         (with-out-str (pp/pprint @state)))
                 ;(reset! state (assoc @state :current-story
-                ;                            #:story{:id (:story-list/id params)
-                ;                                    :title (:story-list/title params)
-                ;                                    :author (:story-list/author params)
+                ;                            #:story{:id (:story/id params)
+                ;                                    :title (:story/title params)
+                ;                                    :author (:story/author params)
                 ;                                    :content "AAAA"}))))
       (remote [env]
               (do
