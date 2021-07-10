@@ -51,10 +51,10 @@
                ; like in UI
                {:ui/keys [all-stories current-story]} props
                story-pairs (partition 2 1 all-stories)
-               pair-of-interest (first (filter (fn [x]
-                                                 (= (first x)
-                                                    current-story))
-                                               story-pairs))]
+               pair-of-interest (time (first (filter (fn [x]
+                                                       (= (first x)
+                                                          current-story))
+                                                     story-pairs)))]
            (when-let [next-story-ident (second pair-of-interest)]
              (df/load! app next-story-ident
                        (rc/nc [:story/id :story/author :story/content :story/title])
@@ -69,11 +69,11 @@
                      ; if you want the denormalized props, use db->tree to get maps of maps,
                      ; like in UI
                      {:ui/keys [all-stories current-story]} props
-                     story-pairs (log/spy :info (partition 2 1 all-stories))
-                     pair-of-interest (first (filter (fn [x]
-                                                       (= (second x)
-                                                          current-story))
-                                                     story-pairs))]
+                     story-pairs (partition 2 1 all-stories)
+                     pair-of-interest (time (first (filter (fn [x]
+                                                             (= (second x)
+                                                                current-story))
+                                                           story-pairs)))]
                  (when-let [prev-story-ident (first pair-of-interest)]
                    (df/load! app prev-story-ident
                              (rc/nc [:story/id :story/author :story/content :story/title])
