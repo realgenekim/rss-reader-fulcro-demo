@@ -30,33 +30,50 @@
 
 (defattr all-stories :story/all-stories :ref
   {ao/target     :story/id
-   ao/pc-output  [{:story/all-stories [:story/id]}]
+   ao/pc-output  [{:story/all-stories [:story/id :story/author :story/title]}]
    ao/pc-resolve (fn [{:keys [query-params] :as env} _]
                    #?(:clj
                       (let [stories (->> (queries/get-all-stories env query-params))]
-                        (log/warn ":story/all-stories" stories)
-                        (log/warn stories)
+                        (log/warn ":story/all-stories")
+                        ;(log/warn stories)
                         {:story/all-stories stories})))})
 
 #?(:clj
    (do
-     ;(pc/defresolver story-id-resolver [env {:story/keys [id]}]
+     ;(pc/defresolver story-resolver [env {:story/keys [id]}]
      ;  {::pc/input  #{:story/id}
-     ;   ::pc/output [:story/id :story/author :story/content]}
-     ;  (println "*** story-id-resolver: ")
-     ;  (dissoc (queries/get-story-by-id env id)
-     ;          :content))
+     ;   ::pc/output [:story/id :story/author :story/title]}
+     ;  (log/warn "*** story-resolver: ")
+     ;  (let [retval (->> (queries/get-story-by-id env id))]
+     ;    ;(println retval)
+     ;    retval))
 
-     (pc/defresolver story-resolver [env {:story/keys [id]}]
+     (pc/defresolver story-content-resolver [env input]
        {::pc/input  #{:story/id}
-        ::pc/output [:story/id :story/author :story/content :story/title]}
-       (println "*** story-resolver: ")
-       (let [retval (queries/get-full-story-by-id env id)]
-         (println retval)
-         retval))))
+        ::pc/output [:story/id :story/author :story/title :story/content]
+        ::pc/batch? true}
+       (log/warn "*** story-content-resolver: ")
+       ;(let [retval (queries/get-full-story-by-id env id)]
+       ;  ;(println retval)
+       ;  retval)
+       (if (sequential? input)
+         (do
+           ;(println retval)
+           (log/warn "***     story-content-resolver: BATCH")
+           (mapv (fn [v]
+                   (let [retval (queries/get-full-story-by-id env (:story/id v))]
+                     (log/spy :warn v)
+                     retval))
+                 input))
+         ; else
+         (do
+           (log/warn "***     story-content-resolver: single")
+           (let [retval (queries/get-full-story-by-id env (:story/id input))]
+             (log/warn retval)
+             retval))))))
 
 
 (def attributes [id title author content pos all-stories])
 
 #?(:clj
-   (def resolvers [story-resolver])) ;full-story-resolver]))
+   (def resolvers [ story-content-resolver])) ; story-resolver full-story-resolver]))

@@ -78,8 +78,6 @@
       (div :.ui.top.menu
         (div :.ui.item "Demo")
         (when logged-in?
-          (println "Root: ui/number2: " (:ui/number2 props))
-          (println "Root: ui/number2: " {:ui/number2 (:ui/number2 props)})
           #?(:cljs
              (comp/fragment
                (ui-dropdown {:className "item" :text "Account"}

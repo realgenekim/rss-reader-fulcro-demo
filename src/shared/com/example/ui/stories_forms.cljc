@@ -44,41 +44,21 @@
    (def format goog.string.format))
 
 
-
-(defn save-current-story-pos!
-  [this {:keys [:story/id :story/pos]
-         :as   story}]
-  (println "save-current-story-pos! story:" story)
-  (let [state* (->> nil ; com.example.client/app
-                    (:com.fulcrologic.fulcro.application/state-atom))]
-    (reset! state* (assoc-in @state* [:ui/current-position] pos))))
-
-(defn load-full-story!
-  [this {:keys [:story/id :story/pos]
-         :as   story}]
-  (println "load-full-story! story: " story)
-  (df/load! this [:story/id id]
-            FullStory {:target [:current-story]}))
-
-
 (comp/defsc Story [this {:story/keys [id author title]
                          :as params}
                    ; computed-factory: adds third argument
                    ; otherwise, component will disappear if you don't re-render parent
                    {:keys [on-select selected]}]
   ; change all to :story/id
-  {:query [:story/id :story/author :story/title :story/pos]
+  {:query [:story/id :story/author :story/title]
    :ident :story/id}
   (dom/li :.item {:classes [(when (= id (:story/id selected))
                               "right triangle icon")]}
-
-    (println params)
+    ;(println params)
     (dom/a {:href "#!"
             :onClick (fn [_]
                        (when on-select
                          (on-select id)))}
-                       ;(load-full-story! this params)
-                       ;(save-current-story-pos! this params))}
            (if (= id (:story/id selected))
              (dom/i {:classes ["right triangle icon"]}))
            (format "%s (%s)" title author))))

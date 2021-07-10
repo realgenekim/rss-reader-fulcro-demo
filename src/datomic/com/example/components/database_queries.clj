@@ -65,7 +65,7 @@
   [env query-params]
   (log/warn "*** get-all-stories!")
   (->> stories
-       (take 10)
+       ;(take 50)
        (map #(select-keys % [:id]))
        (map (fn [m]
               (map->nsmap m "story")))))
@@ -83,7 +83,7 @@
   (log/warn "*** get-story! " story-id)
   (let [retval (->> stories
                     (filter #(= (:id %) story-id))
-                    (map #(select-keys % [:id :author :title :published :content]))
+                    (map #(select-keys % [:id :author :title :published]))
                     (map (fn [m]
                            (assoc m :content
                                     (-> m :content :content))))

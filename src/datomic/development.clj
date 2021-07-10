@@ -31,6 +31,10 @@
   (com.example.components.parser/parser com.example.components.config/config
                                         [:story/all-stories])
   (com.example.components.parser/parser com.example.components.config/config
+                                        [{:story/all-stories [:story/id :story/author :story/title]}])
+  (com.example.components.parser/parser com.example.components.config/config
+                                        [{:story/all-stories [:story/id :story/author :story/title :story/content]}])
+  (com.example.components.parser/parser com.example.components.config/config
                                         [{[:story/id "K3Y7GLlRfaBDsUWYD0WuXjH/byGbQnwaMWp+PEBoUZw=_13ef0cdbc18:15c0fac:70d63bab"]
                                           [:story/author :story/id :story/title]}])
 
