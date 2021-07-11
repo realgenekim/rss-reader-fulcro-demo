@@ -36,13 +36,11 @@
       (dom/div :.item (dom/b (str "Author: " author)))
       (dom/div :.item (dom/b (str "Title: " title)))
       (dom/div :.item (dom/b (str "Published: " (datetime/inst->html-date (datetime/new-date published))))))
-
     (dom/p)
     ; content has embedded html
     ;    e.g., "<strong> hello! </strong"}})))
     (dom/div {:dangerouslySetInnerHTML
               {:__html content}})))
-
 
 (def ui-full-story (comp/factory FullStory {:keyfn :story/id}))
 
@@ -150,6 +148,30 @@
                     (div :.eight.wide.column
                          (ui-full-story (:current-story props)))))))
 
+(comp/defsc StoryNum
+  [this {:ui/keys [all-stories current-story]
+         :as params}]
+  {:query             [{:ui/all-stories (comp/get-query Story)}
+                       {:ui/current-story (comp/get-query FullStory)}]
+   :ident (fn [x] [:component/id ::StoryNum])}
+  (let [idx (map-indexed (fn [idx itm] [itm idx]) all-stories)
+        _ (println idx)
+        ; ^^ appends index to end [[id "xxx"] 1..n]
+        thisone (->> idx
+                     (filter (fn [x]
+                               (= (:story/id (first x))
+                                  (:story/id current-story)))))
+        n (->> thisone first second)]
+    ;(println "StoryNum: thisone: " thisone)
+    (println "StoryNum: n: " n)
+    ;(println "all-stories: " all-stories)
+    ;(println "current story:" current-story)
+    ;(println "params: " params)
+    (dom/p "Current story: " (str n))))
+
+
+(def ui-story-num (comp/factory StoryNum))
+
 (comp/defsc StoriesCustom
   [this {:ui/keys [all-stories current-story]
          :as props}]
@@ -164,6 +186,9 @@
                                    :post-mutation 'com.example.model.mutations/top-story}))}
   (dom/div
     (dom/p "Current story number: ")
+    (ui-story-num {:ui/all-stories all-stories
+                   :ui/current-story current-story})
+
     (dom/div
       ; (ui-current-position props)
       (dom/div :.ui.grid
