@@ -46,21 +46,23 @@
 
 
 (comp/defsc Story [this {:story/keys [id author title published]
+                         :ui/keys [number]
                          :as params}
                    ; computed-factory: adds third argument
                    ; otherwise, component will disappear if you don't re-render parent
                    {:keys [on-select selected]}]
   ; change all to :story/id
-  {:query [:story/id :story/author :story/title :story/published]
+  {:query [:story/id :story/author :story/title :story/published :ui/number]
    :ident :story/id}
   (dom/div :.item #_{:classes [(when (= id (:story/id selected))
                                  "right triangle icon")]}
+    {:id (str "story-" id)}
     ;(println params)
     (dom/a {:href "#!"
             :onClick (fn [_]
                        (when on-select
                          (on-select id)))}
-           (let [text (format "%s (%s)" title author)]
+           (let [text (format "%d. %s (%s)" number title author)]
              (if (= id (:story/id selected))
                (dom/strong text)
                text)))))
@@ -152,16 +154,16 @@
   [this {:ui/keys [all-stories current-story]
          :as params}]
   {:query             [{:ui/all-stories (comp/get-query Story)}
-                       {:ui/current-story (comp/get-query FullStory)}]
-   :ident (fn [x] [:component/id ::StoryNum])}
-  (let [idx (map-indexed (fn [idx itm] [itm idx]) all-stories)
-        _ (println idx)
+                       {:ui/current-story (comp/get-query FullStory)}]}
+   ;:ident (fn [x] [:component/id ::StoryNum])}
+  (let [idx     (map-indexed (fn [idx itm] [itm idx]) all-stories)
+        _       (println idx)
         ; ^^ appends index to end [[id "xxx"] 1..n]
         thisone (->> idx
-                     (filter (fn [x]
-                               (= (:story/id (first x))
-                                  (:story/id current-story)))))
-        n (->> thisone first second)]
+                  (filter (fn [x]
+                            (= (:story/id (first x))
+                               (:story/id current-story)))))
+        n       (->> thisone first second)]
     ;(println "StoryNum: thisone: " thisone)
     (println "StoryNum: n: " n)
     ;(println "all-stories: " all-stories)
@@ -195,33 +197,20 @@
         (dom/div :.row
           (dom/div :.five.wide.column
             (dom/div :.ui.selection.list.vertical-scrollbar.segment
-              (map (fn [story]
-                     (ui-story story
+              (map-indexed (fn [idx story]
+                             (ui-story (merge story {:ui/number idx})
                                {:on-select
-                                (fn [story-id]
-                                  ; ; ident: [:story/id story-id]
-                                  ; it's what triggers the resolver, it's how you access
-                                  ; local client database
-                                  (println "on-select: triggered: " story-id)
-                                  #_(merge/merge-component!
-                                      this
-                                      StoriesCustom
-                                      {:ui/current-story [:story/id story-id]})
-                                    ;:append [:teams])
-                                  ;(merge/merge!
-                                  ;  this
-                                  ;  {:ui/current-story [:story/id story-id]}
-                                  ;  [:component/id ::StoriesCustom]))
-                                  ;(app/schedule-render! this))
-                                  ;  (comp/get-query FullStory))
-                                  (df/load! this [:story/id story-id] FullStory
-                                            {:target [:component/id ::StoriesCustom :ui/current-story]}))
+                                  (fn [story-id]
+                                      ; ; ident: [:story/id story-id]
+                                      ; it's what triggers the resolver, it's how you access
+                                      ; local client database
+                                      (println "on-select: triggered: " story-id)
+                                      (df/load! this [:story/id story-id] FullStory
+                                          {:target [:component/id ::StoriesCustom :ui/current-story]}))
                                 :selected current-story})) all-stories)))
           (dom/div :.eleven.wide.column
             (when current-story
               (ui-full-story current-story))))))))
-
-
 
 
 (comment

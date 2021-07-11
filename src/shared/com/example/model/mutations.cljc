@@ -42,8 +42,26 @@
 
 #?(:cljs
    (do
-     ; (comp/transact! app '[next-story])
-     ;
+
+     ; https://stackoverflow.com/questions/123999/how-can-i-tell-if-a-dom-element-is-visible-in-the-current-viewport
+     (defn scroll-into-view
+       [story-id]
+       (let [id (str "story-" story-id)
+             el (-> js/document (.getElementById id))]
+         ; https://developer.mozilla.org/en-US/docs/Web/API/Element/scrollIntoView
+         (.scrollIntoView el {:behavior "smooth"
+                              :block "nearest"})))
+
+     (defmutation scroll-to-element
+       [params]
+       (action [{:keys [app state]}]
+         (let [ident [:component/id :com.example.ui.stories-forms/StoriesCustom]
+               props (get-in @state ident)
+               {:ui/keys [all-stories current-story]} props
+               story-id (second current-story)]
+           (println "mutation: scroll-to-element: story-id: " story-id)
+           (scroll-into-view story-id))))
+
      (defmutation next-story
        [params]
        (action [{:keys [app state]}]
@@ -70,6 +88,8 @@
                (df/load! app next-story-ident
                          (rc/nc [:story/id :story/author :story/content :story/title])
                          {:target (conj ident :ui/current-story)}))))))
+               ; (scroll-into-view new-story-id))))))
+
 
 
      (defmutation previous-story
