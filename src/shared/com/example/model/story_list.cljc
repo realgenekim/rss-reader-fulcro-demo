@@ -38,7 +38,7 @@
 
 (defattr all-stories :story/all-stories :ref
   {ao/target     :story/id
-   ao/pc-output  [{:story/all-stories [:story/id :story/author :story/title]}]
+   ao/pc-output  [{:story/all-stories [:story/id :story/author :story/title :story/published]}]
    ao/pc-resolve (fn [{:keys [query-params] :as env} _]
                    #?(:clj
                       (let [stories (->> (queries/get-all-stories env query-params))]
@@ -61,7 +61,7 @@
 
      (pc/defresolver story-content-resolver [env input]
        {::pc/input  #{:story/id}
-        ::pc/output [:story/id :story/author :story/title :story/content]
+        ::pc/output [:story/id :story/author :story/title :story/published :story/content]
         ::pc/batch? true}
        ;(log/warn "*** story-content-resolver: ")
        ;(log/warn "*** story-content-resolver: " (:ast env))

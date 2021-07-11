@@ -15,6 +15,7 @@
     [com.fulcrologic.fulcro.algorithms.denormalize :as fdn]
     [com.fulcrologic.fulcro.algorithms.merge :as merge]
     [com.fulcrologic.fulcro.application :as app]
+    [com.fulcrologic.rad.type-support.date-time :as datetime]
     #?(:cljs [goog.string :as gstring])))
 
 #?(:cljs
@@ -23,16 +24,20 @@
 (declare-mutation bottom-story 'com.example.model.mutations/bottom-story)
 (declare-mutation top-story 'com.example.model.mutations/top-story)
 
-(comp/defsc FullStory [_ {:story/keys [id author title content]
+(comp/defsc FullStory [_ {:story/keys [id author title content published]
                           :as props}]
-  {:query [:story/id :story/author :story/content :story/title]
+  {:query [:story/id :story/author :story/content :story/title :story/published]
    :ident :story/id}
   ;(println "FullStory: props: " props)
   ;(println "FullStory: content: " content)
   (dom/div :.ui.segment
-    (dom/h2 "Full Current Story: ")
-    (dom/h3 "Author: " author)
-    (dom/h3 "Title: " title)
+    (dom/h3 "Full Current Story: ")
+    (dom/div :.list
+      (dom/div :.item (dom/b (str "Author: " author)))
+      (dom/div :.item (dom/b (str "Title: " title)))
+      (dom/div :.item (dom/b (str "Published: " (datetime/inst->html-date (datetime/new-date published))))))
+
+    (dom/p)
     ; content has embedded html
     ;    e.g., "<strong> hello! </strong"}})))
     (dom/div {:dangerouslySetInnerHTML
@@ -42,13 +47,13 @@
 (def ui-full-story (comp/factory FullStory {:keyfn :story/id}))
 
 
-(comp/defsc Story [this {:story/keys [id author title]
+(comp/defsc Story [this {:story/keys [id author title published]
                          :as params}
                    ; computed-factory: adds third argument
                    ; otherwise, component will disappear if you don't re-render parent
                    {:keys [on-select selected]}]
   ; change all to :story/id
-  {:query [:story/id :story/author :story/title]
+  {:query [:story/id :story/author :story/title :story/published]
    :ident :story/id}
   (dom/div :.item #_{:classes [(when (= id (:story/id selected))
                                  "right triangle icon")]}
