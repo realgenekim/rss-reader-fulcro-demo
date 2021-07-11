@@ -1,0 +1,14 @@
+.respect-newlines {
+    white-space: pre-line;
+}
+.vertical-scrollbar
+{
+    /*max-height: 150px;*/
+    max-height: 100vh;
+    overflow-y: scroll;
+}
+.no-space-afterwards
+{
+    /*line-height: 0px;*/
+    margin-top:-20px
+}
