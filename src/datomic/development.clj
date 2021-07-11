@@ -28,7 +28,7 @@
 
   ,)
 
-(set-refresh-dirs "src/main" "src/datomic" "src/dev" "src/shared")
+(set-refresh-dirs "src/main" "src/datomic" "src/dev" "src/shared" "resources/public/css")
 
 (def myparse (partial com.example.components.parser/parser com.example.components.config/config))
 

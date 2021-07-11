@@ -50,8 +50,8 @@
   ; change all to :story/id
   {:query [:story/id :story/author :story/title]
    :ident :story/id}
-  (dom/li :.item #_{:classes [(when (= id (:story/id selected))
-                                "right triangle icon")]}
+  (dom/div :.item #_{:classes [(when (= id (:story/id selected))
+                                 "right triangle icon")]}
     ;(println params)
     (dom/a {:href "#!"
             :onClick (fn [_]
@@ -163,8 +163,8 @@
       ; (ui-current-position props)
       (dom/div :.ui.grid
         (dom/div :.row
-          (dom/div :.four.wide.column
-            (dom/ul :.ui.selection.list
+          (dom/div :.five.wide.column
+            (dom/div :.ui.selection.list.vertical-scrollbar.segment
               (map (fn [story]
                      (ui-story story
                                {:on-select
@@ -187,9 +187,9 @@
                                   (df/load! this [:story/id story-id] FullStory
                                             {:target [:component/id ::StoriesCustom :ui/current-story]}))
                                 :selected current-story})) all-stories)))
-          (dom/div :.twelve.wide.column
-              (when current-story
-                   (ui-full-story current-story))))))))
+          (dom/div :.eleven.wide.column
+            (when current-story
+              (ui-full-story current-story))))))))
 
 
 
