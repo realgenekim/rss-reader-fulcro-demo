@@ -201,12 +201,12 @@
                              (ui-story (merge story {:ui/number idx})
                                {:on-select
                                   (fn [story-id]
-                                      ; ; ident: [:story/id story-id]
-                                      ; it's what triggers the resolver, it's how you access
-                                      ; local client database
-                                      (println "on-select: triggered: " story-id)
-                                      (df/load! this [:story/id story-id] FullStory
-                                          {:target [:component/id ::StoriesCustom :ui/current-story]}))
+                                    ; ; ident: [:story/id story-id]
+                                    ; it's what triggers the resolver, it's how you access
+                                    ; local client database
+                                    (println "on-select: triggered: " story-id)
+                                    (df/load! this [:story/id story-id] FullStory
+                                        {:target [:component/id ::StoriesCustom :ui/current-story]}))
                                 :selected current-story})) all-stories)))
           (dom/div :.eleven.wide.column
             (when current-story
