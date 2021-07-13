@@ -16,6 +16,8 @@
     [com.fulcrologic.fulcro.algorithms.merge :as merge]
     [com.fulcrologic.fulcro.application :as app]
     [com.fulcrologic.rad.type-support.date-time :as datetime]
+    [com.fulcrologic.fulcro.raw.components :as rc]
+    [com.fulcrologic.fulcro.mutations :as m]
     #?(:cljs [goog.string :as gstring])))
 
 #?(:cljs
@@ -169,7 +171,7 @@
     ;(println "all-stories: " all-stories)
     ;(println "current story:" current-story)
     ;(println "params: " params)
-    (dom/p "Current story: " (str n))))
+    (dom/p (format "Current story: %d of %d" n (count all-stories)))))
 
 
 (def ui-story-num (comp/factory StoryNum))
@@ -187,7 +189,7 @@
                                   {:target [:component/id ::StoriesCustom :ui/all-stories]
                                    :post-mutation 'com.example.model.mutations/top-story}))}
   (dom/div
-    (dom/p "Current story number: ")
+    (dom/h2 "All Stories")
     (ui-story-num {:ui/all-stories all-stories
                    :ui/current-story current-story})
 
@@ -211,6 +213,56 @@
           (dom/div :.eleven.wide.column
             (when current-story
               (ui-full-story current-story))))))))
+
+;(def StoriesSearch StoriesCustom)
+(comp/defsc StoriesSearch
+  [this {:ui/keys [current-story stories-search-results search-field]
+         :as props}]
+  {:query             [{:ui/stories-search-results (comp/get-query Story)}
+                       {:ui/current-story (comp/get-query FullStory)}
+                       :ui/search-field]
+   :ident             (fn [x] [:component/id ::StoriesSearch])
+   :initial-state     {:ui/stories-search-results []
+                       :ui/search-field "abc"}
+   :route-segment     ["search"]
+   :componentDidMount (fn [this]
+                        (df/load! this :search-results/stories
+                          (rc/nc [:story/id :story/author :story/content :story/title])
+                          {:target [:component/id ::StoriesSearch :ui/stories-search-results]
+                           :params {:search/search-query "gene kim"}}))}
+  (dom/div
+    (dom/h2 "Searched Stories")
+
+
+    (dom/form
+      (dom/input {:id       "search-field"
+                  :value    search-field
+                  :onChange #(m/set-string! this :ui/search-field :event %)}))
+
+    (ui-story-num {:ui/all-stories stories-search-results
+                   :ui/current-story current-story})
+
+
+
+
+    (dom/div :.ui.grid
+      (dom/div :.row
+        (dom/div :.five.wide.column
+          (dom/div :.ui.selection.list.vertical-scrollbar.segment
+            (map-indexed (fn [idx story]
+                           (ui-story (merge story {:ui/number idx})
+                             {:on-select
+                                        (fn [story-id]
+                                          ; ; ident: [:story/id story-id]
+                                          ; it's what triggers the resolver, it's how you access
+                                          ; local client database
+                                          (println "on-select: triggered: " story-id)
+                                          (df/load! this [:story/id story-id] FullStory
+                                                    {:target [:component/id ::StoriesSearch :ui/current-story]}))
+                              :selected current-story})) stories-search-results)))
+        (dom/div :.eleven.wide.column
+          (when current-story
+            (ui-full-story current-story)))))))
 
 
 (comment

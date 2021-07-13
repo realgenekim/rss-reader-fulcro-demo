@@ -39,7 +39,7 @@
                          sales-report/SalesReport InventoryReport
                          sales-report/RealSalesReport
                          ;stories/StoriesListReport stories/StoryReport
-                         stories/StoriesCustom
+                         stories/StoriesCustom stories/StoriesSearch
                          stories/Root7 stories/Root8
                          dashboard/Dashboard
                          mdetail/AccountList]}
@@ -100,7 +100,8 @@
                    (ui-dropdown-item {:onClick (fn [] (rroute/route-to! this mdetail/AccountList {}))} "Master Detail")))
                (ui-dropdown {:className "item" :text "Gene"}
                  (ui-dropdown-menu {}
-                   (ui-dropdown-item {:onClick (fn [] (rroute/route-to! this stories/StoriesCustom {}))} "RAD Report")
+                   (ui-dropdown-item {:onClick (fn [] (rroute/route-to! this stories/StoriesCustom {}))} "Stories Main")
+                   (ui-dropdown-item {:onClick (fn [] (rroute/route-to! this stories/StoriesSearch {}))} "Stories Searched")
                    (ui-dropdown-item {:onClick (fn [] (rroute/route-to! this stories/Root7 {}))} "Root7")
                    (ui-dropdown-item {:onClick (fn [] (rroute/route-to! this stories/Root8 {:ui/number2 (:ui/number2 props)}))} "Root8"))))))
 
