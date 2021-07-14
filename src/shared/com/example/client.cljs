@@ -20,7 +20,6 @@
     [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
     [com.fulcrologic.fulcro.mutations :as mutation]
     [com.fulcrologic.fulcro.components :as comp]
-    [com.fulcrologic.fulcro.rendering.keyframe-render2]
     [com.example.model.mutations]
     ["mousetrap" :as mousetrap]))
 

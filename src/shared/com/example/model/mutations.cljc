@@ -56,7 +56,7 @@
      (defmutation scroll-to-element
        [params]
        (action [{:keys [app state]}]
-         (let [ident [:component/id :com.example.ui.stories-forms/StoriesCustom]
+         (let [ident [:component/id :com.example.ui.stories-forms/StoriesMain]
                props (get-in @state ident)
                {:ui/keys [all-stories current-story]} props
                story-id (second current-story)]
@@ -77,7 +77,7 @@
        [state mode] [map? keyword? => map?]
        (let [ident (case mode
                      :search [:component/id :com.example.ui.stories-forms/StoriesSearch]
-                     :main   [:component/id :com.example.ui.stories-forms/StoriesCustom]
+                     :main   [:component/id :com.example.ui.stories-forms/StoriesMain]
                      nil)
              props (get-in state ident)
              {:ui/keys [all-stories stories-search-results current-story]} props

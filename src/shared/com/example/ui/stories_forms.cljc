@@ -10,7 +10,6 @@
        :cljs [com.fulcrologic.fulcro.dom :as dom :refer [div label input]])
     [com.fulcrologic.fulcro.mutations :as mutation :refer [declare-mutation]]
     [com.fulcrologic.fulcro.components :as comp]
-    ;[com.example.model.mutations :as m]
     [com.fulcrologic.fulcro.data-fetch :as df]
     [com.fulcrologic.fulcro.algorithms.denormalize :as fdn]
     [com.fulcrologic.fulcro.algorithms.merge :as merge]
@@ -18,6 +17,7 @@
     [com.fulcrologic.rad.type-support.date-time :as datetime]
     [com.fulcrologic.fulcro.raw.components :as rc]
     [com.fulcrologic.fulcro.mutations :as m]
+    [com.example.ui.button-toys-form :as buttons]
     #?(:cljs [goog.string :as gstring])
     #?(:cljs [portal.web :as pw])))
 
@@ -189,18 +189,19 @@
     (swap! state assoc-in [:ui/mode] mode)))
 
 
-(comp/defsc StoriesCustom
+(comp/defsc StoriesMain
   [this {:ui/keys [all-stories current-story]
          :as props}]
   {:query             [{:ui/all-stories (comp/get-query Story)}
                        {:ui/current-story (comp/get-query FullStory)}]
-   :ident             (fn [x] [:component/id ::StoriesCustom])
+   :ident             (fn [x] [:component/id ::StoriesMain])
    :initial-state     {:ui/all-stories []}
    :route-segment     ["Stories"]
    :componentDidMount (fn [this]
+                        (println "StoresMain: mounted!")
                         (comp/transact! this [(set-mode {:mode :main})])
                         (df/load! this :story/all-stories Story
-                                  {:target [:component/id ::StoriesCustom :ui/all-stories]
+                                  {:target [:component/id ::StoriesMain :ui/all-stories]
                                    :post-mutation 'com.example.model.mutations/top-story}))}
   (dom/div
     (dom/h2 "All Stories")
@@ -222,20 +223,18 @@
                                     ; local client database
                                     (println "on-select: triggered: " story-id)
                                     (df/load! this [:story/id story-id] FullStory
-                                        {:target [:component/id ::StoriesCustom :ui/current-story]}))
+                                        {:target [:component/id ::StoriesMain :ui/current-story]}))
                                 :selected current-story})) all-stories)))
           (dom/div :.eleven.wide.column
             (when current-story
               (ui-full-story current-story))))))))
-
-;(def StoriesSearch StoriesCustom)
 
 (declare-mutation search-stories 'com.example.model.mutations/search-stories)
 
 (comp/defsc Mode
   [this {:ui/keys [mode] :as props}]
   {:query         [:ui/mode]
-   :initial-state {:ui/mode :search}})
+   :initial-state {:ui/mode :main}})
 
 (defn enter?
   [e]
@@ -255,6 +254,7 @@
                          :ui/mode                   (comp/get-initial-state Mode)})
    :route-segment     ["search"]
    :componentDidMount (fn [this]
+                        (println "StoresSearch: mounted!")
                         (comp/transact! this [(set-mode {:mode :search})])
                         (df/load! this :search-results/stories
                           (rc/nc [:story/id :story/author :story/content :story/title])
@@ -301,9 +301,47 @@
           (when current-story
             (ui-full-story current-story)))))))
 
+(def ui-stories-main (comp/computed-factory StoriesMain))
+(def ui-stories-search (comp/computed-factory StoriesSearch))
+
+(comp/defsc StoriesContainer
+  [this {:ui/keys [mode search main mode button]
+         :as      props}]
+  {:query             [{:ui/search (comp/get-query StoriesSearch)}
+                       {:ui/main (comp/get-query StoriesMain)}
+                       {:ui/mode (comp/get-query Mode)}
+                       {:ui/button (comp/get-query buttons/ButtonTest1)}]
+   :ident             (fn [x] [:component/id ::StoriesContainer])
+   :initial-state     (fn [_]
+                        {:ui/mode (comp/get-initial-state Mode {})
+                         :ui/search (comp/get-initial-state StoriesSearch {})
+                         :ui/main (comp/get-initial-state StoriesMain {})
+                         :ui/button (comp/get-initial-state buttons/ButtonTest1)})
+   :route-segment     ["main"]
+   :componentDidMount (fn [this]
+                        (comp/transact! this [(set-mode {:mode :main})]))}
+  (dom/div
+    (dom/h2 "Story Container")
+    (dom/p "mode: " (str mode))
+    (buttons/ui-button-test-1 (:ui/button props))
+    (case (:ui/mode mode)
+      :main (ui-stories-main main)
+      :search (ui-stories-search search))))
+
+
+
 
 (comment
+
+  (comp/transact! this [(set-mode {:mode :main})])
+  (comp/transact! app [(set-mode {:mode :search})])
+  (def app (resolve 'com.example.client/app))
   (comp/get-query SelectedStory)
-  (comp/get-query StoriesCustom)
+  (comp/get-query StoriesMain),
+  (let [state (app/current-state app)]
+    (com.fulcrologic.fulcro.algorithms.denormalize/db->tree (comp/get-query StoriesContainer)
+      state state,))
+  (comp/get-query StoriesContainer)
+  (app/force-root-render! app)
 
   ,)

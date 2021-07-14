@@ -41,7 +41,8 @@
                          sales-report/RealSalesReport
                          dashboard/Dashboard
                          ;stories/StoriesListReport stories/StoryReport
-                         stories/StoriesCustom stories/StoriesSearch
+                         stories/StoriesMain stories/StoriesSearch
+                         stories/StoriesContainer
                          buttons/ButtonTest1 buttons/ButtonTest2
                          buttons/ButtonTest3
                          mdetail/AccountList]}
@@ -108,8 +109,9 @@
                    (ui-dropdown-item {:onClick (fn [] (rroute/route-to! this buttons/ButtonTest3 {:ui/number2 (:ui/number2 props)}))} "Button Test 3a")))
                (ui-dropdown {:className "item" :text "Gene"}
                  (ui-dropdown-menu {}
-                   (ui-dropdown-item {:onClick (fn [] (rroute/route-to! this stories/StoriesCustom {}))} "Stories Main")
-                   (ui-dropdown-item {:onClick (fn [] (rroute/route-to! this stories/StoriesSearch {}))} "Stories Searched"))))))
+                   (ui-dropdown-item {:onClick (fn [] (rroute/route-to! this stories/StoriesMain {}))} "Stories Main")
+                   (ui-dropdown-item {:onClick (fn [] (rroute/route-to! this stories/StoriesSearch {}))} "Stories Searched")
+                   (ui-dropdown-item {:onClick (fn [] (rroute/route-to! this stories/StoriesContainer {}))} "Stories Container"))))))
 
 
         (div :.right.menu

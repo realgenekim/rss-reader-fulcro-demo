@@ -23,7 +23,7 @@
   {:query [:ui/number2]
    :ident         (fn [] [:component/id ::Root7])
    :initial-state {:ui/number2 0}
-   :route-segment ["root77"]}
+   :route-segment ["button-test-1"]}
   (dom/div
     (dom/h2 "Button Test 1:")
     (dom/p "This demo shows updating state that resides in this component:")
@@ -31,6 +31,8 @@
     (println "props: " props)
     (dom/button {:onClick #(comp/transact! this [(bump-number {})])}
       "You've clicked this button " number2 " times.")))
+
+(def ui-button-test-1 (comp/factory ButtonTest1))
 
 ;
 ; support multiple buttons per page, all pointing to the same ident
