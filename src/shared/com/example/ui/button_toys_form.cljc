@@ -15,13 +15,13 @@
 (mutation/defmutation bump-number [ignored]
   (action [{:keys [ref state]}]
     (println "bump-number")
-    (swap! state update-in [:component/id ::Root7 :ui/number2] inc)))
+    (swap! state update-in [:component/id ::ButtonTest1 :ui/number2] inc)))
 
 (comp/defsc ButtonTest1
   [this {number2 :ui/number2
          :as     props}]
   {:query [:ui/number2]
-   :ident         (fn [] [:component/id ::Root7])
+   :ident         (fn [] [:component/id ::ButtonTest1])
    :initial-state {:ui/number2 0}
    :route-segment ["button-test-1"]}
   (dom/div

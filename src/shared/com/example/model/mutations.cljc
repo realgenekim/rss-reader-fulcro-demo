@@ -31,12 +31,12 @@
          (println "mutation: set-mode: params: " mode)
          ;(do
          ;  (println "bump-number")
-         (swap! state assoc-in [:component/id :com.example.ui.stories-forms/StoriesContainer :ui/mode] (:mode mode))))
+         (swap! state assoc-in [:component/id :com.example.ui.stories-forms/Mode :ui/mode] mode)))
 
      (defn get-mode
        [state]
-       (let [mode (->> (get-in @state [:component/id :com.example.ui.stories-forms/StoriesContainer :ui/mode :ui/mode]))]
-         (log/spy mode)
+       (let [mode (-> (get-in @state [:component/id :com.example.ui.stories-forms/Mode :ui/mode]))]
+         (println "get-mode: " mode)
          mode))
 
      ; https://stackoverflow.com/questions/123999/how-can-i-tell-if-a-dom-element-is-visible-in-the-current-viewport
@@ -62,9 +62,10 @@
 
      (>defn get-state-and-stories
        " given mode, return ident (where current value will live) and stories (which reside in its scope) "
-       [state mode] [map? keyword? => map?]
+       [state mode] [map? map? => map?]
        (println "get-state-and-stories: mode; " mode)
-       (let [ident (case mode
+       (let [m (:ui/mode mode)
+             ident (case m
                      :search [:component/id :com.example.ui.stories-forms/StoriesSearch]
                      :main   [:component/id :com.example.ui.stories-forms/StoriesMain]
                      nil)
@@ -72,7 +73,7 @@
              {:ui/keys [all-stories stories-search-results current-story]} props
              ; if you want the denormalized props, use db->tree to get maps of maps,
              ; like in UI
-             source-stories (case mode
+             source-stories (case m
                               :search stories-search-results
                               :main all-stories
                               nil)]
@@ -165,7 +166,8 @@
          (df/load! app :search-results/stories
            (rc/nc [:story/id :story/author :story/content :story/title])
            {:target [:component/id :com.example.ui.stories-forms/StoriesSearch :ui/stories-search-results]
-            :params {:search/search-query (:query params)}})))))
+            :params {:search/search-query (:query params)}
+            :post-mutation 'com.example.model.mutations/top-story})))))
 
 
 

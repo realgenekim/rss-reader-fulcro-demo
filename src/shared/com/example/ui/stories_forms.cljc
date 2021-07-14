@@ -186,7 +186,7 @@
 (comp/defsc Mode
   [this {:ui/keys [mode] :as props}]
   {:query         [:ui/mode]
-   ;:ident (fn [] [:component/id :com.example.ui.stories-forms/StoriesContainer])
+   :ident         (fn [] [:component/id ::Mode])
    :initial-state {:ui/mode :main}}
   (dom/p "Mode: " (str mode)))
 
@@ -194,20 +194,23 @@
 
 
 (comp/defsc StoriesMain
-  [this {:ui/keys [all-stories current-story]
+  [this {:ui/keys [all-stories current-story mode]
          :as props}]
   {:query             [{:ui/all-stories (comp/get-query Story)}
-                       {:ui/current-story (comp/get-query FullStory)}]
+                       {:ui/current-story (comp/get-query FullStory)}
+                       {:ui/mode (comp/get-query Mode)}]
    :ident             (fn [x] [:component/id ::StoriesMain])
    :initial-state     {:ui/all-stories []}
    :route-segment     ["Stories"]
    :componentDidMount (fn [this]
                         (println "StoresMain: mounted!")
+                        (comp/transact! this [(set-mode {:ui/mode :main})])
                         (df/load! this :story/all-stories Story
                                   {:target [:component/id ::StoriesMain :ui/all-stories]
                                    :post-mutation 'com.example.model.mutations/top-story}))}
   (dom/div
     (dom/h2 "All Stories")
+    (dom/p "Mode: " (str mode))
     (ui-story-num {:ui/all-stories all-stories
                    :ui/current-story current-story})
 
@@ -255,6 +258,7 @@
    :route-segment     ["search"]
    :componentDidMount (fn [this]
                         (println "StoresSearch: mounted!")
+                        (comp/transact! this [(set-mode {:ui/mode :search})])
                         (df/load! this :search-results/stories
                           (rc/nc [:story/id :story/author :story/content :story/title])
                           {:target [:component/id ::StoriesSearch :ui/stories-search-results]
@@ -264,6 +268,7 @@
   (dom/div
     (println "StoriesSearch: mode: " mode)
     (dom/h2 "Searched Stories")
+    (dom/p "Mode: " (str mode))
     (dom/div :.ui.input
       (dom/input {:type     "text"
                   :id       "search-field"
@@ -304,26 +309,34 @@
 (def ui-stories-search (comp/computed-factory StoriesSearch))
 
 (comp/defsc StoriesContainer
-  [this {:ui/keys [mode search main button]
+  [this {:ui/keys [mode search main buttons]
          :as      props}]
   {:query         [{:ui/search (comp/get-query StoriesSearch)}
                    {:ui/main (comp/get-query StoriesMain)}
                    {:ui/mode (comp/get-query Mode)}
-                   {:ui/button (comp/get-query buttons/ButtonTest1)}]
+                   {:ui/buttons (comp/get-query buttons/ButtonTest1)}]
    :ident         (fn [x] [:component/id ::StoriesContainer])
    :initial-state (fn [_]
                     {:ui/mode   (comp/get-initial-state Mode)
                      :ui/search (comp/get-initial-state StoriesSearch {})
                      :ui/main   (comp/get-initial-state StoriesMain {})
-                     :ui/button (comp/get-initial-state buttons/ButtonTest1)})
-   :route-segment ["main"]}
+                     :ui/buttons (comp/get-initial-state buttons/ButtonTest1)})
+   :route-segment ["main"]
+   :componentDidMount (fn [this]
+                        (println "StoriesContainer: mounted!")
+                        (comp/transact! this [(set-mode {:ui/mode :main})]))}
   (dom/div
     (dom/h2 "Story Container")
+    (div
+      (dom/div :.ui.button {:onClick (fn [x] (comp/transact! this [(set-mode {:ui/mode :main})]))}
+        "Main")
+      (dom/div :.ui.button {:onClick (fn [x] (comp/transact! this [(set-mode {:ui/mode :search})]))}
+        "Search"))
     (dom/p "mode: " (str mode))
-    (ui-mode mode)
-    (buttons/ui-button-test-1 (:ui/button props))
-    (case (:ui/mode mode)
-      :main (ui-stories-main main)
+    ;(buttons/ui-button-test-1 (:ui/button props))
+    (case (:ui/mode (:ui/mode mode))
+      :main (ui-stories-main (merge main
+                               {:ui/mode mode}))
       :search (ui-stories-search search)
       nil)))
 
@@ -331,10 +344,11 @@
 
 (comment
 
-  (comp/transact! app [(set-mode {:mode :main})])
-  (comp/transact! app [(set-mode {:mode :search})])
+  (comp/transact! app [(set-mode {:ui/mode :main})])
+  (comp/transact! app [(set-mode {:ui/mode :search})])
   (def app (resolve 'com.example.client/app))
-  (com.example.model.mutations/get-mode app)
+  (com.example.model.mutations/get-mode (->> @app :com.fulcrologic.fulcro.application/state-atom))
+
   (comp/get-query SelectedStory)
   (comp/get-query StoriesMain),
   (let [state (app/current-state app)]
