@@ -26,6 +26,7 @@
 
 (declare-mutation bottom-story 'com.example.model.mutations/bottom-story)
 (declare-mutation top-story 'com.example.model.mutations/top-story)
+(declare-mutation set-mode 'com.example.model.mutations/set-mode)
 
 (comp/defsc FullStory [_ {:story/keys [id author title content published]
                           :as props}]
@@ -184,8 +185,12 @@
 
 (comp/defsc Mode
   [this {:ui/keys [mode] :as props}]
-  {:query         [:component/id :com.example.ui.stories-forms/StoriesContainer :ui/mode]
-   :initial-state {:ui/mode :main}})
+  {:query         [:ui/mode]
+   ;:ident (fn [] [:component/id :com.example.ui.stories-forms/StoriesContainer])
+   :initial-state {:ui/mode :main}}
+  (dom/p "Mode: " (str mode)))
+
+(def ui-mode (comp/factory Mode))
 
 
 (comp/defsc StoriesMain
@@ -198,7 +203,6 @@
    :route-segment     ["Stories"]
    :componentDidMount (fn [this]
                         (println "StoresMain: mounted!")
-                        (comp/transact! this [('set-mode {:mode :main})])
                         (df/load! this :story/all-stories Story
                                   {:target [:component/id ::StoriesMain :ui/all-stories]
                                    :post-mutation 'com.example.model.mutations/top-story}))}
@@ -302,26 +306,26 @@
 (comp/defsc StoriesContainer
   [this {:ui/keys [mode search main button]
          :as      props}]
-  {:query             [{:ui/search (comp/get-query StoriesSearch)}
-                       {:ui/main (comp/get-query StoriesMain)}
-                       :ui/mode
-                       {:ui/button (comp/get-query buttons/ButtonTest1)}]
-   :ident             (fn [x] [:component/id ::StoriesContainer])
-   :initial-state     (fn [_]
-                        {:ui/mode :main
-                         :ui/search (comp/get-initial-state StoriesSearch {})
-                         :ui/main (comp/get-initial-state StoriesMain {})
-                         :ui/button (comp/get-initial-state buttons/ButtonTest1)})
-   :route-segment     ["main"]}
+  {:query         [{:ui/search (comp/get-query StoriesSearch)}
+                   {:ui/main (comp/get-query StoriesMain)}
+                   {:ui/mode (comp/get-query Mode)}
+                   {:ui/button (comp/get-query buttons/ButtonTest1)}]
+   :ident         (fn [x] [:component/id ::StoriesContainer])
+   :initial-state (fn [_]
+                    {:ui/mode   (comp/get-initial-state Mode)
+                     :ui/search (comp/get-initial-state StoriesSearch {})
+                     :ui/main   (comp/get-initial-state StoriesMain {})
+                     :ui/button (comp/get-initial-state buttons/ButtonTest1)})
+   :route-segment ["main"]}
   (dom/div
     (dom/h2 "Story Container")
     (dom/p "mode: " (str mode))
+    (ui-mode mode)
     (buttons/ui-button-test-1 (:ui/button props))
-    (case mode
+    (case (:ui/mode mode)
       :main (ui-stories-main main)
       :search (ui-stories-search search)
       nil)))
-
 
 
 
@@ -330,6 +334,7 @@
   (comp/transact! app [(set-mode {:mode :main})])
   (comp/transact! app [(set-mode {:mode :search})])
   (def app (resolve 'com.example.client/app))
+  (com.example.model.mutations/get-mode app)
   (comp/get-query SelectedStory)
   (comp/get-query StoriesMain),
   (let [state (app/current-state app)]

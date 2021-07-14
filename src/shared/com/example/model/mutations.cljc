@@ -35,7 +35,9 @@
 
      (defn get-mode
        [state]
-       (->> (get-in @state [:component/id :com.example.ui.stories-forms/StoriesContainer :ui/mode])))
+       (let [mode (->> (get-in @state [:component/id :com.example.ui.stories-forms/StoriesContainer :ui/mode :ui/mode]))]
+         (log/spy mode)
+         mode))
 
      ; https://stackoverflow.com/questions/123999/how-can-i-tell-if-a-dom-element-is-visible-in-the-current-viewport
      (defn scroll-into-view
@@ -61,6 +63,7 @@
      (>defn get-state-and-stories
        " given mode, return ident (where current value will live) and stories (which reside in its scope) "
        [state mode] [map? keyword? => map?]
+       (println "get-state-and-stories: mode; " mode)
        (let [ident (case mode
                      :search [:component/id :com.example.ui.stories-forms/StoriesSearch]
                      :main   [:component/id :com.example.ui.stories-forms/StoriesMain]
@@ -71,7 +74,8 @@
              ; like in UI
              source-stories (case mode
                               :search stories-search-results
-                              :main all-stories)]
+                              :main all-stories
+                              nil)]
          {:source-ident ident
           :source-stories source-stories}))
 
