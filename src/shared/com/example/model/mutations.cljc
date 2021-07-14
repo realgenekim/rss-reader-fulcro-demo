@@ -17,32 +17,25 @@
     [taoensso.timbre :as log]
     [com.fulcrologic.guardrails.core :refer [>defn =>]]))
 
-#?(:clj
-   (defn read-file []
-     ; "ccsp2.txt"
-     ; "clojure.txt"
-     (-> ;(slurp (str "/Users/genekim/src.local/feedly" "/" "clojure.txt"))
-       (slurp "resources/stories.txt")
-       (read-string))))
 
-(defresolver my-very-awesome-teams [_ _] ; a global resolver
-  {::pc/input  #{}
-   ::pc/output [{:teams [:team/id :team/name :team/players]}]}
-  {:teams [#:team{:name "Hikers" :id :hikers
-                  :players [#:player{:id 1}
-                            #:player{:id 2}
-                            #:player{:id 3}]}]})
 
-(defresolver get-stories [_ _] ; a global resolver)
-  {::pc/input  #{}
-   ::pc/output [{:stories [:story/id :story/title :team/author]}]}
-  (do
-    (println "get-stories! resolver")
-    {:stories [#:story{:id 1, :title "abc", :author "Gene"}
-               #:story{:id 2, :title "def", :author "Jez"}]}))
+
+
+
 
 #?(:cljs
    (do
+
+     (defmutation set-mode [mode]
+       (action [{:keys [state]}]
+         (println "mutation: set-mode: params: " mode)
+         ;(do
+         ;  (println "bump-number")
+         (swap! state assoc-in [:component/id :com.example.ui.stories-forms/StoriesContainer :ui/mode] (:mode mode))))
+
+     (defn get-mode
+       [state]
+       (->> (get-in @state [:component/id :com.example.ui.stories-forms/StoriesContainer :ui/mode])))
 
      ; https://stackoverflow.com/questions/123999/how-can-i-tell-if-a-dom-element-is-visible-in-the-current-viewport
      (defn scroll-into-view
@@ -63,14 +56,7 @@
            (println "mutation: scroll-to-element: story-id: " story-id)
            (scroll-into-view story-id))))
 
-     (comment
-       (get-in @state [:ui/mode])
-       (swap! state assoc-in [:ui/mode] :search)
-       ,)
 
-     (defn get-mode
-       [state]
-       (->> (get-in @state [:ui/mode]) :mode))
 
      (>defn get-state-and-stories
        " given mode, return ident (where current value will live) and stories (which reside in its scope) "
