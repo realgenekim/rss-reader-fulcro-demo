@@ -14,7 +14,8 @@
     [clojure.pprint :as pp]
     [com.example.ui.stories-forms :as stories]
     [com.fulcrologic.fulcro.algorithms.merge :as merge]
-    [taoensso.timbre :as log]))
+    [taoensso.timbre :as log]
+    [com.fulcrologic.guardrails.core :refer [>defn =>]]))
 
 #?(:clj
    (defn read-file []
@@ -62,32 +63,69 @@
            (println "mutation: scroll-to-element: story-id: " story-id)
            (scroll-into-view story-id))))
 
+     (comment
+       (get-in @state [:ui/mode])
+       (swap! state assoc-in [:ui/mode] :search)
+       ,)
+
+     (defn get-mode
+       [state]
+       (->> (get-in @state [:ui/mode]) :mode))
+
+     (>defn get-state-and-stories
+       " given mode, return ident (where current value will live) and stories (which reside in its scope) "
+       [state mode] [map? keyword? => map?]
+       (let [ident (case mode
+                     :search [:component/id :com.example.ui.stories-forms/StoriesSearch]
+                     :main   [:component/id :com.example.ui.stories-forms/StoriesCustom]
+                     nil)
+             props (get-in state ident)
+             {:ui/keys [all-stories stories-search-results current-story]} props
+             ; if you want the denormalized props, use db->tree to get maps of maps,
+             ; like in UI
+             source-stories (case mode
+                              :search stories-search-results
+                              :main all-stories)]
+         {:source-ident ident
+          :source-stories source-stories}))
+
+
+     (defn get-next-story-ident-from-action
+       " given ident and source-stories and action, return the next-story-ident which can be
+         loaded via df/load! "
+       [ident-and-stories current-story action]
+       (let [{:keys [source-ident source-stories]} ident-and-stories
+             story-pairs      (partition 2 1 source-stories)
+             f                (case action
+                                :up first
+                                :down second)
+             pair-of-interest (time
+                                (first
+                                  (filter (fn [x]
+                                            ; either first (up) or second (down)
+                                            (= (f x)
+                                              current-story))
+                                    story-pairs)))]
+         pair-of-interest))
+
      (defmutation next-story
        [params]
-       (action [{:keys [app state]}]
-         (let [ident [:component/id :com.example.ui.stories-forms/StoriesCustom]
-               props (get-in @state ident)
-               ; if you want the denormalized props, use db->tree to get maps of maps,
-               ; like in UI
-               {:ui/keys [all-stories current-story]} props
-               story-pairs (partition 2 1 all-stories)
-               pair-of-interest (time (first (filter (fn [x]
-                                                       (= (first x)
-                                                          current-story))
-                                                     story-pairs)))]
+       (action [{:keys [ref app state]}]
+         ; ref is the ident of the component that invoked the mutation
+         ; => [:component/id ::Root8]
+         (println "mutation: next-story: mode: " (get-mode state))
+         (let [ident-and-stories (get-state-and-stories @state (get-mode state))
+               {:keys [source-ident source-stories]} ident-and-stories
+               props             (get-in @state source-ident)
+               {:ui/keys [current-story]} props
+               ;_                 (println "source-stories: " source-stories)
+               pair-of-interest  (get-next-story-ident-from-action ident-and-stories current-story :up)]
            (when-let [next-story-ident (second pair-of-interest)]
              (let [new-story-id (second next-story-ident)]
-              ; [:story/id [:story/id "K3Y7GLlRfaBDsUWYD0Wu … 70d2:ae3a36:ad5391a1" ]]
-              ; (log/spy :warn pair-of-interest)
-              ; (log/spy :warn (->> pair-of-interest second))
                (println "next story: story-id: " new-story-id)
-               #_(merge/merge-component!
-                   app
-                   stories/StoriesCustom
-                   {:ui/current-story [:story/id new-story-id]})
                (df/load! app next-story-ident
                          (rc/nc [:story/id :story/author :story/content :story/title])
-                         {:target (conj ident :ui/current-story)}))))))
+                         {:target (conj source-ident :ui/current-story)}))))))
                ; (scroll-into-view new-story-id))))))
 
 
@@ -95,67 +133,51 @@
      (defmutation previous-story
        [params]
        (action [{:keys [app state]}]
-               (let [ident [:component/id :com.example.ui.stories-forms/StoriesCustom]
-                     props (get-in @state ident)
-                     ; if you want the denormalized props, use db->tree to get maps of maps,
-                     ; like in UI
-                     {:ui/keys [all-stories current-story]} props
-                     story-pairs (partition 2 1 all-stories)
-                     pair-of-interest (time (first (filter (fn [x]
-                                                             (= (second x)
-                                                                current-story))
-                                                           story-pairs)))]
+               (let [ident-and-stories (get-state-and-stories @state (get-mode state))
+                     {:keys [source-ident source-stories]} ident-and-stories
+                     props             (get-in @state source-ident)
+                     {:ui/keys [current-story]} props
+                     ;_                 (println "source-stories: " source-stories)
+                     pair-of-interest  (get-next-story-ident-from-action ident-and-stories current-story :down)]
                  (when-let [prev-story-ident (first pair-of-interest)]
                    (df/load! app prev-story-ident
                              (rc/nc [:story/id :story/author :story/content :story/title])
-                             {:target (conj ident :ui/current-story)})))))
+                             {:target (conj source-ident :ui/current-story)})))))
 
      (defmutation top-story
        [params]
        (action [{:keys [app state]}]
-               (let [ident       [:component/id :com.example.ui.stories-forms/StoriesCustom]
-                     props       (get-in @state ident)
-                     {:ui/keys [all-stories current-story]} props
-                     target-ident (first all-stories)]
+               (let [ident-and-stories (get-state-and-stories @state (get-mode state))
+                     {:keys [source-ident source-stories]} ident-and-stories
+                     target-ident (first source-stories)]
                  (println "top-story: " target-ident)
                  (when target-ident
                    (df/load! app target-ident
                              (rc/nc [:story/id :story/author :story/content :story/title])
-                             {:target (conj ident :ui/current-story)})))))
+                             {:target (conj source-ident :ui/current-story)})))))
 
      (defmutation bottom-story
        [params]
        (action [{:keys [app state]}]
-               (let [ident [:component/id :com.example.ui.stories-forms/StoriesCustom]
-                     props (get-in @state ident)
-                     {:ui/keys [all-stories current-story]} props
-                     target-ident (last all-stories)]
+               (let [ident-and-stories (get-state-and-stories @state (get-mode state))
+                     {:keys [source-ident source-stories]} ident-and-stories
+                     target-ident (last source-stories)]
                  (println "bottom-story: " target-ident)
                  (when target-ident
                    (df/load! app target-ident
                              (rc/nc [:story/id :story/author :story/content :story/title])
-                             {:target (conj ident :ui/current-story)})))))))
+                             {:target (conj source-ident :ui/current-story)})))))
+
+     (defmutation search-stories
+       [params]
+       (action [{:keys [app state]}]
+         (println "mutation: search-stories: params: " params)
+         (df/load! app :search-results/stories
+           (rc/nc [:story/id :story/author :story/content :story/title])
+           {:target [:component/id :com.example.ui.stories-forms/StoriesSearch :ui/stories-search-results]
+            :params {:search/search-query (:query params)}})))))
 
 
-
-
-#?(:cljs
-   (defmutation get-story
-     [params]
-     (action [{:keys [app state]}]
-             (do
-               (println "mutation: get-story: params"
-                        (with-out-str (pp/pprint params)))
-               (println "mutation: get-story: state"
-                        (with-out-str (pp/pprint @state)))
-               (let [retval #:story{:id (:story/id params)
-                                    :title (:story/title params)
-                                    :author (:story/author params)
-                                    :content "AAAA"}]
-                 (println "mutation: new current-story: state"
-                          (with-out-str (pp/pprint retval)))
-                 (reset! state (assoc @state :current-story retval)))))
-     (remote [env] true)))
 
 
 

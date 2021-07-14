@@ -74,25 +74,28 @@
          ;(let [retval (queries/get-full-story-by-id env id)]
          ;  ;(println retval)
          ;  retval)
-         (if (sequential? input)
-           (do
-             ;(println retval)
-             (log/warn "***     story-content-resolver: BATCH")
-             (mapv (fn [v]
-                     (let [retval (queries/get-story-by-id-shaped env (:story/id v) output-shape)]
-                       (log/spy :warn v)
-                       retval))
-               input))
-           ; else
-           (do
-             (log/warn "***     story-content-resolver: single")
-             (let [retval (queries/get-story-by-id-shaped env (:story/id input) output-shape)]
-               (log/debug retval)
-               retval)))))
+         (time
+          (if (sequential? input)
+            (do
+              ;(println retval)
+              (log/warn "***     story-content-resolver: BATCH")
+              (mapv (fn [v]
+                      (let [retval (queries/get-story-by-id-shaped env (:story/id v) output-shape)]
+                        (log/spy :debug v)
+                        retval))
+                input))
+            ; else
+            (do
+              (log/warn "***     story-content-resolver: single")
+              (let [retval (queries/get-story-by-id-shaped env (:story/id input) output-shape)]
+                (log/debug retval)
+                retval))))))
 
      (defn contains-string?
        [text substr]
-       (boolean (re-find (re-pattern (str "(?i)" substr)) text)))
+       (if-not text
+         false
+         (boolean (re-find (re-pattern (str "(?i)" substr)) text))))
 
      (comment
        (contains-string? "bandband" "BAND")

@@ -18,7 +18,8 @@
     [com.fulcrologic.rad.type-support.date-time :as datetime]
     [com.fulcrologic.fulcro.raw.components :as rc]
     [com.fulcrologic.fulcro.mutations :as m]
-    #?(:cljs [goog.string :as gstring])))
+    #?(:cljs [goog.string :as gstring])
+    #?(:cljs [portal.web :as pw])))
 
 #?(:cljs
    (def format goog.string.format))
@@ -34,10 +35,13 @@
   ;(println "FullStory: content: " content)
   (dom/div :.ui.segment
     (dom/h3 "Full Current Story: ")
+    ;(println "published: " published)
     (dom/div :.list
       (dom/div :.item (dom/b (str "Author: " author)))
       (dom/div :.item (dom/b (str "Title: " title)))
-      (dom/div :.item (dom/b (str "Published: " (datetime/inst->html-date (datetime/new-date published))))))
+      (dom/div :.item (dom/b (str "Published: " (if published
+                                                  (datetime/inst->html-date (datetime/new-date published))
+                                                  "---")))))
     (dom/p)
     ; content has embedded html
     ;    e.g., "<strong> hello! </strong"}})))
@@ -159,7 +163,7 @@
                        {:ui/current-story (comp/get-query FullStory)}]}
    ;:ident (fn [x] [:component/id ::StoryNum])}
   (let [idx     (map-indexed (fn [idx itm] [itm idx]) all-stories)
-        _       (println idx)
+        ;_       (println idx)
         ; ^^ appends index to end [[id "xxx"] 1..n]
         thisone (->> idx
                   (filter (fn [x]
@@ -176,6 +180,15 @@
 
 (def ui-story-num (comp/factory StoryNum))
 
+
+(mutation/defmutation set-mode [mode]
+  (action [{:keys [state]}]
+    (println "mutation: set-mode: params: " mode)
+    ;(do
+    ;  (println "bump-number")
+    (swap! state assoc-in [:ui/mode] mode)))
+
+
 (comp/defsc StoriesCustom
   [this {:ui/keys [all-stories current-story]
          :as props}]
@@ -185,6 +198,7 @@
    :initial-state     {:ui/all-stories []}
    :route-segment     ["Stories"]
    :componentDidMount (fn [this]
+                        (comp/transact! this [(set-mode {:mode :main})])
                         (df/load! this :story/all-stories Story
                                   {:target [:component/id ::StoriesCustom :ui/all-stories]
                                    :post-mutation 'com.example.model.mutations/top-story}))}
@@ -215,35 +229,78 @@
               (ui-full-story current-story))))))))
 
 ;(def StoriesSearch StoriesCustom)
+
+(declare-mutation search-stories 'com.example.model.mutations/search-stories)
+
+(comp/defsc Mode
+  [this {:ui/keys [mode] :as props}]
+  {:query         [:ui/mode]
+   :initial-state {:ui/mode :search}})
+
+#_(comp/defsc Root8
+    [this {:ui/keys [number2] :as props}]
+    {:query [:ui/number2]
+     :initial-state {:ui/number2 3}
+     :route-segment ["root8"]})
+
+(comp/defsc Root7
+  [this {number2 :ui/number2
+         ;:ui/keys [number]
+         ;stories :stories
+         ;stories :stories
+         ;number :ui/number
+         ;current-story :current-story
+         :as     props}]
+  {:query [
+           ;{:stories (comp/get-query Story)}
+           ;{:current-story (comp/get-query FullStory)}
+           :ui/number2]})
+   ;[df/marker-table :teams]]
+
+(defn enter?
+  [e]
+  (= 13 (.-charCode e)))
+
 (comp/defsc StoriesSearch
-  [this {:ui/keys [current-story stories-search-results search-field]
+  [this {:ui/keys [current-story stories-search-results search-field mode]
          :as props}]
   {:query             [{:ui/stories-search-results (comp/get-query Story)}
                        {:ui/current-story (comp/get-query FullStory)}
+                       {:ui/mode (comp/get-query Mode)}
                        :ui/search-field]
    :ident             (fn [x] [:component/id ::StoriesSearch])
-   :initial-state     {:ui/stories-search-results []
-                       :ui/search-field "abc"}
+   :initial-state     (fn [p]
+                        {:ui/stories-search-results []
+                         :ui/search-field           "abc"
+                         :ui/mode                   (comp/get-initial-state Mode)})
    :route-segment     ["search"]
    :componentDidMount (fn [this]
+                        (comp/transact! this [(set-mode {:mode :search})])
                         (df/load! this :search-results/stories
                           (rc/nc [:story/id :story/author :story/content :story/title])
                           {:target [:component/id ::StoriesSearch :ui/stories-search-results]
-                           :params {:search/search-query "gene kim"}}))}
+                           :params {:search/search-query "gene kim"}
+                           :post-mutation 'com.example.model.mutations/top-story}))}
+
   (dom/div
+    (println "StoriesSearch: mode: " mode)
     (dom/h2 "Searched Stories")
-
-
-    (dom/form
-      (dom/input {:id       "search-field"
+    (dom/div :.ui.input
+      (dom/input {:type     "text"
+                  :id       "search-field"
                   :value    search-field
-                  :onChange #(m/set-string! this :ui/search-field :event %)}))
+                  :onChange #(m/set-string! this :ui/search-field :event %)
+                  :onKeyPress (fn [e]
+                                (println "key press" (.-charCode e))
+                                (when (enter? e)
+                                  (comp/transact! this [(search-stories {:query search-field})])))})
+      (dom/div :.ui.button {:onClick (fn [x]
+                                       (println "Search button: " search-field)
+                                       (comp/transact! this [(search-stories {:query search-field})]))}
+        "Search"))
 
     (ui-story-num {:ui/all-stories stories-search-results
                    :ui/current-story current-story})
-
-
-
 
     (dom/div :.ui.grid
       (dom/div :.row
@@ -277,6 +334,8 @@
           ;  (println "bump-number")
           (swap! state update :ui/number2 inc)))
 
+
+
 (mutation/defmutation bump-number2 [{:keys [field]}]
   ; field: e.g., :ui/number2
   (action [{:keys [ref state]}]
@@ -286,6 +345,15 @@
           ;(do
             (println "bump-number2")
             (swap! state update-in path inc))))
+
+(comment
+  (def state (->> com.example.client/app (:com.fulcrologic.fulcro.application/state-atom)))
+  (get-in @state [:ui/number2])
+  (swap! state update :ui/number2 inc)
+
+  (get-in @state [:ui/mode])
+  (swap! state assoc-in [:ui/mode] :search)
+  ,)
 
 
 (comp/defsc Root7
