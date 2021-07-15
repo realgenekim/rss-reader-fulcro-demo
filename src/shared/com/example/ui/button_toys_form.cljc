@@ -32,6 +32,21 @@
     (dom/button {:onClick #(comp/transact! this [(bump-number {})])}
       "You've clicked this button " number2 " times.")))
 
+
+(comp/defsc ButtonTest1b
+  [this {:ui/keys [number2] :as props}]
+  {:query [{:ui/number2 (comp/get-query ButtonTest1)}]
+   :ident (fn [_] [:component/id ::ButtonTest1b])
+   :initial-state (fn [_]
+                    {:ui/number2 (comp/get-initial-state ButtonTest1)})
+   :route-segment ["button-test-1b"]}
+  (dom/div
+    (dom/h2 "Button Test 1b")
+    (dom/p "Embed button from Button Test 1")
+    (dom/p ":ui/number2: " (str number2))))
+
+
+
 (def ui-button-test-1 (comp/factory ButtonTest1))
 
 ;

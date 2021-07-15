@@ -187,6 +187,7 @@
 
 
 
+
 (comp/defsc Mode
   [this {:ui/keys [mode] :as props}]
   {:query         [:ui/mode]
@@ -204,14 +205,15 @@
                        {:ui/current-story (comp/get-query FullStory)}
                        {:ui/mode (comp/get-query Mode)}]
    :ident             (fn [x] [:component/id ::StoriesMain])
-   :initial-state     {:ui/all-stories []}
+   :initial-state     (fn [x] {:ui/all-stories []
+                               :ui/mode        (comp/get-initial-state Mode)})
    :route-segment     ["Stories"]
    :componentDidMount (fn [this]
                         (println "StoresMain: mounted!")
                         (comp/transact! this [(set-mode {:ui/mode :main})])
                         (df/load! this :story/all-stories Story
-                                  {:target [:component/id ::StoriesMain :ui/all-stories]
-                                   :post-mutation 'com.example.model.mutations/top-story}))}
+                          {:target        [:component/id ::StoriesMain :ui/all-stories]
+                           :post-mutation 'com.example.model.mutations/top-story}))}
   (dom/div
     (dom/h2 "All Stories")
     (dom/p "Mode: " (str mode))
@@ -313,18 +315,20 @@
 (def ui-stories-search (comp/computed-factory StoriesSearch))
 
 (comp/defsc StoriesContainer
-  [this {:ui/keys [mode search main buttons]
+  [this {:ui/keys [mode search main]
+                   ;buttons]
          :as      props}]
   {:query         [{:ui/search (comp/get-query StoriesSearch)}
                    {:ui/main (comp/get-query StoriesMain)}
-                   {:ui/mode (comp/get-query Mode)}
-                   {:ui/buttons (comp/get-query buttons/ButtonTest1)}]
+                   {:ui/mode (comp/get-query Mode)}]
+                   ; uncommenting this will change behavior of routing to ButtonTest1!
+                   ;{:ui/buttons (comp/get-query buttons/ButtonTest1)}]
    :ident         (fn [x] [:component/id ::StoriesContainer])
    :initial-state (fn [_]
                     {:ui/mode   (comp/get-initial-state Mode)
                      :ui/search (comp/get-initial-state StoriesSearch {})
-                     :ui/main   (comp/get-initial-state StoriesMain {})
-                     :ui/buttons (comp/get-initial-state buttons/ButtonTest1)})
+                     :ui/main   (comp/get-initial-state StoriesMain {})})
+                     ;:ui/buttons (comp/get-initial-state buttons/ButtonTest1)})
    :route-segment ["main"]
    :componentDidMount (fn [this]
                         (println "StoriesContainer: mounted!")
@@ -344,6 +348,20 @@
       :search (ui-stories-search search)
       nil)))
 
+(comp/defsc ModeTest1
+  [this {:ui/keys [mode] :as props}]
+  {:query [{:ui/mode (comp/get-query Mode)}]
+   :ident (fn [_] [:component/id ::ModeTest1])
+   :initial-state (fn [_]
+                    {:ui/mode (comp/get-initial-state Mode)})
+   :route-segment ["mode-test-1"]}
+  (dom/div
+    (println "ModeTest1: " mode)
+    (println "ModeTest1: " props)
+    (dom/h2 "Mode Test 1b")
+    (dom/p "Render just the mode")
+    (dom/p ":ui/mode: " (str mode))
+    (ui-mode mode)))
 
 
 (comment

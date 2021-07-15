@@ -42,8 +42,11 @@
                          dashboard/Dashboard
                          ;stories/StoriesListReport stories/StoryReport
                          stories/StoriesMain stories/StoriesSearch
+                         stories/ModeTest1
                          stories/StoriesContainer
-                         buttons/ButtonTest1 buttons/ButtonTest2
+                         buttons/ButtonTest1
+                         buttons/ButtonTest1b
+                         buttons/ButtonTest2
                          buttons/ButtonTest3
                          mdetail/AccountList]}
   ;; Normal Fulcro code to show a loader on slow route change (assuming Semantic UI here, should
@@ -65,15 +68,12 @@
                    :as props}]
   {:query         [{:authenticator (comp/get-query Authenticator)}
                    {:router (comp/get-query MainRouter)}
-                   ;{:ui/number2 [(comp/get-query stories/Root8)]}
-                   :ui/number2
                    ::app/active-remotes
                    ::auth/authorization]
    :initial-state {:router        {}
                    ; ^^^^ macro magic happening here: associating it with MainRounter, from the :query
                    ;:router        (comp/get-initial-state MainRouter {})
-                   :authenticator {}
-                   :ui/number2    5}}
+                   :authenticator {}}}
   (let [logged-in? (= :success (some-> authorization :local ::auth/status))
         busy?      (seq active-remotes)
         username   (some-> authorization :local :account/name)]
@@ -104,6 +104,7 @@
                (ui-dropdown {:className "item" :text "Button Toys"}
                  (ui-dropdown-menu {}
                    (ui-dropdown-item {:onClick (fn [] (rroute/route-to! this buttons/ButtonTest1 {}))} "Button Test 1")
+                   (ui-dropdown-item {:onClick (fn [] (rroute/route-to! this buttons/ButtonTest1b {}))} "Button Test 1b")
                    (ui-dropdown-item {:onClick (fn [] (rroute/route-to! this buttons/ButtonTest2 {}))} "Button Test 2")
                    (ui-dropdown-item {:onClick (fn [] (rroute/route-to! this buttons/ButtonTest3 {}))} "Button Test 3")
                    (ui-dropdown-item {:onClick (fn [] (rroute/route-to! this buttons/ButtonTest3 {:ui/number2 (:ui/number2 props)}))} "Button Test 3a")))
@@ -111,7 +112,8 @@
                  (ui-dropdown-menu {}
                    (ui-dropdown-item {:onClick (fn [] (rroute/route-to! this stories/StoriesMain {}))} "Stories Main")
                    (ui-dropdown-item {:onClick (fn [] (rroute/route-to! this stories/StoriesSearch {}))} "Stories Searched")
-                   (ui-dropdown-item {:onClick (fn [] (rroute/route-to! this stories/StoriesContainer {}))} "Stories Container"))))))
+                   (ui-dropdown-item {:onClick (fn [] (rroute/route-to! this stories/StoriesContainer {}))} "Stories Container")
+                   (ui-dropdown-item {:onClick (fn [] (rroute/route-to! this stories/ModeTest1 {}))} "Mode Test"))))))
 
 
         (div :.right.menu
