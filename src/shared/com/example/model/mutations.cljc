@@ -111,6 +111,7 @@
                {:ui/keys [current-story]} props
                ;_                 (println "source-stories: " source-stories)
                pair-of-interest  (get-next-story-ident-from-action ident-and-stories current-story :up)]
+               ;pair-of-interest  [(rand-nth source-stories) (rand-nth source-stories)]]
            (when-let [next-story-ident (second pair-of-interest)]
              (let [new-story-id (second next-story-ident)]
                (println "next story: story-id: " new-story-id)
@@ -124,16 +125,17 @@
      (defmutation previous-story
        [params]
        (action [{:keys [app state]}]
-               (let [ident-and-stories (get-state-and-stories @state (get-mode state))
-                     {:keys [source-ident source-stories]} ident-and-stories
-                     props             (get-in @state source-ident)
-                     {:ui/keys [current-story]} props
-                     ;_                 (println "source-stories: " source-stories)
-                     pair-of-interest  (get-next-story-ident-from-action ident-and-stories current-story :down)]
-                 (when-let [prev-story-ident (first pair-of-interest)]
-                   (df/load! app prev-story-ident
-                             (rc/nc [:story/id :story/author :story/content :story/title])
-                             {:target (conj source-ident :ui/current-story)})))))
+         (time
+           (let [ident-and-stories (get-state-and-stories @state (get-mode state))
+                 {:keys [source-ident source-stories]} ident-and-stories
+                 props             (get-in @state source-ident)
+                 {:ui/keys [current-story]} props
+                 ;_                 (println "source-stories: " source-stories)
+                 pair-of-interest  (get-next-story-ident-from-action ident-and-stories current-story :down)]
+             (when-let [prev-story-ident (first pair-of-interest)]
+               (df/load! app prev-story-ident
+                         (rc/nc [:story/id :story/author :story/content :story/title])
+                         {:target (conj source-ident :ui/current-story)}))))))
 
      (defmutation top-story
        [params]

@@ -170,13 +170,17 @@
                   (filter (fn [x]
                             (= (:story/id (first x))
                                (:story/id current-story)))))
-        n       (->> thisone first second)]
+        n       (->> thisone first second)
+        nstories (count all-stories)]
     ;(println "StoryNum: thisone: " thisone)
     (println "StoryNum: n: " n)
     ;(println "all-stories: " all-stories)
     ;(println "current story:" current-story)
     ;(println "params: " params)
-    (dom/p (format "Current story: %d of %d" n (count all-stories)))))
+    (dom/p
+      (if-not (= 0 nstories)
+       (format "Current story: %d of %d" n nstories)
+       "...loading..."))))
 
 
 (def ui-story-num (comp/factory StoryNum))
