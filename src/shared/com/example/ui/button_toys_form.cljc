@@ -21,7 +21,11 @@
   [this {number2 :ui/number2
          :as     props}]
   {:query [:ui/number2]
-   :ident         (fn [] [:component/id ::ButtonTest1])
+   :ident         (fn [props] [:component/id ::ButtonTest1])
+   ; always use :ident in (fn [props]) form, if ident is constant or irregular
+   ; common pattern is when [:story/id]
+   ; DANGER: two-element vector does not mean what you think it means
+   ;     it will actually be interpreted [:story/by-id :story/id]
    :initial-state {:ui/number2 0}
    :route-segment ["button-test-1"]}
   (dom/div

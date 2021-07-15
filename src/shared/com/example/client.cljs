@@ -89,7 +89,7 @@
   (setup-RAD app)
   (dr/change-route! app ["landing-page"])
   (history/install-route-history! app (html5-history))
-  (auth/start! app [LoginForm] {:after-session-check `fix-route})
+  ;(auth/start! app [LoginForm] {:after-session-check `fix-route})
   (init-keyboard-bindings)
   (app/mount! app Root "app" {:initialize-state? false}))
 

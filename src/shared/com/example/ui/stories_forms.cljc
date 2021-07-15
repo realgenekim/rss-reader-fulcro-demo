@@ -189,10 +189,11 @@
 
 
 (comp/defsc Mode
-  [this {:ui/keys [mode] :as props}]
-  {:query         [:ui/mode]
+  [this {:ui/keys [mode show-help?] :as props}]
+  {:query         [:ui/mode :ui/show-help?]
    :ident         (fn [] [:component/id ::Mode])
-   :initial-state {:ui/mode :main}}
+   :initial-state {:ui/mode :main
+                   :ui/show-help? true}}
   (dom/p "Mode: " (str mode)))
 
 (def ui-mode (comp/factory Mode))
@@ -270,6 +271,9 @@
                           {:target [:component/id ::StoriesSearch :ui/stories-search-results]
                            :params {:search/search-query "gene kim"}
                            :post-mutation 'com.example.model.mutations/top-story}))}
+   ;:keyboard-shortcuts {"j" it's being called globally:
+   ;                             [(mutation-next-story {:stories
+   ;                     "k"}}
 
   (dom/div
     (println "StoriesSearch: mode: " mode)
@@ -315,21 +319,19 @@
 (def ui-stories-search (comp/computed-factory StoriesSearch))
 
 (comp/defsc StoriesContainer
-  [this {:ui/keys [mode search main]
-                   ;buttons]
+  [this {:ui/keys [mode search main buttons]
          :as      props}]
-  {:query         [{:ui/search (comp/get-query StoriesSearch)}
-                   {:ui/main (comp/get-query StoriesMain)}
-                   {:ui/mode (comp/get-query Mode)}]
-                   ; uncommenting this will change behavior of routing to ButtonTest1!
-                   ;{:ui/buttons (comp/get-query buttons/ButtonTest1)}]
-   :ident         (fn [x] [:component/id ::StoriesContainer])
-   :initial-state (fn [_]
-                    {:ui/mode   (comp/get-initial-state Mode {})
-                     :ui/search (comp/get-initial-state StoriesSearch {})
-                     :ui/main   (comp/get-initial-state StoriesMain {})})
-                     ;:ui/buttons (comp/get-initial-state buttons/ButtonTest1)})
-   :route-segment ["main"]
+  {:query             [{:ui/search (comp/get-query StoriesSearch)}
+                       {:ui/main (comp/get-query StoriesMain)}
+                       {:ui/mode (comp/get-query Mode)}
+                       ; uncommenting this will change behavior of routing to ButtonTest1!
+                       {:ui/buttons (comp/get-query buttons/ButtonTest1)}]
+   :ident             (fn [x] [:component/id ::StoriesContainer])
+   :initial-state     {:ui/mode    {}
+                       :ui/search  {}
+                       :ui/main    {}
+                       :ui/buttons {}}
+   :route-segment     ["main"]
    :componentDidMount (fn [this]
                         (println "StoriesContainer: mounted!")
                         (comp/transact! this [(set-mode {:ui/mode :main})]))}
@@ -341,10 +343,11 @@
       (dom/div :.ui.button {:onClick (fn [x] (comp/transact! this [(set-mode {:ui/mode :search})]))}
         "Search"))
     (dom/p "mode: " (str mode))
-    ;(buttons/ui-button-test-1 (:ui/button props))
-    (case (:ui/mode (:ui/mode mode))
-      :main (ui-stories-main (merge main
-                               {:ui/mode mode}))
+    ; from Tony session: a typo!!!  destructuring would have caught it
+    ;  to post: "how much time did we spend chasing down things going wrong in Om Next b/c of this"
+    ;(buttons/ui-button-test-1 buttons)
+    (case (:ui/mode mode)
+      :main (ui-stories-main main)
       :search (ui-stories-search search)
       nil)))
 

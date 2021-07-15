@@ -23,7 +23,8 @@
     [com.fulcrologic.rad.form :as form]
     [com.fulcrologic.rad.ids :refer [new-uuid]]
     [com.fulcrologic.rad.routing :as rroute]
-    [taoensso.timbre :as log]))
+    [taoensso.timbre :as log]
+    [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]))
 
 (defsc LandingPage [this props]
   {:query         ['*]
@@ -62,25 +63,27 @@
 
 (def ui-authenticator (comp/factory Authenticator))
 
-(defsc Root [this {::auth/keys [authorization]
+(defsc Root [this {
+                   ;::auth/keys [authorization]
                    ::app/keys  [active-remotes]
-                   :keys       [authenticator router]
+                   :keys       [;authenticator
+                                router]
                    :as props}]
-  {:query         [{:authenticator (comp/get-query Authenticator)}
+  {:query         [;{:authenticator (comp/get-query Authenticator)}
                    {:router (comp/get-query MainRouter)}
-                   ::app/active-remotes
-                   ::auth/authorization]
-   :initial-state {:router        {}
+                   ::app/active-remotes]
+                   ;::auth/authorization]
+   :initial-state {:router        {}}}
                    ; ^^^^ macro magic happening here: associating it with MainRounter, from the :query
                    ;:router        (comp/get-initial-state MainRouter {})
-                   :authenticator {}}}
-  (let [logged-in? (= :success (some-> authorization :local ::auth/status))
-        busy?      (seq active-remotes)
-        username   (some-> authorization :local :account/name)]
+                   ;:authenticator {}}}
+  (let [;logged-in? (= :success (some-> authorization :local ::auth/status))
+        busy?      (seq active-remotes)]
+        ;username   (some-> authorization :local :account/name)]
     (dom/div
       (div :.ui.top.menu
         (div :.ui.item "Demo")
-        (when logged-in?
+        (when true ;logged-in?
           #?(:cljs
              (comp/fragment
                (ui-dropdown {:className "item" :text "Account"}
@@ -103,7 +106,7 @@
                    (ui-dropdown-item {:onClick (fn [] (rroute/route-to! this mdetail/AccountList {}))} "Master Detail")))
                (ui-dropdown {:className "item" :text "Button Toys"}
                  (ui-dropdown-menu {}
-                   (ui-dropdown-item {:onClick (fn [] (rroute/route-to! this buttons/ButtonTest1 {}))} "Button Test 1")
+                   (ui-dropdown-item {:onClick (fn [] (dr/change-route! this ["button-test-1"] {}))} "Button Test 1")
                    (ui-dropdown-item {:onClick (fn [] (rroute/route-to! this buttons/ButtonTest1b {}))} "Button Test 1b")
                    (ui-dropdown-item {:onClick (fn [] (rroute/route-to! this buttons/ButtonTest2 {}))} "Button Test 2")
                    (ui-dropdown-item {:onClick (fn [] (rroute/route-to! this buttons/ButtonTest3 {}))} "Button Test 3")
@@ -120,22 +123,22 @@
           (div :.item
             (div :.ui.tiny.loader {:classes [(when busy? "active")]})
             ent/nbsp ent/nbsp ent/nbsp ent/nbsp)
-          (if logged-in?
+          (if true; logged-in?
             (comp/fragment
               (div :.ui.item
-                (str "Logged in as " username))
+                (str "Logged in as " "hello")) ; username
               (div :.ui.item
                 (dom/button :.ui.button {:onClick (fn []
                                                     ;; TODO: check if we can change routes...
                                                     (rroute/route-to! this LandingPage {})
                                                     (auth/logout! this :local))}
                   "Logout")))
-            (div :.ui.item
-              (dom/button :.ui.primary.button {:onClick #(auth/authenticate! this :local nil)}
-                "Login")))))
+            (div :.ui.item))))
+              ;(dom/button :.ui.primary.button {:onClick #(auth/authenticate! this :local nil)}
+              ;  "Login")))))
       ;(div :.ui.container.segment
       (div :.ui.segment
-        (ui-authenticator authenticator)
+        ;(ui-authenticator authenticator)
         (ui-main-router router)))))
 
 (def ui-root (comp/factory Root))

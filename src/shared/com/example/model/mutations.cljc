@@ -26,7 +26,11 @@
 #?(:cljs
    (do
 
-     (defmutation set-mode [mode]
+     ; alternative: subroutes
+     ; mode will go away
+     ; replace with search field always being on main screen
+     ; if search-results (that come from server) is not empty, render search results
+     (defmutation set-mode [{:ui/keys [mode] :as params}]
        (action [{:keys [state]}]
          (println "mutation: set-mode: params: " mode)
          ;(do
@@ -78,20 +82,19 @@
 
 
 
-     (>defn get-state-and-stories
+     (defn get-state-and-stories
        " given mode, return ident (where current value will live) and stories (which reside in its scope) "
-       [state mode] [map? map? => map?]
+       [state mode] [map? keyword? => map?]
        (println "get-state-and-stories: mode; " mode)
-       (let [m (:ui/mode mode)
-             ident (case m
-                     :search [:component/id :com.example.ui.stories-forms/StoriesSearch]
-                     :main   [:component/id :com.example.ui.stories-forms/StoriesMain]
-                     nil)
-             props (get-in state ident)
+       (let [ident          (case mode
+                              :search [:component/id :com.example.ui.stories-forms/StoriesSearch]
+                              :main [:component/id :com.example.ui.stories-forms/StoriesMain]
+                              nil)
+             props          (get-in state ident)
              {:ui/keys [all-stories stories-search-results current-story]} props
              ; if you want the denormalized props, use db->tree to get maps of maps,
              ; like in UI
-             source-stories (case m
+             source-stories (case mode
                               :search stories-search-results
                               :main all-stories
                               nil)]
@@ -116,6 +119,40 @@
                                               current-story))
                                     story-pairs)))]
          pair-of-interest))
+
+     (defn create-story-prev-next-lookup-cache
+       " input: sequence of items
+         output: {0 {:prev nil, :curr 0, :next 1}]
+                  1 {:prev 0, :curr 1, :next 2}]
+                  2 {:prev 1, :curr 2, :next 3}}"
+       [stories]
+       (let [story-triples (partition 3 1 (concat [nil] stories))
+             labelled-map  (->> story-triples
+                             (map #(zipmap [:prev :curr :next] %))
+                             (map (juxt :curr identity))
+                             (into {}))]
+         labelled-map))
+
+     (defmutation create-prev-next-cache
+       ; tony: store this in :ui/cache {:keyboard {"a" ... }
+       ; [search/main] (or unify the two components)
+       ; and thus the need to figure out which component is active
+       [params]
+       (action [{:keys [ref app state]}]
+         ; ref is the ident of the component that invoked the mutation
+         ; => [:component/id ::Root8]
+         (println "mutation: create-prev-next-cache: mode: " (get-mode state))
+         (time
+           (let [ident-and-stories (get-state-and-stories @state (get-mode state))
+                 {:keys [source-ident source-stories]} ident-and-stories
+                 lookup-table (create-story-prev-next-lookup-cache source-stories)]
+             (df/load! app lookup-table
+               (rc/nc [:story/id :story/author :story/content :story/title])
+               {:target (conj source-ident :ui/current-story)})))))
+
+     (comment
+       (create-story-prev-next-lookup-cache (range 5)))
+
 
      (defmutation next-story
        [params]
