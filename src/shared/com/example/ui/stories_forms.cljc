@@ -325,7 +325,7 @@
                    ;{:ui/buttons (comp/get-query buttons/ButtonTest1)}]
    :ident         (fn [x] [:component/id ::StoriesContainer])
    :initial-state (fn [_]
-                    {:ui/mode   (comp/get-initial-state Mode)
+                    {:ui/mode   (comp/get-initial-state Mode {})
                      :ui/search (comp/get-initial-state StoriesSearch {})
                      :ui/main   (comp/get-initial-state StoriesMain {})})
                      ;:ui/buttons (comp/get-initial-state buttons/ButtonTest1)})
