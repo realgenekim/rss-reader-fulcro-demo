@@ -11,8 +11,8 @@ server:
 	clj -A:dev:datomic -M -m com.example.components.server
 
 uberjar:
-	clj -X:uberjar :aliases '[:datomic]' :aot true :jar ./target/feedly-reader-standalone.jar \
-		:main-class com.example.components.server
+	time clj -X:uberjar :aliases '[:datomic]' :aot true :verbose true :jar ./target/feedly-reader-standalone.jar \
+			:main-class com.example.components.server
 
 runuberjar:
 	java -jar target/feedly-reader-standalone.jar	
