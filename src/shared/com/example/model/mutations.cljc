@@ -10,12 +10,13 @@
         :cljs
         [[com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
          [com.fulcrologic.fulcro.components :as comp]])
-         ;[com.example.ui.stories-forms :as s]])
+    ;[com.example.ui.stories-forms :as s]])
     [clojure.pprint :as pp]
     [com.example.ui.stories-forms :as stories]
     [com.fulcrologic.fulcro.algorithms.merge :as merge]
     [taoensso.timbre :as log]
-    [com.fulcrologic.guardrails.core :refer [>defn =>]]))
+    [com.fulcrologic.guardrails.core :refer [>defn =>]]
+    [com.fulcrologic.fulcro.mutations :as mutation]))
 
 
 
@@ -25,6 +26,8 @@
 
 #?(:cljs
    (do
+
+     ;(mutation/declare-mutation top-story top-story)
 
      ; alternative: subroutes
      ; mode will go away
@@ -133,22 +136,7 @@
                              (into {}))]
          labelled-map))
 
-     (defmutation create-prev-next-cache
-       ; tony: store this in :ui/cache {:keyboard {"a" ... }
-       ; [search/main] (or unify the two components)
-       ; and thus the need to figure out which component is active
-       [params]
-       (action [{:keys [ref app state]}]
-         ; ref is the ident of the component that invoked the mutation
-         ; => [:component/id ::Root8]
-         (println "mutation: create-prev-next-cache: mode: " (get-mode state))
-         (time
-           (let [ident-and-stories (get-state-and-stories @state (get-mode state))
-                 {:keys [source-ident source-stories]} ident-and-stories
-                 lookup-table (create-story-prev-next-lookup-cache source-stories)]
-             (df/load! app lookup-table
-               (rc/nc [:story/id :story/author :story/content :story/title])
-               {:target (conj source-ident :ui/current-story)})))))
+
 
      (comment
        (create-story-prev-next-lookup-cache (range 5)))
@@ -164,16 +152,25 @@
            (let [ident-and-stories (get-state-and-stories @state (get-mode state))
                  {:keys [source-ident source-stories]} ident-and-stories
                  props             (get-in @state source-ident)
-                 {:ui/keys [current-story]} props
+                 {:ui/keys [current-story next-prev-stories]} props
+                 _ (println current-story)
+                 entry (get next-prev-stories current-story)]
+             (let [next-story-ident (get entry :next)]
+               (println "next story: story-id: " next-story-ident)
+               (df/load! app next-story-ident
+                 (rc/nc [:story/id :story/author :story/content :story/title])
+                 {:target (conj source-ident :ui/current-story)}))))))
+
+
                  ;_                 (println "source-stories: " source-stories)
-                 pair-of-interest  (get-next-story-ident-from-action ident-and-stories current-story :up)]
-             ;pair-of-interest  [(rand-nth source-stories) (rand-nth source-stories)]]
-             (when-let [next-story-ident (second pair-of-interest)]
-               (let [new-story-id (second next-story-ident)]
-                 (println "next story: story-id: " new-story-id)
-                 (df/load! app next-story-ident
-                   (rc/nc [:story/id :story/author :story/content :story/title])
-                   {:target (conj source-ident :ui/current-story)})))))))
+             ;    pair-of-interest  (get-next-story-ident-from-action ident-and-stories current-story :up)]
+             ;;pair-of-interest  [(rand-nth source-stories) (rand-nth source-stories)]]
+             ;(when-let [next-story-ident (second pair-of-interest)]
+             ;  (let [new-story-id (second next-story-ident)]
+             ;    (println "next story: story-id: " new-story-id)
+             ;    (df/load! app next-story-ident
+             ;      (rc/nc [:story/id :story/author :story/content :story/title])
+             ;      {:target (conj source-ident :ui/current-story)})))))))
                ; (scroll-into-view new-story-id))))))
 
      (defmutation random-story
@@ -194,21 +191,22 @@
                    {:target (conj source-ident :ui/current-story)})))))))
 
 
-
      (defmutation previous-story
        [params]
        (action [{:keys [app state]}]
+         (println "mutation: prev-story: mode: " (get-mode state))
          (time
            (let [ident-and-stories (get-state-and-stories @state (get-mode state))
                  {:keys [source-ident source-stories]} ident-and-stories
                  props             (get-in @state source-ident)
-                 {:ui/keys [current-story]} props
-                 ;_                 (println "source-stories: " source-stories)
-                 pair-of-interest  (get-next-story-ident-from-action ident-and-stories current-story :down)]
-             (when-let [prev-story-ident (first pair-of-interest)]
-               (df/load! app prev-story-ident
-                         (rc/nc [:story/id :story/author :story/content :story/title])
-                         {:target (conj source-ident :ui/current-story)}))))))
+                 {:ui/keys [current-story next-prev-stories]} props
+                 _ (println current-story)
+                 entry (get next-prev-stories current-story)]
+             (let [next-story-ident (get entry :prev)]
+               (println "previous story: story-id: " next-story-ident)
+               (df/load! app next-story-ident
+                 (rc/nc [:story/id :story/author :story/content :story/title])
+                 {:target (conj source-ident :ui/current-story)}))))))
 
      (defmutation top-story
        [params]
@@ -221,6 +219,24 @@
                    (df/load! app target-ident
                              (rc/nc [:story/id :story/author :story/content :story/title])
                              {:target (conj source-ident :ui/current-story)})))))
+
+     (defmutation create-prev-story-next-cache
+       ; tony: store this in :ui/cache {:keyboard {"a" ... }
+       ; [search/main] (or unify the two components)
+       ; and thus the need to figure out which component is active
+       [params]
+       (action [{:keys [ref app state]}]
+         ; ref is the ident of the component that invoked the mutation
+         ; => [:component/id ::Root8]
+         (println "mutation: create-prev-next-cache: ")
+         (time
+           (let [ident-and-stories (get-state-and-stories @state (get-mode state))
+                 {:keys [source-ident source-stories]} ident-and-stories
+                 _ (println "create-prev-story-next-cache: source-ident: " source-ident)
+                 _ (println "create-prev-story-next-cache: ref" ref)
+                 lookup-table (create-story-prev-next-lookup-cache source-stories)]
+             (swap! state assoc-in (conj source-ident :ui/next-prev-stories) lookup-table)
+             (comp/transact! app [(top-story {})])))))
 
      (defmutation bottom-story
        [params]

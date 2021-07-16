@@ -130,7 +130,7 @@
               (div :.ui.item
                 (dom/button :.ui.button {:onClick (fn []
                                                     ;; TODO: check if we can change routes...
-                                                    (rroute/route-to! this LandingPage {})
+                                                    (rroute/route-to! this stories/StoriesContainer {})
                                                     (auth/logout! this :local))}
                   "Logout")))
             (div :.ui.item))))

@@ -200,21 +200,22 @@
 
 
 (comp/defsc StoriesMain
-  [this {:ui/keys [all-stories current-story mode]
+  [this {:ui/keys [all-stories current-story mode next-prev-stories]
          :as props}]
   {:query             [{:ui/all-stories (comp/get-query Story)}
                        {:ui/current-story (comp/get-query FullStory)}
-                       {:ui/mode (comp/get-query Mode)}]
+                       {:ui/mode (comp/get-query Mode)}
+                       :ui/next-prev-stories]
    :ident             (fn [x] [:component/id ::StoriesMain])
    :initial-state     (fn [x] {:ui/all-stories []
                                :ui/mode        (comp/get-initial-state Mode)})
-   :route-segment     ["Stories"]
+   :route-segment     ["stories"]
    :componentDidMount (fn [this]
                         (println "StoresMain: mounted!")
                         (comp/transact! this [(set-mode {:ui/mode :main})])
                         (df/load! this :story/all-stories Story
                           {:target        [:component/id ::StoriesMain :ui/all-stories]
-                           :post-mutation 'com.example.model.mutations/top-story}))}
+                           :post-mutation 'com.example.model.mutations/create-prev-story-next-cache}))}
   (dom/div
     (dom/h2 "All Stories")
     (dom/p "Mode: " (str mode))
@@ -270,7 +271,7 @@
                           (rc/nc [:story/id :story/author :story/content :story/title])
                           {:target [:component/id ::StoriesSearch :ui/stories-search-results]
                            :params {:search/search-query "gene kim"}
-                           :post-mutation 'com.example.model.mutations/top-story}))}
+                           :post-mutation 'com.example.model.mutations/create-prev-story-next-cache}))}
    ;:keyboard-shortcuts {"j" it's being called globally:
    ;                             [(mutation-next-story {:stories
    ;                     "k"}}
