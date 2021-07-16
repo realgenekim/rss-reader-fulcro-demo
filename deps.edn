@@ -54,4 +54,10 @@
                                      com.fulcrologic/semantic-ui-wrapper {:mvn/version "2.0.1"}
                                      binaryage/devtools                  {:mvn/version "1.0.0"}
                                      org.clojure/tools.namespace         {:mvn/version "1.0.0"}
-                                     djblue/portal                       {:mvn/version "0.12.0"}}}}}
+                                     djblue/portal                       {:mvn/version "0.12.0"}}}
+
+           :uberjar {:replace-deps {com.github.seancorfield/depstar {:mvn/version "2.1.267"}}
+                     :aliases      [:datomic]
+                     :extra-paths  ["resources"]
+                     :exec-fn      hf.depstar/uberjar
+                     :exec-args    {:aot true}}}}

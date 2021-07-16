@@ -1,12 +1,14 @@
-(ns feedly)
+(ns feedly
+  (:require
+    [clojure.java.io :as io]))
 
 
 (defn read-file []
-  ; "ccsp2.txt"
-  ; "clojure.txt"
   (-> ;(slurp (str "/Users/genekim/src.local/feedly" "/" "clojure.txt"))
     ;(slurp "../../feedly/ccsp2.txt")
-    (slurp "../../feedly/clojure.txt")
+    ;(slurp "../../feedly/clojure.txt")
+    (io/resource "clojure.txt")
+    slurp
     (read-string)))
 
 (comment
@@ -15,9 +17,5 @@
 
   (count stories)
   (first stories)
-
-  (-> ;(slurp (str "/Users/genekim/src.local/feedly" "/" "clojure.txt"))
-    (slurp "../../feedly/resources/stories.txt")
-    (read-string))
 
   ,)
