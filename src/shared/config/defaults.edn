@@ -1,5 +1,5 @@
 {:org.httpkit.server/config         {:port 3000
-                                     :ip   "localhost"}
+                                     :ip   "0.0.0.0"}
 
  :com.fulcrologic.rad.database-adapters.datomic/databases
                                     {:main {:datomic/schema           :production

@@ -1,0 +1,21 @@
+# -t us.gcr.io/booktracker-1208/booktracker:$(BOOKTRACKERVER)
+
+# examples:
+# https://github.com/GoogleCloudPlatform/cloud-builders/blob/master/gcloud/cloudbuild.yaml
+
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['pull', 'us.gcr.io/booktracker-1208/feedly-reader:latest']
+- name: 'gcr.io/cloud-builders/docker'
+  args: [
+            'build',
+            '--cache-from',
+            'us.gcr.io/booktracker-1208/feedly-reader:latest',
+            '-t', 
+            'us.gcr.io/booktracker-1208/feedly-reader:latest',
+            '-f', 'Dockerfile',
+            '.'
+        ]
+images: [
+          'us.gcr.io/booktracker-1208/feedly-reader:latest'
+        ]

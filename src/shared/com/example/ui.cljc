@@ -37,14 +37,16 @@
 ;    builds initial-state
 (defrouter MainRouter [this {:keys [current-state route-factory route-props]}]
   {:always-render-body? true
-   :router-targets      [LandingPage ItemForm InvoiceForm InvoiceList AccountList AccountForm AccountInvoices
+   :router-targets      [stories/StoriesContainer
+
+                         LandingPage ItemForm InvoiceForm InvoiceList AccountList AccountForm AccountInvoices
                          sales-report/SalesReport InventoryReport
                          sales-report/RealSalesReport
                          dashboard/Dashboard
                          ;stories/StoriesListReport stories/StoryReport
                          stories/StoriesMain stories/StoriesSearch
                          stories/ModeTest1
-                         stories/StoriesContainer
+
                          buttons/ButtonTest1
                          buttons/ButtonTest1b
                          buttons/ButtonTest2

@@ -1,0 +1,9 @@
+# for google cloud build to ignore in CircleCI builds
+node_modules/
+#target/
+.cpcache/
+.idea/
+.git/
+.gitlibs/
+cloud_sql_proxy
+#*.jar
