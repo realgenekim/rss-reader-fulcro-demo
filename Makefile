@@ -17,17 +17,21 @@ uberjar:
 runuberjar:
 	java -jar target/feedly-reader-standalone.jar	
 
+# --machine-type=N1_HIGHCPU_8 \
+#--machine-type=N1_HIGHCPU_32 \
+# e2-highcpu-8
+# normal is e2-medium (1vCPU, 4GB)
+
 googlecloudbuild:
-	gcloud builds submit \
-	 --config k8s/cloudbuild.yaml .
+	time gcloud builds submit \
+	--machine-type=e2-highcpu-8 \
+	--timeout=10m \
+	--config k8s/cloudbuild.yaml .
 
 
 deploycloudrun:
-	gcloud run deploy feedly-reader --image us.gcr.io/booktracker-1208/feedly-reader:latest \
+	time gcloud run deploy feedly-reader --image us.gcr.io/booktracker-1208/feedly-reader:latest \
 		--region us-central1 --platform managed --port 3000
 
-gcp:
-	gcloud compute instances create-with-container vm2 \
-    --image-family cos-dev \
-    --image-project cos-cloud \
-    --container-image us.gcr.io/booktracker-1208/feedly-reader:latest
+cljs-build-prod:
+	time shadow-cljs -A:f3-dev:rad-dev:i18n-dev release main
