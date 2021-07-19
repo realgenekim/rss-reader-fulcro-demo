@@ -52,14 +52,14 @@
 (def ui-full-story (comp/factory FullStory {:keyfn :story/id}))
 
 
-(comp/defsc Story [this {:story/keys [id author title published]
+(comp/defsc Story [this {:story/keys [id author title]
                          :ui/keys [number]
                          :as params}
                    ; computed-factory: adds third argument
                    ; otherwise, component will disappear if you don't re-render parent
                    {:keys [on-select selected]}]
   ; change all to :story/id
-  {:query [:story/id :story/author :story/title :story/published :ui/number]
+  {:query [:story/id :story/author :story/title :ui/number]
    :ident :story/id}
   (dom/div :.item #_{:classes [(when (= id (:story/id selected))
                                  "right triangle icon")]}
@@ -76,38 +76,6 @@
 
 
 (def ui-story (comp/computed-factory Story {:keyfn :story/id}))
-
-(comment
-  (reset! state)
-  (reset! state* (assoc-in @state* [:ui/current-position] 5))
-
-  (fdn/db->tree SelectedStory {:a [:b 1]})
-  (fdn/db->tree [:story/id] state state)
-  (fdn/db->tree [:story/id :story/author] state state)
-
-  (merge/merge!
-    com.example.client/app
-    {:current-story {:story/id      "abc"
-                     :story/author  "Gene"
-                     :story/title   "title"
-                     :story/content "XXS"}}
-    (comp/get-query FullStory))
-
-  (merge/merge!
-    com.example.client/app
-    {:current-story [{[:story/id "K3Y7GLlRfaBDsUWYD0WuXjH/byGbQnwaMWp+PEBoUZw=_13ef0cdbc18:15c0fac:70d63bab"]
-                      [:story/id :story/author :story]}]}
-    (comp/get-query FullStory))
-
-  ; these work!  setting the :story/id triggers all the pathom resolvers!
-
-  (df/load! com.example.client/app [:story/id "K3Y7GLlRfaBDsUWYD0WuXjH/byGbQnwaMWp+PEBoUZw=_13ef0cdbc18:15c0fac:70d63bab"]
-            FullStory {:target [:current-story]})
-  (df/load! com.example.client/app [:story/id "K3Y7GLlRfaBDsUWYD0WuXjH/byGbQnwaMWp+PEBoUZw=_16f2e23f4d5:155f3ef:69b9f616"]
-            FullStory {:target [:current-story]})
-
-
-  ,)
 
 (comp/defsc CurrentPosition
   [this {:ui/keys [current-position]
@@ -202,8 +170,9 @@
   [this {:ui/keys [show-help?] :as props}]
   {:query         [:ui/mode :ui/show-help?]
    :ident         (fn [] [:component/id ::Help])
-   :initial-state {:ui/show-help? true}}
+   :initial-state {:ui/show-help? false}}
   (dom/div
+    (dom/p "Read 7,120 RSS articles from Planet Clojure — downloaded from Feedly, December 2019.  (This was built upon the Fulcro RAD demo app).")
     (dom/p "\"?\" to get keyboard help: ")
     (if show-help?
       (dom/div
@@ -215,7 +184,9 @@
                     "?: toggle help"]]
           ;(for [h help]
           ;  (dom/p ^{:key h} h)))))))
-          (map dom/p help))))))
+          (map dom/p help))))
+    (dom/p)))
+
 
 
 
@@ -274,6 +245,8 @@
   [e]
   (= 13 (.-charCode e)))
 
+(def initial-search-query "rich hickey")
+
 (comp/defsc StoriesSearch
   [this {:ui/keys [current-story stories-search-results search-field mode]
          :as props}]
@@ -284,13 +257,13 @@
    :ident             (fn [x] [:component/id ::StoriesSearch])
    :initial-state     (fn [p]
                         {:ui/stories-search-results []
-                         :ui/search-field           "rich hickey"
+                         :ui/search-field           initial-search-query
                          :ui/mode                   (comp/get-initial-state Mode)})
    :route-segment     ["search"]
    :componentDidMount (fn [this]
                         (println "StoresSearch: mounted!")
                         (comp/transact! this [(set-mode {:ui/mode :search})])
-                        (comp/transact! this [(search-stories {:query "gene kim"})]))}
+                        (comp/transact! this [(search-stories {:query initial-search-query})]))}
    ;:keyboard-shortcuts {"j" it's being called globally:
    ;                             [(mutation-next-story {:stories
    ;                     "k"}}
@@ -359,7 +332,7 @@
                         (comp/transact! this [(set-mode {:ui/mode :main})]))}
   (dom/div
     (ui-help show-help?)
-    (dom/h2 "Story Container")
+    ;(dom/h2 "Story Container")
     (div
       (dom/div :.ui.button {:onClick (fn [x] (comp/transact! this [(set-mode {:ui/mode :main})]))}
         "Main")
