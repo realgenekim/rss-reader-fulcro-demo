@@ -127,9 +127,11 @@
        " input: sequence of items
          output: {0 {:prev nil, :curr 0, :next 1}]
                   1 {:prev 0, :curr 1, :next 2}]
-                  2 {:prev 1, :curr 2, :next 3}}"
+                  2 {:prev 1, :curr 2, :next 3}}
+                  2 {:prev 2, :curr 3, :next nil}}"
        [stories]
-       (let [story-triples (partition 3 1 (concat [nil] stories))
+       ; put nils as first and last, to create entries w/no :prev, and w/no :next
+       (let [story-triples (partition 3 1 (concat [nil] stories [nil]))
              labelled-map  (->> story-triples
                              (map #(zipmap [:prev :curr :next] %))
                              (map (juxt :curr identity))
@@ -258,7 +260,7 @@
            (rc/nc [:story/id :story/author :story/content :story/title])
            {:target [:component/id :com.example.ui.stories-forms/StoriesSearch :ui/stories-search-results]
             :params {:search/search-query (:query params)}
-            :post-mutation 'com.example.model.mutations/top-story})))))
+            :post-mutation 'com.example.model.mutations/create-prev-story-next-cache})))))
 
 
 

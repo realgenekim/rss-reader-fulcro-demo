@@ -193,8 +193,8 @@
   {:query         [:ui/mode :ui/show-help?]
    :ident         (fn [] [:component/id ::Mode])
    :initial-state {:ui/mode :main
-                   :ui/show-help? true}}
-  (dom/p "Mode: " (str mode)))
+                   :ui/show-help? true}})
+  ;(dom/p "Mode: " (str mode)))
 
 (def ui-mode (comp/factory Mode))
 
@@ -218,7 +218,7 @@
                            :post-mutation 'com.example.model.mutations/create-prev-story-next-cache}))}
   (dom/div
     (dom/h2 "All Stories")
-    (dom/p "Mode: " (str mode))
+    ;(dom/p "Mode: " (str mode))
     (ui-story-num {:ui/all-stories all-stories
                    :ui/current-story current-story})
 
@@ -261,17 +261,13 @@
    :ident             (fn [x] [:component/id ::StoriesSearch])
    :initial-state     (fn [p]
                         {:ui/stories-search-results []
-                         :ui/search-field           "abc"
+                         :ui/search-field           "gene kim"
                          :ui/mode                   (comp/get-initial-state Mode)})
    :route-segment     ["search"]
    :componentDidMount (fn [this]
                         (println "StoresSearch: mounted!")
                         (comp/transact! this [(set-mode {:ui/mode :search})])
-                        (df/load! this :search-results/stories
-                          (rc/nc [:story/id :story/author :story/content :story/title])
-                          {:target [:component/id ::StoriesSearch :ui/stories-search-results]
-                           :params {:search/search-query "gene kim"}
-                           :post-mutation 'com.example.model.mutations/create-prev-story-next-cache}))}
+                        (comp/transact! this [(search-stories {:query "gene kim"})]))}
    ;:keyboard-shortcuts {"j" it's being called globally:
    ;                             [(mutation-next-story {:stories
    ;                     "k"}}
@@ -279,7 +275,7 @@
   (dom/div
     (println "StoriesSearch: mode: " mode)
     (dom/h2 "Searched Stories")
-    (dom/p "Mode: " (str mode))
+    ;(dom/p "Mode: " (str mode))
     (dom/div :.ui.input
       (dom/input {:type     "text"
                   :id       "search-field"
@@ -343,7 +339,7 @@
         "Main")
       (dom/div :.ui.button {:onClick (fn [x] (comp/transact! this [(set-mode {:ui/mode :search})]))}
         "Search"))
-    (dom/p "mode: " (str mode))
+    ;(dom/p "mode: " (str mode))
     ; from Tony session: a typo!!!  destructuring would have caught it
     ;  to post: "how much time did we spend chasing down things going wrong in Om Next b/c of this"
     ;(buttons/ui-button-test-1 buttons)

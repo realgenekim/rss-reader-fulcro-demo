@@ -13,8 +13,13 @@
 (defsc LoginForm [this {:ui/keys [username password] :as props} {:keys [visible?]}]
   {:query               [:ui/username
                          :ui/password]
-   :initial-state       {:ui/username "tony@example.com"
-                         :ui/password "letmein"}
+   :initial-state       (fn [x]
+                          (if #?(:cljs goog.DEBUG
+                                 :clj  false)
+                            {:ui/username "tony@example.com"
+                             :ui/password "letmein"}
+                            {:ui/username ""
+                             :ui/password ""}))
 
    ::auth/provider      :local
    ::auth/check-session `account/check-session
