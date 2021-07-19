@@ -1,7 +1,7 @@
 = Planet Clojure RSS Feed Reader
 
 This is a toy application that lets you read past articles from the Planet Clojure
-RSS feed (downloaded December 2019), written on top of the Fulcro RAD demo application.
+RSS feed (downloaded December 2019), written on top of the https://github.com/fulcrologic/fulcro-rad-demo[Fulcro RAD demo application].
 
 It is intended to show how one would build a simple application with Fulcro.
 
