@@ -192,12 +192,35 @@
   [this {:ui/keys [mode show-help?] :as props}]
   {:query         [:ui/mode :ui/show-help?]
    :ident         (fn [] [:component/id ::Mode])
-   :initial-state {:ui/mode :main
-                   :ui/show-help? true}})
+   :initial-state {:ui/mode :main}})
   ;(dom/p "Mode: " (str mode)))
 
 (def ui-mode (comp/factory Mode))
 
+
+(comp/defsc Help
+  [this {:ui/keys [show-help?] :as props}]
+  {:query         [:ui/mode :ui/show-help?]
+   :ident         (fn [] [:component/id ::Help])
+   :initial-state {:ui/show-help? true}}
+  (dom/div
+    (dom/p "\"?\" to get keyboard help: ")
+    (if show-help?
+      (dom/div
+        (dom/h2 "Help")
+        (let [help ["j/k: next/prev story"
+                    "t/b: top/bottom story"
+                    "r: random story"
+                    "</>: switch mode"
+                    "?: toggle help"]]
+          ;(for [h help]
+          ;  (dom/p ^{:key h} h)))))))
+          (map dom/p help))))))
+
+
+
+
+(def ui-help (comp/factory Help))
 
 (comp/defsc StoriesMain
   [this {:ui/keys [all-stories current-story mode next-prev-stories]
@@ -261,7 +284,7 @@
    :ident             (fn [x] [:component/id ::StoriesSearch])
    :initial-state     (fn [p]
                         {:ui/stories-search-results []
-                         :ui/search-field           "gene kim"
+                         :ui/search-field           "rich hickey"
                          :ui/mode                   (comp/get-initial-state Mode)})
    :route-segment     ["search"]
    :componentDidMount (fn [this]
@@ -316,23 +339,26 @@
 (def ui-stories-search (comp/computed-factory StoriesSearch))
 
 (comp/defsc StoriesContainer
-  [this {:ui/keys [mode search main buttons]
+  [this {:ui/keys [mode search main buttons show-help?]
          :as      props}]
   {:query             [{:ui/search (comp/get-query StoriesSearch)}
                        {:ui/main (comp/get-query StoriesMain)}
                        {:ui/mode (comp/get-query Mode)}
+                       {:ui/show-help? (comp/get-query Help)}
                        ; uncommenting this will change behavior of routing to ButtonTest1!
                        {:ui/buttons (comp/get-query buttons/ButtonTest1)}]
    :ident             (fn [x] [:component/id ::StoriesContainer])
    :initial-state     {:ui/mode    {}
                        :ui/search  {}
                        :ui/main    {}
+                       :ui/show-help?    {}
                        :ui/buttons {}}
    :route-segment     ["main"]
    :componentDidMount (fn [this]
                         (println "StoriesContainer: mounted!")
                         (comp/transact! this [(set-mode {:ui/mode :main})]))}
   (dom/div
+    (ui-help show-help?)
     (dom/h2 "Story Container")
     (div
       (dom/div :.ui.button {:onClick (fn [x] (comp/transact! this [(set-mode {:ui/mode :main})]))}

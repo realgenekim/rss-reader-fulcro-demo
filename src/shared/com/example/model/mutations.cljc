@@ -54,15 +54,21 @@
                          :search :main
                          :main :search)]
            (comp/transact! app [(set-mode {:ui/mode newmode})]))))
-           ;(do
-           ;  (println "bump-number")
-           ;(swap! state assoc-in [:component/id :com.example.ui.stories-forms/Mode :ui/mode] mode))))
 
      (comment
        (def app (resolve 'com.example.client/app))
        (comp/transact! app [(set-mode {:ui/mode :search})])
        (com.example.model.mutations/get-mode (->> @app :com.fulcrologic.fulcro.application/state-atom))
        ,)
+
+     (defmutation toggle-help [_]
+       (action [{:keys [state]}]
+         (let [ident [:component/id :com.example.ui.stories-forms/Help :ui/show-help?]
+               b (-> (get-in @state ident))]
+           ;(do
+           ;  (println "bump-number")
+           (println "mutation: toggle-help: current mode: " b)
+           (swap! state assoc-in ident (not b)))))
 
      ; https://stackoverflow.com/questions/123999/how-can-i-tell-if-a-dom-element-is-visible-in-the-current-viewport
      (defn scroll-into-view

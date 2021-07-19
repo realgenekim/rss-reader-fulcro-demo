@@ -64,6 +64,7 @@
 (m/declare-mutation scroll-to-element 'com.example.model.mutations/scroll-to-element)
 (m/declare-mutation switch-mode 'com.example.model.mutations/switch-mode)
 (m/declare-mutation random-story 'com.example.model.mutations/random-story)
+(m/declare-mutation toggle-help 'com.example.model.mutations/toggle-help)
 
 (defn init-keyboard-bindings []
   (.bind js/Mousetrap "h" #(js/alert "keyboard shortcut!"))
@@ -76,7 +77,8 @@
   (.bind js/Mousetrap "^" #(comp/transact! app [(scroll-to-element {})]))
   (.bind js/Mousetrap "<" #(comp/transact! app [(switch-mode {})]))
   (.bind js/Mousetrap ">" #(comp/transact! app [(switch-mode {})]))
-  (.bind js/Mousetrap "r" #(comp/transact! app [(random-story {})])))
+  (.bind js/Mousetrap "r" #(comp/transact! app [(random-story {})]))
+  (.bind js/Mousetrap "?" #(comp/transact! app [(toggle-help {})])))
 
 (defn init []
   (log/merge-config! {:output-fn prefix-output-fn
