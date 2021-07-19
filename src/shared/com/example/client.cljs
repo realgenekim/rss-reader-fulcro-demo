@@ -20,6 +20,7 @@
     [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
     [com.fulcrologic.fulcro.mutations :as mutation]
     [com.fulcrologic.fulcro.components :as comp]
+    [com.example.ui.stories-forms :as stories]
     [com.example.model.mutations]
     ["mousetrap" :as mousetrap]))
 
@@ -87,11 +88,13 @@
   (app/set-root! app Root {:initialize-state? true})
   (dr/initialize! app)
   (setup-RAD app)
-  (dr/change-route! app ["landing-page"])
+  ;(dr/change-route! app ["landing-page"])
   (history/install-route-history! app (html5-history))
   ;(auth/start! app [LoginForm] {:after-session-check `fix-route})
   (init-keyboard-bindings)
-  (app/mount! app Root "app" {:initialize-state? false}))
+  (app/mount! app Root "app" {:initialize-state? false})
+  ; when there's no auth, just call this to route to what URL bar says: (normally called in fix-route)
+  (hist5/restore-route! app stories/StoriesContainer {}))
 
 (comment)
 

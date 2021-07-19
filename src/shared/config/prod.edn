@@ -14,4 +14,6 @@
                                                :ssl-redirect   false
                                                :frame-options  :sameorigin
                                                :xss-protection {:enable? true
-                                                                :mode    :block}}}}
+                                                                :mode    :block}}}
+ :org.httpkit.server/config         {:port :env.edn/PORT
+                                     :ip   "0.0.0.0"}}

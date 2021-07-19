@@ -31,15 +31,19 @@
    :ident         (fn [] [:component/id ::LandingPage])
    :initial-state {}
    :route-segment ["landing-page"]}
-  (dom/div "Welcome to the Demo. Please log in."))
+  (dom/div :.ui.basic.segment
+    (dom/div :.ui.active.loader.text.loader
+      "Welcome to the Demo. Please log in.")))
+
+
 
 ;; This will just be a normal router...but there can be many of them.
 ;    builds initial-state
 (defrouter MainRouter [this {:keys [current-state route-factory route-props]}]
   {:always-render-body? true
-   :router-targets      [stories/StoriesContainer
-
-                         LandingPage ItemForm InvoiceForm InvoiceList AccountList AccountForm AccountInvoices
+   :router-targets      [LandingPage
+                         stories/StoriesContainer
+                          ItemForm InvoiceForm InvoiceList AccountList AccountForm AccountInvoices
                          sales-report/SalesReport InventoryReport
                          sales-report/RealSalesReport
                          dashboard/Dashboard
