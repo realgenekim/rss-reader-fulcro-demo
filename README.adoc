@@ -5,14 +5,20 @@ RSS feed (downloaded December 2019), written on top of the https://github.com/fu
 
 It is intended to show how one would build a simple application with Fulcro.
 
-It has two screens:
+== Client
+
+The ClojureScript client has two screens:
 
 - Main:  show all 7120 RSS stories, with keybaord navigation to show full version of current story
 - Search: search articles: one input form to trigger search on server
 
 It demonstrates using Pathom to retrieve stories and search results.
 
-It includes the Google Cloud Build, which targets Google Cloud Run.
+== Server
+
+The Clojure server reads from `resources/stoires.txt` (an EDN file) and uses it as its "database."
+
+This project includes files to build using Google Cloud Build, and to deploy into Google Cloud Run.
 
 You can run the application https://feedly-reader-rhpg5b3znq-uc.a.run.app/[here].
 
