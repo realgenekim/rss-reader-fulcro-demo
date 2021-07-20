@@ -50,15 +50,6 @@
 
 #?(:clj
    (do
-     ;(pc/defresolver story-resolver [env {:story/keys [id]}]
-     ;  {::pc/input  #{:story/id}
-     ;   ::pc/output [:story/id :story/author :story/title]}
-     ;  (log/warn "*** story-resolver: ")
-     ;  (let [retval (->> (queries/get-story-by-id env id))]
-     ;    ;(println retval)
-     ;    retval))
-
-
 
      (pc/defresolver story-content-resolver [env input]
        {::pc/input  #{:story/id}
