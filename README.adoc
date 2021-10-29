@@ -20,7 +20,9 @@ The Clojure server reads from `resources/stories.txt` (an EDN file) and uses it 
 
 This project includes files to build using Google Cloud Build, and to deploy into Google Cloud Run.
 
-You can run the application https://feedly-reader-rhpg5b3znq-uc.a.run.app/[here].  (It may take 10-20s for it to startup -- I'm extremely pleased with how fast it can start.  It handles cold starts faster than Heroku by adding memory and cores.)
+You can run the application https://feedly-reader-rhpg5b3znq-uc.a.run.app/[here].  
+
+(It may take 10-20s for the application to startup, because of cold starts -- I'm extremely pleased with how fast it can start.  It handles cold starts faster than Heroku by adding memory and cores.)
 
 Screenshot below:
 
