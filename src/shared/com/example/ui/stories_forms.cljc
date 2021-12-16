@@ -16,7 +16,7 @@
     [com.fulcrologic.rad.type-support.date-time :as datetime]
     [com.fulcrologic.fulcro.raw.components :as rc]
     [com.fulcrologic.fulcro.mutations :as m]
-    [com.example.ui.button-toys-form :as buttons]
+    ;[com.example.ui.button-toys-form :as buttons]
     #?(:cljs [goog.string :as gstring])
     #?(:cljs [portal.web :as pw])))
 
@@ -311,20 +311,20 @@
 (def ui-stories-search (comp/computed-factory StoriesSearch))
 
 (comp/defsc StoriesContainer
-  [this {:ui/keys [mode search main buttons show-help?]
+  [this {:ui/keys [mode search main show-help?]
          :as      props}]
   {:query             [{:ui/search (comp/get-query StoriesSearch)}
                        {:ui/main (comp/get-query StoriesMain)}
                        {:ui/mode (comp/get-query Mode)}
-                       {:ui/show-help? (comp/get-query Help)}
+                       {:ui/show-help? (comp/get-query Help)}]
                        ; uncommenting this will change behavior of routing to ButtonTest1!
-                       {:ui/buttons (comp/get-query buttons/ButtonTest1)}]
+                       ;{:ui/buttons (comp/get-query buttons/ButtonTest1)}]
    :ident             (fn [x] [:component/id ::StoriesContainer])
    :initial-state     {:ui/mode    {}
                        :ui/search  {}
                        :ui/main    {}
-                       :ui/show-help?    {}
-                       :ui/buttons {}}
+                       :ui/show-help?    {}}
+                       ;:ui/buttons {}}
    :route-segment     ["main"]
    :componentDidMount (fn [this]
                         (println "StoriesContainer: mounted!")

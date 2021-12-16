@@ -1,5 +1,12 @@
+# get all the npm deps
+init:
+	yarn install
+
 cljs:
 	shadow-cljs -A:f3-dev:rad-dev:i18n-dev server
+
+cljs-compile:
+	shadow-cljs watch main
 
 report:
 	npx shadow-cljs run shadow.cljs.build-report main report.html
@@ -15,7 +22,7 @@ uberjar:
 			:main-class com.example.components.server
 
 runuberjar:
-	java -jar target/feedly-reader-standalone.jar	
+	PORT=3000 java -jar target/feedly-reader-standalone.jar	
 
 # --machine-type=N1_HIGHCPU_8 \
 #--machine-type=N1_HIGHCPU_32 \
@@ -35,3 +42,26 @@ deploycloudrun:
 
 cljs-build-prod:
 	time shadow-cljs -A:f3-dev:rad-dev:i18n-dev release main
+
+
+native-image:
+	time native-image \
+	         --report-unsupported-elements-at-runtime \
+			 --no-fallback \
+             -jar ./target/feedly-reader-standalone.jar \
+            --initialize-at-build-time=com.fasterxml.jackson \
+             --initialize-at-build-time=clojure,cheshire \
+             --initialize-at-build-time=. \
+             --trace-object-instantiation=com.sun.jmx.mbeanserver.JmxMBeanServer \
+             --trace-class-initialization=com.sun.jmx.mbeanserver.JmxMBeanServer \
+             --initialize-at-run-time=com.sun.jmx.mbeanserver.JmxMBeanServer \
+             --allow-incomplete-classpath \
+             -H:+ReportExceptionStackTraces \
+             -H:ReflectionConfigurationFiles=reflect-config.json \
+
+
+
+run-uberjar-with-agent:
+# 	java -agentlib:native-image-agent=caller-filter-file=filter.json,config-output-dir=. -cp $(clojure -Spath):classes refl.main
+	PORT=3000 java -agentlib:native-image-agent=caller-filter-file=filter.json,config-output-dir=. \
+			-jar target/feedly-reader-standalone.jar
