@@ -49,15 +49,14 @@ native-image:
 	         --report-unsupported-elements-at-runtime \
 			 --no-fallback \
              -jar ./target/feedly-reader-standalone.jar \
-            --initialize-at-build-time=com.fasterxml.jackson \
+             --initialize-at-build-time=com.fasterxml.jackson,org.h2 \
              --initialize-at-build-time=clojure,cheshire \
              --initialize-at-build-time=. \
              --trace-object-instantiation=com.sun.jmx.mbeanserver.JmxMBeanServer \
              --trace-class-initialization=com.sun.jmx.mbeanserver.JmxMBeanServer \
-             --initialize-at-run-time=com.sun.jmx.mbeanserver.JmxMBeanServer \
+             --initialize-at-run-time=com.sun.jmx.mbeanserver.JmxMBeanServer,org.h2 \
              --allow-incomplete-classpath \
-             -H:+ReportExceptionStackTraces \
-             -H:ReflectionConfigurationFiles=reflect-config.json \
+             -H:+ReportExceptionStackTraces
 
 
 
