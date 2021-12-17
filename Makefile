@@ -18,7 +18,7 @@ server:
 	clj -A:dev:datomic -M -m com.example.components.server
 
 uberjar:
-	time clj -X:uberjar :aliases '[:datomic #_:nocljs]' :aot true :jar ./target/feedly-reader-standalone.jar \
+	time clojure -X:uberjar :aliases '[:datomic #_:nocljs]' :aot true :jar ./target/feedly-reader-standalone.jar \
 			:main-class com.example.components.server
 
 runuberjar:
