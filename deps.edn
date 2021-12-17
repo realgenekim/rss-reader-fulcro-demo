@@ -1,13 +1,26 @@
 {:paths   ["src/shared" "resources"]
 
- :deps    {com.fulcrologic/fulcro                 {:mvn/version "3.5.0-RC3"}
-           com.fulcrologic/fulcro-rad             {:mvn/version "1.0.11"}
+ :classpath-overrides {org.clojure/clojurescript ""}
+
+ :deps    {
+           ;org.clojure/clojure                    {:mvn/version "1.10.3"}
+           org.clojure/clojure                    {:mvn/version "1.11.0-alpha3"}
+           ;com.fulcrologic/fulcro                 {:mvn/version "3.5.0-RC3"}
+           ;; override spec.alpha to prevent locking problems with guardrails
+           org.clojure/spec.alpha                 {:mvn/version "0.3.214"}
+
+           com.fulcrologic/fulcro                 {:local/root "../tmp/fulcro"}
+           com.fulcrologic/fulcro-rad             {
+                                                   ;:mvn/version "1.0.11"
+                                                   :local/root "../tmp/fulcro-rad"
+                                                   :exclusions [org.clojure/clojurescript]}
            com.fulcrologic/fulcro-rad-semantic-ui {:mvn/version "1.1.1"}
            com.fulcrologic/fulcro-i18n            {:mvn/version "0.0.5-alpha"}
            com.wsscode/pathom                     {:mvn/version "2.3.1"}
            edn-query-language/eql                 {:mvn/version "1.0.1"}
            com.taoensso/encore                    {:mvn/version "3.1.0"}
-           com.fulcrologic/guardrails             {:mvn/version "1.1.4"}
+           com.fulcrologic/guardrails             {:mvn/version "1.1.10"}
+           ;com.fulcrologic/guardrails             {:local/root "../../tmp/guardrails"}
 
            ;org.postgresql/postgresql              {:mvn/version "42.2.8"}
 
@@ -26,13 +39,12 @@
            org.slf4j/log4j-over-slf4j             {:mvn/version "1.7.30"} ; auto sends log4j to slf4j
            org.slf4j/jul-to-slf4j                 {:mvn/version "1.7.30"} ; auto sends java.util.logging to slf4j
            org.slf4j/jcl-over-slf4j               {:mvn/version "1.7.30"} ; auto-sends java.common.logging to slf4j
-           com.fzakaria/slf4j-timbre              {:mvn/version "0.3.19"} ; hooks slf4j to timbre
+           com.fzakaria/slf4j-timbre              {:mvn/version "0.3.19"}} ; hooks slf4j to timbre
 
-           org.clojure/clojurescript              {:mvn/version "1.10.866"}
-           org.clojure/clojure                    {:mvn/version "1.10.3"}
+           ;org.clojure/clojurescript              {:mvn/version "1.10.866"}
 
-           ;; override spec.alpha to prevent locking problems with guardrails
-           org.clojure/spec.alpha                 {:mvn/version "0.3.214"}}
+
+
 
  :aliases {:test      {:extra-paths ["src/shared-tests"]
                        :extra-deps  {fulcrologic/fulcro-spec {:mvn/version "3.1.11"}}}
@@ -53,6 +65,8 @@
            :run-tests {:main-opts  ["-m" "kaocha.runner"]
                        :extra-deps {lambdaisland/kaocha {:mvn/version "1.0.732"}}}
 
+           :nocljs    {:classpath-overrides {org.clojure/clojurescript ""}}
+
            :dev       {:extra-paths ["src/dev" "resources"]
                        :extra-deps  {thheller/shadow-cljs                {:mvn/version "2.14.5"}
                                      com.fulcrologic/semantic-ui-wrapper {:mvn/version "2.0.1"}
@@ -60,8 +74,8 @@
                                      org.clojure/tools.namespace         {:mvn/version "1.0.0"}
                                      djblue/portal                       {:mvn/version "0.12.0"}}}
 
-           :uberjar {:replace-deps {com.github.seancorfield/depstar {:mvn/version "2.1.267"}}
-                     :aliases      [:datomic]
-                     :extra-paths  ["resources"]
+           :uberjar {:replace-deps {com.github.seancorfield/depstar {:mvn/version "2.1.303"}}
+                     :aliases      [:datomic :nocljs]
+                     :extra-paths  ["resources" "src/datomic"]
                      :exec-fn      hf.depstar/uberjar
                      :exec-args    {:aot true}}}}
