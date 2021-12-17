@@ -25,7 +25,7 @@ aliases:
       - checkout
       - store_artifacts:
           path: /tmp
-      - run: sudo apt-get install make lsb-release time
+      - run: sudo apt-get install make lsb-release time file
 #      - run: git clone https://github.com/realgenekim/google-cloud
 
       - run:
