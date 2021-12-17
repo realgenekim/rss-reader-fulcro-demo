@@ -26,6 +26,14 @@ aliases:
           path: /tmp
       - run: sudo apt-get install make lsb-release time
 #      - run: git clone https://github.com/realgenekim/google-cloud
+
+      - run:
+          name: Install GraalVM
+          command: curl https://github.com/graalvm/graalvm-ce-builds/releases/download/vm-21.3.0/graalvm-ce-java11-linux-amd64-21.3.0.tar.gz -O -J -L && tar xfz graalvm-ce-java11-linux-amd64-21.3.0.tar.gz && mv graalvm-ce-21.3.0 .graalvm && rm graalvm-ce-linux-amd64-21.3.0.tar.gz
+      - run:
+          name: Install native-image
+          command: $GRAALVM_HOME/bin/gu install native-image
+
       - run:
           command: |
             cd /tmp
@@ -36,7 +44,7 @@ aliases:
             cp /usr/local/bin/clojure ~/bin
             sudo npm install -g shadow-cljs
 
-      - run: /bin/bash -x .circleci/install-secrets-edn.sh
+      # - run: /bin/bash -x .circleci/install-secrets-edn.sh
 
       # compute cache key
       - run: cat deps.edn > /tmp/cachekey
