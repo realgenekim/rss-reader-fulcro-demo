@@ -12,6 +12,7 @@ aliases:
       LEIN_ROOT: "true"
       # Customize the JVM maximum heap limit
       JVM_OPTS: -Xmx3200m
+      GRAALVM_HOME: /home/circleci/repo/.graalvm
 
 
   # modeled after: https://circleci.com/blog/decrease-your-build-times-by-running-jobs-in-parallel-with-workflows/
@@ -28,8 +29,9 @@ aliases:
 #      - run: git clone https://github.com/realgenekim/google-cloud
 
       - run:
-          name: Install GraalVM
-          command: curl https://github.com/graalvm/graalvm-ce-builds/releases/download/vm-21.3.0/graalvm-ce-java11-linux-amd64-21.3.0.tar.gz -O -J -L && tar xfz graalvm-ce-java11-linux-amd64-21.3.0.tar.gz && mv graalvm-ce-21.3.0 .graalvm && rm graalvm-ce-linux-amd64-21.3.0.tar.gz
+          name: Download GraalVM
+          command:  /bin/bash -x .circleci/install-graalvm.sh
+            
       - run:
           name: Install native-image
           command: $GRAALVM_HOME/bin/gu install native-image
