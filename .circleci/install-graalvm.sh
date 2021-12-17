@@ -30,6 +30,8 @@ GRAALVM_VERSION="${GRAALVM_VERSION:-21.2.0}"
 
 GRAALVM_FILENAME="graalvm-ce-java11-linux-amd64-$GRAALVM_VERSION.tar.gz"
 
+mkdir -p $INSTALL_DIR
+
 pushd "$INSTALL_DIR" >/dev/null
 
 if ! [ -d "graalvm-ce-java11-$GRAALVM_VERSION" ]; then
