@@ -1,4 +1,4 @@
-{:paths   ["src/shared" "resources"]
+{:paths   ["src/shared" "resources" "src/patch"]
 
  :classpath-overrides {org.clojure/clojurescript ""}
 

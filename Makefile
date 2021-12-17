@@ -54,6 +54,7 @@ native-image:
              --initialize-at-build-time=. \
              --trace-object-instantiation=com.sun.jmx.mbeanserver.JmxMBeanServer \
              --trace-class-initialization=com.sun.jmx.mbeanserver.JmxMBeanServer \
+             --trace-object-instantiation=java.lang.Thread \
              --initialize-at-run-time=com.sun.jmx.mbeanserver.JmxMBeanServer,org.h2 \
              --allow-incomplete-classpath \
              -H:+ReportExceptionStackTraces
