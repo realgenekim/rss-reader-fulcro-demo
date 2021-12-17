@@ -7,6 +7,8 @@
     [com.example.components.ring-middleware :refer [middleware]])
   (:gen-class))
 
+(require 'ring.middleware.multipart-params.temp_file) ;; preload for native-image
+
 (defstate http-server
   :start
   (let [cfg     (get config :org.httpkit.server/config)
