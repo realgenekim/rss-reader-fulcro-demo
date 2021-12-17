@@ -37,7 +37,7 @@ aliases:
           command: |
             ls -l $GRAALVM_HOME
             ls -l $GRAALVM_HOME/graalvm-ce-java11-21.2.0/bin/gu
-            $GRAALVM_HOME/graalvm-ce-java11-21.2.0/bin/gu install native-image
+            $GRAALVM_HOME/graalvm-ce-java11-21.2.0/lib/installer/bin/gu install native-image
 
       - run: native-image --help
 
