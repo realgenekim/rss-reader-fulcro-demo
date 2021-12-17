@@ -34,7 +34,9 @@ aliases:
             
       - run:
           name: Install native-image
-          command: $GRAALVM_HOME/bin/gu install native-image
+          command: $GRAALVM_HOME/graalvm-ce-java11-21.2.0/bin/gu install native-image
+
+      - run: native-image --help
 
       - run:
           command: |
