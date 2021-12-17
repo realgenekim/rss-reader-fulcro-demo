@@ -1,0 +1,203 @@
+# Use the latest 2.1 version of CircleCI pipeline processing engine, see https://circleci.com/docs/2.0/configuration-reference/
+version: 2.1
+
+aliases:
+  - &build_environnment
+    docker:
+      # specify the version you desire here
+      - image: circleci/clojure:openjdk-11-lein-2.9.1-stretch-node
+    resource_class: large
+    working_directory: ~/repo
+    environment:
+      LEIN_ROOT: "true"
+      # Customize the JVM maximum heap limit
+      JVM_OPTS: -Xmx3200m
+
+
+  # modeled after: https://circleci.com/blog/decrease-your-build-times-by-running-jobs-in-parallel-with-workflows/
+
+  - &attach_workspace
+    attach_workspace:
+            at: ~/data
+
+  - &buildtest
+      - checkout
+      - store_artifacts:
+          path: /tmp
+      - run: sudo apt-get install make lsb-release time
+#      - run: git clone https://github.com/realgenekim/google-cloud
+      - run:
+          command: |
+            cd /tmp
+            curl -O https://download.clojure.org/install/linux-install-1.10.3.1040.sh
+            chmod +x linux-install-1.10.3.1040.sh
+            sudo ./linux-install-1.10.3.1040.sh
+            mkdir ~/bin
+            cp /usr/local/bin/clojure ~/bin
+            sudo npm install -g shadow-cljs
+
+      - run: /bin/bash -x .circleci/install-secrets-edn.sh
+
+      # compute cache key
+      - run: cat deps.edn > /tmp/cachekey
+
+      # Download and cache JVM dependencies
+      #   actually the key should be the concatenations of all the project.clj and deps.edn
+      - restore_cache:
+          keys:
+          - v1-dependencies-{{ checksum "/tmp/cachekey" }}
+          # fallback to using the latest cache if no exact match is found
+          - v1-dependencies-
+
+      - run: du -h ~/.m2 || true
+      - run: du -h node_modules || true
+      - run: pwd
+      - run: ls -alR
+
+      # load all the JVM deps
+      - run: 
+          command: |
+             echo hello
+             yarn install
+             clojure -P
+             clojure -A:run-tests:dev:datomic:uberjar:jib-deploy -P
+
+      - save_cache:
+          paths:
+            - ~/.m2
+            - node_modules
+          key: v1-dependencies-{{ checksum "/tmp/cachekey" }}
+
+      - run: du -h ~/.m2 || true
+      - run: du -h node_modules || true
+      - run: pwd
+      - run: ls -alR
+
+
+      #
+      # run tests
+      #
+
+      - run: make clj-test
+
+      # strange: ~/.m2 gives error
+      - persist_to_workspace:
+          root: .
+          paths:
+              - .m2
+              - node_modules
+              - bin
+
+      #
+      # build
+      #
+      - run: make release
+      - run: make uberjar
+
+      - run: ls -lh ./target
+
+
+      - run:
+          command: |
+            mkdir -p /tmp/errors
+            cp /tmp/clojure*.edn /tmp/errors
+          when: on_fail
+
+      - store_artifacts:
+          path: /tmp/errors
+
+      # deploy only when on main
+      - run:
+          name: Deploy Main  to Google Cloud RUN
+          command: |
+            if [ "${CIRCLE_BRANCH}" != "main" ]; then
+              echo "Not on main: DONE!"
+              circleci-agent step halt
+            fi
+
+      - run: /bin/bash -x .circleci/installgcloud.sh
+      - run: /bin/bash -x .circleci/gcpauth.sh
+      - run: gcloud auth configure-docker
+      - run: gcloud compute instances list
+
+      - run: make jib-deploy
+
+      # save cache one more time: (often pick up :dev :jib-deploy)
+
+      - run: du -h ~/.m2 || true
+      - run: du -h node_modules || true
+
+      - save_cache:
+          paths:
+            - ~/.m2
+            - node_modules
+          key: v1-dependencies-{{ checksum "/tmp/cachekey" }}
+
+#
+# deploy tools
+#
+
+      - run: make cloudrundeploy
+
+#  - &deploybookserver
+#      - checkout
+#      - *attach_workspace
+#      #
+#      # Google Cloud and Kubernetes
+#      #
+#      # - run: (cd bookserver; make uberjar)
+#      - run: sudo apt-get install make lsb-release
+#      - run: /bin/bash -x .circleci/installgcloud.sh
+#      - run: /bin/bash -x .circleci/gcpauth.sh
+#      - run:
+#          name: Deploy Master  to Google Cloud Builder
+#          command: |
+#            if [ "${CIRCLE_BRANCH}" == "main" ]; then
+#              (cd bookserver; make googlecloudbuild kubereload)
+#            fi
+#
+#  - &deploypubsub
+#      - checkout
+#      - run: git clone https://github.com/realgenekim/google-cloud
+#      - *attach_workspace
+#      #
+#      # Google Cloud and Kubernetes
+#      #
+#      # - run: (cd pubsub; make uberjar)
+#      - run: sudo apt-get install make lsb-release
+#      - run: /bin/bash -x .circleci/installgcloud.sh
+#      - run: /bin/bash -x .circleci/gcpauth.sh
+#      - run:
+#          name: Deploy Master  to Google Cloud Builder
+#          command: |
+#            if [ "${CIRCLE_BRANCH}" == "main" ]; then
+#              (cd pubsub; make googlecloudbuild kubereload)
+#            fi
+
+# Orchestrate or schedule a set of jobs, see https://circleci.com/docs/2.0/workflows/
+workflows:
+  BuildTestRun:
+    jobs:
+      - "BuildTest":
+          context: gcp
+#      - "DeployBookserver":
+#          context: gcp
+#          requires:
+#            - "BuildTest"
+#      - "DeployPubSub":
+#          context: gcp
+#          requires:
+#            - "BuildTest"
+
+jobs:
+  "BuildTest":
+    <<: *build_environnment
+    steps: *buildtest
+
+#  "DeployBookserver":
+#    <<: *build_environnment
+#    steps: *deploybookserver
+#
+#  "DeployPubSub":
+#    <<: *build_environnment
+#    steps: *deploypubsub
