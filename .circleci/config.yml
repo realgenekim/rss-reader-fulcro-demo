@@ -41,7 +41,9 @@ aliases:
             file  $GRAALVM_HOME/lib/installer/bin/gu
             $GRAALVM_HOME/bin/gu install native-image
 
-      - run: native-image --help
+      - run: |
+            ls -l $GRAALVM_HOME/bin/native-image
+            $GRAALVM_HOME/bin/native-image --help
 
       - run:
           command: |
