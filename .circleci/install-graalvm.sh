@@ -24,7 +24,11 @@ GRAALVM_VERSION="${GRAALVM_VERSION:-21.2.0}"
 # 		;;
 # esac
 
-GRAALVM_FILENAME="graalvm-ce-java11-$GRAALVM_PLATFORM-$GRAALVM_ARCH-$GRAALVM_VERSION.tar.gz"
+# # curl https://github.com/graalvm/graalvm-ce-builds/releases/download/vm-21.3.0/graalvm-ce-java11-linux-amd64-21.3.0.tar.gz -O -J -L
+
+
+
+GRAALVM_FILENAME="graalvm-ce-java11-linux-amd64-$GRAALVM_VERSION.tar.gz"
 
 pushd "$INSTALL_DIR" >/dev/null
 
