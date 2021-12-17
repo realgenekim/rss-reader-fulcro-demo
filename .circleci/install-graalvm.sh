@@ -39,7 +39,7 @@ pushd "$INSTALL_DIR" >/dev/null
 if ! [ -d "graalvm-ce-java11-$GRAALVM_VERSION" ]; then
 	echo "Downloading GraalVM $GRAALVM_PLATFORM-$GRAALVM_ARCH-$GRAALVM_VERSION on '$PWD'..."
 	curl -O -sL "https://github.com/graalvm/graalvm-ce-builds/releases/download/vm-$GRAALVM_VERSION/$GRAALVM_FILENAME"
-	tar xzf "$GRAALVM_FILENAME"
+	tar xzfv "$GRAALVM_FILENAME"
 fi
 
 popd >/dev/null
