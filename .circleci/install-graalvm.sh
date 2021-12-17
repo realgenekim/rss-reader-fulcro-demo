@@ -40,6 +40,8 @@ if ! [ -d "graalvm-ce-java11-$GRAALVM_VERSION" ]; then
 	echo "Downloading GraalVM $GRAALVM_PLATFORM-$GRAALVM_ARCH-$GRAALVM_VERSION on '$PWD'..."
 	curl -O -sL "https://github.com/graalvm/graalvm-ce-builds/releases/download/vm-$GRAALVM_VERSION/$GRAALVM_FILENAME"
 	tar xzfv "$GRAALVM_FILENAME"
+	
+	mv graalvm-ce-java11-21.2.0/* .
 fi
 
 popd >/dev/null
