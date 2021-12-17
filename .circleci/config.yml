@@ -97,7 +97,7 @@ aliases:
       # run tests
       #
 
-      - run: make clj-test
+      # - run: make clj-test
 
       # strange: ~/.m2 gives error
       - persist_to_workspace:
@@ -115,6 +115,8 @@ aliases:
 
       - run: ls -lh ./target
 
+      - run: PATH=$(PATH):$GRAALVM_HOME make native-image
+
 
       - run:
           command: |
@@ -126,25 +128,25 @@ aliases:
           path: /tmp/errors
 
       # deploy only when on main
-      - run:
-          name: Deploy Main  to Google Cloud RUN
-          command: |
-            if [ "${CIRCLE_BRANCH}" != "main" ]; then
-              echo "Not on main: DONE!"
-              circleci-agent step halt
-            fi
+      # - run:
+      #     name: Deploy Main  to Google Cloud RUN
+      #     command: |
+      #       if [ "${CIRCLE_BRANCH}" != "main" ]; then
+      #         echo "Not on main: DONE!"
+      #         circleci-agent step halt
+      #       fi
 
-      - run: /bin/bash -x .circleci/installgcloud.sh
-      - run: /bin/bash -x .circleci/gcpauth.sh
-      - run: gcloud auth configure-docker
-      - run: gcloud compute instances list
+      # - run: /bin/bash -x .circleci/installgcloud.sh
+      # - run: /bin/bash -x .circleci/gcpauth.sh
+      # - run: gcloud auth configure-docker
+      # - run: gcloud compute instances list
 
-      - run: make jib-deploy
+      # - run: make jib-deploy
 
-      # save cache one more time: (often pick up :dev :jib-deploy)
+      # # save cache one more time: (often pick up :dev :jib-deploy)
 
-      - run: du -h ~/.m2 || true
-      - run: du -h node_modules || true
+      # - run: du -h ~/.m2 || true
+      # - run: du -h node_modules || true
 
       - save_cache:
           paths:
