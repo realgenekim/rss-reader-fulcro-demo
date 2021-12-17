@@ -2,27 +2,27 @@
 
 set -euo pipefail
 
-INSTALL_DIR="${1:-$HOME}"
+INSTALL_DIR="$GRAALVM_HOME"
 
 GRAALVM_VERSION="${GRAALVM_VERSION:-21.2.0}"
 
-case "$BABASHKA_PLATFORM" in
-	macos)
-		GRAALVM_PLATFORM="darwin"
-		;;
-	linux)
-		GRAALVM_PLATFORM="linux"
-		;;
-esac
+# case "$BABASHKA_PLATFORM" in
+# 	macos)
+# 		GRAALVM_PLATFORM="darwin"
+# 		;;
+# 	linux)
+# 		GRAALVM_PLATFORM="linux"
+# 		;;
+# esac
 
-case "${BABASHKA_ARCH:-}" in
-	aarch64)
-		GRAALVM_ARCH="aarch64"
-		;;
-	*)
-		GRAALVM_ARCH="amd64"
-		;;
-esac
+# case "${BABASHKA_ARCH:-}" in
+# 	aarch64)
+# 		GRAALVM_ARCH="aarch64"
+# 		;;
+# 	*)
+# 		GRAALVM_ARCH="amd64"
+# 		;;
+# esac
 
 GRAALVM_FILENAME="graalvm-ce-java11-$GRAALVM_PLATFORM-$GRAALVM_ARCH-$GRAALVM_VERSION.tar.gz"
 
