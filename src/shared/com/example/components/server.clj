@@ -1,13 +1,26 @@
 (ns com.example.components.server
   (:require
-    [org.httpkit.server :refer [run-server]]
-    [mount.core :as mount :refer [defstate]]
-    [taoensso.timbre :as log]
     [com.example.components.config :refer [config]]
-    [com.example.components.ring-middleware :refer [middleware]])
+    [com.example.components.ring-middleware :refer [middleware]]
+    [mount.core :as mount :refer [defstate]]
+    [org.httpkit.server :refer [run-server]]
+    [ring.util.response :as response]
+    [taoensso.timbre :as log])
   (:gen-class))
 
 (require 'ring.middleware.multipart-params.temp_file) ;; preload for native-image
+
+;; graalvm has its own resource scheme. if the content length is zero, we assume
+;; it's a directory and return nil, like ring's own jar resource handling
+(defmethod response/resource-data :resource
+  [^java.net.URL url]
+  ;; GraalVM resource scheme
+  (let [resource (.openConnection url)
+        len (#'ring.util.response/connection-content-length resource)]
+    (when (pos? len)
+      {:content        (.getInputStream resource)
+       :content-length len
+       :last-modified  (#'ring.util.response/connection-last-modified resource)})))
 
 (defstate http-server
   :start
