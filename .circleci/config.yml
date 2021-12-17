@@ -12,7 +12,7 @@ aliases:
       LEIN_ROOT: "true"
       # Customize the JVM maximum heap limit
       JVM_OPTS: -Xmx3200m
-      GRAALVM_HOME: /home/circleci/repo/.graalvm
+      GRAALVM_HOME: ~/.graalvm
 
 
   # modeled after: https://circleci.com/blog/decrease-your-build-times-by-running-jobs-in-parallel-with-workflows/
