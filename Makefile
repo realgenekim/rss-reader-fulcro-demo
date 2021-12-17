@@ -58,6 +58,7 @@ native-image:
              --initialize-at-run-time=com.sun.jmx.mbeanserver.JmxMBeanServer,org.h2 \
              -H:IncludeResources=config/defaults.edn \
              -H:IncludeResources=config/prod.edn \
+             -H:IncludeResources=public/.* \
              --allow-incomplete-classpath \
              -H:+ReportExceptionStackTraces
 

@@ -70,7 +70,7 @@
            ;; :nocljs    {:classpath-overrides {org.clojure/clojurescript ""}}
 
            :dev       {:extra-paths ["src/dev" "resources"]
-                       :extra-deps  {thheller/shadow-cljs                {:mvn/version "2.14.5"}
+                       :extra-deps  {thheller/shadow-cljs                {:mvn/version "2.16.8"}
                                      com.fulcrologic/semantic-ui-wrapper {:mvn/version "2.0.1"}
                                      binaryage/devtools                  {:mvn/version "1.0.0"}
                                      org.clojure/tools.namespace         {:mvn/version "1.0.0"}
