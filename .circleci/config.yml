@@ -121,7 +121,7 @@ aliases:
       - run:
           command: |
             mkdir -p /tmp/errors
-            cp /tmp/clojure*.edn /tmp/errors
+            cp /tmp/clojure*.edn *build_artifacts* /tmp/errors
           when: on_fail
 
       - store_artifacts:
