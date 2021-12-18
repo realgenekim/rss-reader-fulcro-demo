@@ -37,8 +37,10 @@
 (def image-name "us.gcr.io/booktracker-1208/feedly-reader-exe:latest")
 
 (def base-image-with-creds
-  ; (-> (RegistryImage/named "gcr.io/google-appengine/debian11")
-  (-> (RegistryImage/named "gcr.io/distroless/base-debian11")
+  ; we can't run distroless, because we need /bin/bash and entrypoint.sh, until we can figure out how
+  ; to set file modes to executable via jib
+  ;; (-> (RegistryImage/named "gcr.io/distroless/base-debian11"
+  (-> (RegistryImage/named "gcr.io/google-appengine/debian11")
     (.addCredentialRetriever
       (-> (CredentialRetrieverFactory/forImage
             (to-imgref image-name)
