@@ -6,7 +6,7 @@ aliases:
     docker:
       # specify the version you desire here
       - image: circleci/clojure:openjdk-11-lein-2.9.1-stretch-node
-    resource_class: large
+    resource_class: 2xlarge
     working_directory: ~/repo
     environment:
       LEIN_ROOT: "true"
@@ -115,7 +115,7 @@ aliases:
 
       - run: ls -lh ./target
 
-      - run: PATH=$PATH:$GRAALVM_HOME/bin make native-image
+      - run: PATH=$PATH:$GRAALVM_HOME/bin:$GRAALVM_HOME/languages/llvm/native/bin make native-image
 
 
       - run:
