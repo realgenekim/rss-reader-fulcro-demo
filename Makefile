@@ -76,3 +76,7 @@ jib-deploy:
 cloudrundeploy:
 	time gcloud run deploy feedly-reader-exe --image us.gcr.io/booktracker-1208/feedly-reader-exe:latest \
 		--region us-west1 --platform managed
+
+docker-shell:
+	docker pull us.gcr.io/booktracker-1208/feedly-reader-exe:latest
+	docker run --rm -it --entrypoint /bin/bash us.gcr.io/booktracker-1208/feedly-reader-exe

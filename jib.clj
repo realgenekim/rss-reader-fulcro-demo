@@ -37,7 +37,7 @@
 (def image-name "us.gcr.io/booktracker-1208/feedly-reader-exe:latest")
 
 (def base-image-with-creds
-  (-> (RegistryImage/named "gcr.io/distroless/base-debian11")
+  (-> (RegistryImage/named "gcr.io/google-appengine/debian11")
     (.addCredentialRetriever
       (-> (CredentialRetrieverFactory/forImage
             (to-imgref image-name)
@@ -50,7 +50,7 @@
 (def app-layer [(into-list (get-path local-standalone-jar-path))
                 (AbsoluteUnixPath/get "/")])
 
-(def entrypoint ["/feedly-reader-standalone"])
+(def entrypoint ["/bin/bash" "entrypoint.sh"])
 
 (def arguments local-standalone-jar-path)
 
@@ -61,8 +61,8 @@
 (defn jib-deploy [_]
   (time (-> (Jib/from base-image-with-creds)
           ; keys
-          ;(.addLayer (into-list (get-path "./secrets.edn"))
-          ;           (AbsoluteUnixPath/get "/"))
+          (.addLayer (into-list (get-path "./bin/entrypoint.sh"))
+                     (AbsoluteUnixPath/get "/"))
           ; jar file
           (.addLayer (first app-layer) (second app-layer))
           (.setEntrypoint (apply into-list entrypoint))
