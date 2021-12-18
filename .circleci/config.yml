@@ -6,8 +6,8 @@ aliases:
     docker:
       # specify the version you desire here
       - image: circleci/clojure:openjdk-11-lein-bullseye-node-browsers-legacy
-    # resource_class: xlarge
-    resource_class: large
+    resource_class: xlarge
+    # resource_class: large
     working_directory: ~/repo
     environment:
       LEIN_ROOT: "true"
