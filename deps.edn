@@ -80,4 +80,14 @@
                      :aliases      [:datomic :nocljs]
                      :extra-paths  ["resources" "src/datomic"]
                      :exec-fn      hf.depstar/uberjar
-                     :exec-args    {:aot true}}}}
+                     :exec-args    {:aot true}}
+
+           :jib-deploy {:deps
+                                    {io.github.clojure/tools.build       {:git/tag "v0.6.6" :git/sha "4d41c26"}
+                                     com.google.cloud.tools/jib-core     {:mvn/version "0.20.0"}}
+                        :ns-default jib
+                        :uberjar    {:replace-deps {com.github.seancorfield/depstar {:mvn/version "2.0.206"}}
+                                     :exec-fn      hf.depstar/uberjar
+                                     :exec-args    {:aot true}}}
+
+           ,}}

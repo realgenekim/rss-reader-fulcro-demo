@@ -115,7 +115,7 @@ aliases:
 
       - run: ls -lh ./target
 
-      - run: PATH=$(PATH):$GRAALVM_HOME make native-image
+      - run: PATH=$PATH:$GRAALVM_HOME make native-image
 
 
       - run:
