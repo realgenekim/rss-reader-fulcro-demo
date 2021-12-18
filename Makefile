@@ -45,6 +45,7 @@ cljs-build-prod:
 
 
 native-image:
+	echo $(PATH)
 	time native-image \
 	         --report-unsupported-elements-at-runtime \
 			 --no-fallback \
@@ -68,3 +69,10 @@ run-uberjar-with-agent:
 # 	java -agentlib:native-image-agent=caller-filter-file=filter.json,config-output-dir=. -cp $(clojure -Spath):classes refl.main
 	PORT=3000 java -agentlib:native-image-agent=caller-filter-file=filter.json,config-output-dir=. \
 			-jar target/feedly-reader-standalone.jar
+
+jib-deploy:
+	time clojure -T:jib-deploy jib-deploy
+
+cloudrundeploy:
+	time gcloud run deploy feedly-reader-exe --image us.gcr.io/booktracker-1208/feedly-reader-exe:latest \
+		--region us-west1 --platform managed
