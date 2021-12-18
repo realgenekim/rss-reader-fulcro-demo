@@ -5,16 +5,16 @@
                [com.fulcrologic.semantic-ui.modules.dropdown.ui-dropdown-item :refer [ui-dropdown-item]]])
     #?(:clj  [com.fulcrologic.fulcro.dom-server :as dom :refer [div label input]]
        :cljs [com.fulcrologic.fulcro.dom :as dom :refer [div label input]])
-    [com.example.ui.account-forms :refer [AccountForm AccountList]]
-    [com.example.ui.invoice-forms :refer [InvoiceForm InvoiceList AccountInvoices]]
-    [com.example.ui.item-forms :refer [ItemForm InventoryReport]]
-    [com.example.ui.line-item-forms :refer [LineItemForm]]
+    ;[com.example.ui.account-forms :refer [AccountForm AccountList]]
+    ;[com.example.ui.invoice-forms :refer [InvoiceForm InvoiceList AccountInvoices]]
+    ;[com.example.ui.item-forms :refer [ItemForm InventoryReport]]
+    ;[com.example.ui.line-item-forms :refer [LineItemForm]]
     [com.example.ui.login-dialog :refer [LoginForm]]
-    [com.example.ui.sales-report :as sales-report]
-    [com.example.ui.dashboard :as dashboard]
-    [com.example.ui.master-detail :as mdetail]
+    ;[com.example.ui.sales-report :as sales-report]
+    ;[com.example.ui.dashboard :as dashboard]
+    ;[com.example.ui.master-detail :as mdetail]
     [com.example.ui.stories-forms :as stories]
-    [com.example.ui.button-toys-form :as buttons]
+    ;[com.example.ui.button-toys-form :as buttons]
     [com.fulcrologic.fulcro.application :as app]
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
     [com.fulcrologic.fulcro.dom.html-entities :as ent]
@@ -43,19 +43,19 @@
   {:always-render-body? true
    :router-targets      [LandingPage
                          stories/StoriesContainer
-                          ItemForm InvoiceForm InvoiceList AccountList AccountForm AccountInvoices
-                         sales-report/SalesReport InventoryReport
-                         sales-report/RealSalesReport
-                         dashboard/Dashboard
+                          ;ItemForm InvoiceForm InvoiceList AccountList AccountForm AccountInvoices
+                         ;sales-report/SalesReport InventoryReport
+                         ;sales-report/RealSalesReport
+                         ;dashboard/Dashboard
                          ;stories/StoriesListReport stories/StoryReport
                          stories/StoriesMain stories/StoriesSearch
-                         stories/ModeTest1
+                         stories/ModeTest1]}
 
-                         buttons/ButtonTest1
-                         buttons/ButtonTest1b
-                         buttons/ButtonTest2
-                         buttons/ButtonTest3
-                         mdetail/AccountList]}
+                         ;buttons/ButtonTest1
+                         ;buttons/ButtonTest1b
+                         ;buttons/ButtonTest2
+                         ;buttons/ButtonTest3
+                         ;mdetail/AccountList]}
   ;; Normal Fulcro code to show a loader on slow route change (assuming Semantic UI here, should
   ;; be generalized for RAD so UI-specific code isn't necessary)
   (dom/div
