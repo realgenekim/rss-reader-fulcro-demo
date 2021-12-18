@@ -6,12 +6,12 @@ aliases:
     docker:
       # specify the version you desire here
       - image: circleci/clojure:openjdk-11-lein-2.9.1-stretch-node
-    resource_class: 2xlarge
+    resource_class: xlarge
     working_directory: ~/repo
     environment:
       LEIN_ROOT: "true"
       # Customize the JVM maximum heap limit
-      JVM_OPTS: -Xmx3200m
+      # JVM_OPTS: -Xmx3200m
       GRAALVM_HOME: ~/.graalvm
 
 
@@ -39,7 +39,7 @@ aliases:
             ls -l $GRAALVM_HOME/bin/gu
             ls -l $GRAALVM_HOME/lib/installer/bin/gu
             file  $GRAALVM_HOME/lib/installer/bin/gu
-            $GRAALVM_HOME/bin/gu install native-image
+            $GRAALVM_HOME/bin/gu install native-image llvm-toolchain
 
       - run: |
             ls -l $GRAALVM_HOME/bin/native-image
