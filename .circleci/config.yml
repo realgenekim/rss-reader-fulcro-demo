@@ -138,6 +138,8 @@ aliases:
 
       - run: PATH=$PATH:$GRAALVM_HOME/bin:$GRAALVM_HOME/languages/llvm/native/bin make native-image
 
+      - run: ls -lh feedly-reader-standalone*
+
 
       - run:
           command: |
