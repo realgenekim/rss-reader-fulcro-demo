@@ -121,6 +121,15 @@ aliases:
 
       - run: ls -lh ./target
 
+      # deploy only when on main
+      - run:
+          name: Deploy Main to Google Cloud RUN
+          command: |
+            if [ "${CIRCLE_BRANCH}" != "main" ]; then
+              echo "Not on main: DONE!"
+              circleci-agent step halt
+            fi
+
       #
       # native image
       #
@@ -150,14 +159,7 @@ aliases:
       - store_artifacts:
           path: /tmp/errors
 
-      # deploy only when on main
-      # - run:
-      #     name: Deploy Main  to Google Cloud RUN
-      #     command: |
-      #       if [ "${CIRCLE_BRANCH}" != "main" ]; then
-      #         echo "Not on main: DONE!"
-      #         circleci-agent step halt
-      #       fi
+      # install GCP
 
       - run: /bin/bash -x .circleci/installgcloud.sh
       - run: /bin/bash -x .circleci/gcpauth.sh
