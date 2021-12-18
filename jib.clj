@@ -37,7 +37,8 @@
 (def image-name "us.gcr.io/booktracker-1208/feedly-reader-exe:latest")
 
 (def base-image-with-creds
-  (-> (RegistryImage/named "gcr.io/google-appengine/debian11")
+  ; (-> (RegistryImage/named "gcr.io/google-appengine/debian11")
+  (-> (RegistryImage/named "gcr.io/distroless/base-debian11"
     (.addCredentialRetriever
       (-> (CredentialRetrieverFactory/forImage
             (to-imgref image-name)
