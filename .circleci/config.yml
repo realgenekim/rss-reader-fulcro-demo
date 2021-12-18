@@ -157,12 +157,12 @@ aliases:
       #         circleci-agent step halt
       #       fi
 
-      # - run: /bin/bash -x .circleci/installgcloud.sh
-      # - run: /bin/bash -x .circleci/gcpauth.sh
-      # - run: gcloud auth configure-docker
-      # - run: gcloud compute instances list
+      - run: /bin/bash -x .circleci/installgcloud.sh
+      - run: /bin/bash -x .circleci/gcpauth.sh
+      - run: gcloud auth configure-docker
+      - run: gcloud compute instances list
 
-      # - run: make jib-deploy
+      - run: make jib-deploy
 
       # # save cache one more time: (often pick up :dev :jib-deploy)
 
