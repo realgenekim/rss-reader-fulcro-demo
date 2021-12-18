@@ -53,7 +53,6 @@ native-image:
              --initialize-at-build-time=com.fasterxml.jackson,org.h2 \
              --initialize-at-build-time=clojure,cheshire \
              --initialize-at-build-time=. \
-			 -H:-CheckToolchain \
              --trace-object-instantiation=com.sun.jmx.mbeanserver.JmxMBeanServer \
              --trace-class-initialization=com.sun.jmx.mbeanserver.JmxMBeanServer \
              --trace-object-instantiation=java.lang.Thread \

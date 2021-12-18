@@ -39,7 +39,7 @@ aliases:
             ls -l $GRAALVM_HOME/bin/gu
             ls -l $GRAALVM_HOME/lib/installer/bin/gu
             file  $GRAALVM_HOME/lib/installer/bin/gu
-            $GRAALVM_HOME/bin/gu install native-image llvm-toolchain
+            $GRAALVM_HOME/bin/gu install native-image
 
       - run: |
             ls -l $GRAALVM_HOME/bin/native-image
@@ -113,7 +113,28 @@ aliases:
       - run: make release
       - run: make uberjar
 
+      - run:
+          command: |
+            mkdir -p /tmp/errors
+            cp /tmp/clojure*.edn *build_artifacts* /tmp/errors
+          when: on_fail
+
       - run: ls -lh ./target
+
+      #
+      # native image
+      #
+
+      - run:
+          name: Install native dev tools
+          command: |
+            sudo apt-get -y install build-essential zlib1g-dev      
+
+      - run:
+          command: |
+            mkdir -p /tmp/errors
+            cp /tmp/clojure*.edn *build_artifacts* /tmp/errors
+          when: on_fail      
 
       - run: PATH=$PATH:$GRAALVM_HOME/bin:$GRAALVM_HOME/languages/llvm/native/bin make native-image
 
@@ -121,7 +142,7 @@ aliases:
       - run:
           command: |
             mkdir -p /tmp/errors
-            cp /tmp/clojure*.edn *build_artifacts* /tmp/errors
+            cp *build_artifacts* /tmp/errors
           when: on_fail
 
       - store_artifacts:
