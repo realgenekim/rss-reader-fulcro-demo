@@ -61,7 +61,7 @@
     m))
 
 
-(def stories (f/read-file))
+(def stories (f/read-file-gzip))
 
 (defn get-all-stories
   [env query-params]
