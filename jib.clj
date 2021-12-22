@@ -41,7 +41,7 @@
   ; to set file modes to executable via jib
   ;; (-> (RegistryImage/named "gcr.io/distroless/base-debian11"
   ;(-> (RegistryImage/named "gcr.io/google-appengine/debian11"))
-  (-> (RegistryImage/named "gcr.io/google-containers/alpine-with-bash")
+  (-> (RegistryImage/named "us.gcr.io/google-containers/alpine-with-bash:1.0")
     (.addCredentialRetriever
       (-> (CredentialRetrieverFactory/forImage
             (to-imgref image-name)
