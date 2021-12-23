@@ -160,7 +160,14 @@ aliases:
       - store_artifacts:
           path: /tmp/errors
 
-      # install GCP
+      - store_artifacts:
+          path: ./target
+
+      - store_artifacts:
+          path: ./feedly-reader-standalone
+
+
+    # install GCP
 
       - run: /bin/bash -x .circleci/installgcloud.sh
       - run: /bin/bash -x .circleci/gcpauth.sh
