@@ -40,7 +40,8 @@
   ; we can't run distroless, because we need /bin/bash and entrypoint.sh, until we can figure out how
   ; to set file modes to executable via jib
   ; "debug" label gives us busybox
-  (-> (RegistryImage/named "gcr.io/distroless/base-debian11:debug")
+  ;(-> (RegistryImage/named "gcr.io/distroless/base-debian11:debug"))
+  (-> (RegistryImage/named "gcr.io/distroless/cc:debug")
   ;(-> (RegistryImage/named "gcr.io/google-appengine/debian11"))
   ;(-> (RegistryImage/named "us.gcr.io/google-containers/alpine-with-bash:1.0")
     (.addCredentialRetriever
