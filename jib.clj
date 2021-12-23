@@ -41,15 +41,16 @@
   ; to set file modes to executable via jib
   ; "debug" label gives us busybox
   ;(-> (RegistryImage/named "gcr.io/distroless/base-debian11:debug"))
-  (-> (RegistryImage/named "gcr.io/distroless/java:debug")
-  ;(-> (RegistryImage/named "gcr.io/google-appengine/debian11"))
+  ;(-> (RegistryImage/named "gcr.io/distroless/java:debug")
+    ; 359 MB
+  (-> (RegistryImage/named "gcr.io/google-appengine/debian11")
   ;(-> (RegistryImage/named "us.gcr.io/google-containers/alpine-with-bash:1.0")
-    (.addCredentialRetriever
-      (-> (CredentialRetrieverFactory/forImage
-            (to-imgref image-name)
-            logger)
-        (.dockerConfig)))))
-        ;(.wellKnownCredentialHelpers)))))
+     (.addCredentialRetriever
+       (-> (CredentialRetrieverFactory/forImage
+             (to-imgref image-name)
+             logger)
+         (.dockerConfig)))))
+         ;(.wellKnownCredentialHelpers)))))
 
 (def local-standalone-jar-path "./feedly-reader-standalone")
 
