@@ -1,4 +1,4 @@
-#/bin/bash
+#/busybox/sh"
 
 cd /
 chmod +x feedly-reader-standalone
