@@ -61,7 +61,8 @@ native-image:
              -H:IncludeResources=config/prod.edn \
              -H:IncludeResources=public/.* \
              --allow-incomplete-classpath \
-             -H:+ReportExceptionStackTraces
+             -H:+ReportExceptionStackTraces \
+             -H:+StaticExecutableWithDynamicLibC
 
 
 
@@ -84,4 +85,4 @@ docker-run:
 	docker run us.gcr.io/booktracker-1208/feedly-reader-exe:latest
 
 docker-shell:
-	docker run --rm -it --entrypoint /bin/bash us.gcr.io/booktracker-1208/feedly-reader-exe
+	docker run --rm -it --entrypoint /busybox/sh us.gcr.io/booktracker-1208/feedly-reader-exe
