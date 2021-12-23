@@ -40,25 +40,28 @@
   ; we can't run distroless, because we need /bin/bash and entrypoint.sh, until we can figure out how
   ; to set file modes to executable via jib
   ; "debug" label gives us busybox
-  ;(-> (RegistryImage/named "gcr.io/distroless/base-debian11:debug"))
+  (-> (RegistryImage/named "gcr.io/distroless/base-debian11:debug")
+    ; 60 MB, but
+    ; error while loading shared libraries: libz.so.1: cannot open shared object file: No such file or directory
   ;(-> (RegistryImage/named "gcr.io/distroless/java:debug")
-    ; 359 MB
-  (-> (RegistryImage/named "gcr.io/google-appengine/debian11")
+   ; 359 MB
+  ;(-> (RegistryImage/named "gcr.io/google-appengine/debian11")
+   ; 123 MB
   ;(-> (RegistryImage/named "us.gcr.io/google-containers/alpine-with-bash:1.0")
-     (.addCredentialRetriever
-       (-> (CredentialRetrieverFactory/forImage
-             (to-imgref image-name)
-             logger)
-         (.dockerConfig)))))
-         ;(.wellKnownCredentialHelpers)))))
+    (.addCredentialRetriever
+      (-> (CredentialRetrieverFactory/forImage
+            (to-imgref image-name)
+            logger)
+        (.dockerConfig)))))
+        ;(.wellKnownCredentialHelpers)))))
 
 (def local-standalone-jar-path "./feedly-reader-standalone")
 
 (def app-layer [(into-list (get-path local-standalone-jar-path))
                 (AbsoluteUnixPath/get "/")])
 
-;(def entrypoint ["/busybox/sh" "entrypoint.sh"])
-(def entrypoint ["/bin/sh" "entrypoint.sh"])
+(def entrypoint ["/busybox/sh" "entrypoint.sh"])
+;(def entrypoint ["/bin/sh" "entrypoint.sh"])
 
 (def arguments local-standalone-jar-path)
 
