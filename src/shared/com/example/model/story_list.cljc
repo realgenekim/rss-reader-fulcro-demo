@@ -47,6 +47,17 @@
                         ;(log/warn stories)
                         {:story/all-stories stories})))})
 
+(defattr first-page-stories :story/first-page-stories :ref
+  {ao/target     :story/id
+   ao/pc-output  [{:story/first-page-stories [:story/id :story/author :story/title :story/published]}]
+   ao/pc-resolve (fn [{:keys [query-params] :as env} _]
+                   #?(:clj
+                      (let [stories (->> (queries/get-all-stories env query-params)
+                                         (take 30))]
+                        (log/warn :story/first-page-stories)
+                        ;(log/warn stories)
+                        {:story/first-page-stories stories})))})
+
 
 #?(:clj
    (do
@@ -177,7 +188,8 @@
 
 
 
-(def attributes [id title author content pos all-stories])
+(def attributes [id title author content pos
+                 all-stories first-page-stories])
 
 #?(:clj
    (def resolvers [ story-content-resolver story-search-resolver])) ; story-resolver full-story-resolver]))
