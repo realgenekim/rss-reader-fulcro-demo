@@ -206,6 +206,9 @@
    :componentDidMount (fn [this]
                         (println "StoresMain: mounted!")
                         (comp/transact! this [(set-mode {:ui/mode :main})])
+                        (df/load! this :story/first-page-stories Story
+                          {:target        [:component/id ::StoriesMain :ui/all-stories]})
+                           ;:post-mutation 'com.example.model.mutations/create-prev-story-next-cache})
                         (df/load! this :story/all-stories Story
                           {:target        [:component/id ::StoriesMain :ui/all-stories]
                            :post-mutation 'com.example.model.mutations/create-prev-story-next-cache}))}
