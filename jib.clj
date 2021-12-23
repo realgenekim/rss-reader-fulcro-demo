@@ -55,7 +55,7 @@
 (def app-layer [(into-list (get-path local-standalone-jar-path))
                 (AbsoluteUnixPath/get "/")])
 
-(def entrypoint ["/bin/bash" "entrypoint.sh"])
+(def entrypoint ["/busybox/sh" "entrypoint.sh"])
 
 (def arguments local-standalone-jar-path)
 
