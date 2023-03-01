@@ -5,6 +5,9 @@ init:
 cljs:
 	shadow-cljs -A:f3-dev:rad-dev:i18n-dev server
 
+cljs-watch:
+	shadow-cljs -A:f3-dev:rad-dev:i18n-dev watch main
+
 cljs-compile:
 	shadow-cljs watch main
 
