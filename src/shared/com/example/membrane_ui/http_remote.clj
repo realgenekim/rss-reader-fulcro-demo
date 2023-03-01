@@ -3,16 +3,17 @@
   (:refer-clojure :exclude [send])
   (:require
     [clojure.spec.alpha :as s]
+    [clojure.math :as math]
     [clojure.string :as str]
     [cognitect.transit :as ct]
     [com.fulcrologic.fulcro.algorithms.transit :as t]
     [com.fulcrologic.fulcro.algorithms.tx-processing :as txn]
     [edn-query-language.core :as eql]
     [com.fulcrologic.guardrails.core :refer [>defn => >def]]
-    [goog.events :as events]
+    ;[goog.events :as events]
     [taoensso.timbre :as log]
-    [com.fulcrologic.fulcro.algorithms.do-not-use :as futil])
-  (:import [goog.net XhrIo EventType ErrorCode]))
+    [com.fulcrologic.fulcro.algorithms.do-not-use :as futil]))
+  ;(:import [goog.net XhrIo EventType ErrorCode]))
 
 (>def ::method #{:post :get :delete :put :head :connect :options :trace :patch})
 (>def ::url string?)
@@ -45,40 +46,42 @@
 (>def ::abort! fn?)
 (>def ::fulcro-remote (s/keys :req-un [::transmit!] :opt-un [::abort!]))
 
-(def xhrio-error-states {(.-NO_ERROR ^js ErrorCode)        :none
-                         (.-EXCEPTION ^js ErrorCode)       :exception
-                         (.-HTTP_ERROR ^js ErrorCode)      :http-error
-                         (.-ABORT ^js ErrorCode)           :abort
-                         (.-ACCESS_DENIED ^js ErrorCode)   :access-denied
-                         (.-FILE_NOT_FOUND ^js ErrorCode)  :not-found
-                         (.-FF_SILENT_ERROR ^js ErrorCode) :silent
-                         (.-CUSTOM_ERROR ^js ErrorCode)    :custom
-                         (.-OFFLINE ^js ErrorCode)         :offline
-                         (.-TIMEOUT ^js ErrorCode)         :timeout})
+#_(def xhrio-error-states {(.-NO_ERROR ^js ErrorCode)        :none
+                           (.-EXCEPTION ^js ErrorCode)       :exception
+                           (.-HTTP_ERROR ^js ErrorCode)      :http-error
+                           (.-ABORT ^js ErrorCode)           :abort
+                           (.-ACCESS_DENIED ^js ErrorCode)   :access-denied
+                           (.-FILE_NOT_FOUND ^js ErrorCode)  :not-found
+                           (.-FF_SILENT_ERROR ^js ErrorCode) :silent
+                           (.-CUSTOM_ERROR ^js ErrorCode)    :custom
+                           (.-OFFLINE ^js ErrorCode)         :offline
+                           (.-TIMEOUT ^js ErrorCode)         :timeout})
 
-(defn make-xhrio [] (XhrIo.))
-(defn xhrio-dispose [^js xhrio] (.dispose xhrio))
-(defn xhrio-enable-progress-events [^js xhrio] (.setProgressEventsEnabled xhrio true))
-(defn xhrio-abort [^js xhrio] (.abort xhrio))
-(defn xhrio-send [^js xhrio url verb body headers] (.send xhrio url verb body (some-> headers clj->js)))
-(defn xhrio-status-code [^js xhrio] (.getStatus xhrio))
-(defn xhrio-status-text [^js xhrio] (.getStatusText xhrio))
-(defn xhrio-raw-error [^js xhrio] (.getLastErrorCode xhrio))
-(defn xhrio-error-code [^js xhrio]
-  (let [status (xhrio-status-code xhrio)
-        error  (get xhrio-error-states (xhrio-raw-error xhrio) :unknown)
-        error  (if (and (= 0 status) (= error :http-error)) :network-error error)]
-    error))
-(defn xhrio-error-text [^js xhrio] (.getLastError xhrio))
-(defn xhrio-response [^js xhrio] (.getResponse xhrio))
-(defn xhrio-response-headers [^js xhrio] (js->clj (.getResponseHeaders xhrio)))
+;(defn make-xhrio [] (XhrIo.))
+;(defn xhrio-dispose [^js xhrio] (.dispose xhrio))
+;(defn xhrio-enable-progress-events [^js xhrio] (.setProgressEventsEnabled xhrio true))
+;(defn xhrio-abort [^js xhrio] (.abort xhrio))
+;(defn xhrio-send [^js xhrio url verb body headers] (.send xhrio url verb body (some-> headers clj->js)))
+;(defn xhrio-status-code [^js xhrio] (.getStatus xhrio))
+;(defn xhrio-status-text [^js xhrio] (.getStatusText xhrio))
+;(defn xhrio-raw-error [^js xhrio] (.getLastErrorCode xhrio))
+;(defn xhrio-error-code [^js xhrio]
+;  (let [status (xhrio-status-code xhrio)
+;        error  (get xhrio-error-states (xhrio-raw-error xhrio) :unknown)
+;        error  (if (and (= 0 status) (= error :http-error)) :network-error error)
+;    error)
+;(defn xhrio-error-text [^js xhrio] (.getLastError xhrio))
+;(defn xhrio-response [^js xhrio] (.getResponse xhrio))
+;(defn xhrio-response-headers [^js xhrio] (js->clj (.getResponseHeaders xhrio)))
 
 (defn xhrio-progress
   "Given an xhrio progress event, returns a map with keys :loaded and :total, where loaded is the
   number of bytes transferred in the given phase (upload/download) and total is the total number
   of bytes to transfer (if known). "
-  [^js event]
-  {:loaded (.-loaded event) :total (.-total event)})
+  ;[^js event]
+  [event]
+  ;{:loaded (.-loaded event) :total (.-total event)})
+  {:loaded 0 :total 100})
 
 (defn progress%
   "Takes the progress report from the progress network event
@@ -105,7 +108,8 @@
          x             (if (= 0 total) 1 (/ loaded total))]
      (if (zero? slope)
        100
-       (js/Math.floor (+ base (* x slope)))))))
+       ;(js/Math.floor (+ base (* x slope)))
+       (math/floor (+ base (* x slope)))))))
 
 (def response-types {:default      ""
                      :array-buffer "arraybuffer"
@@ -181,7 +185,8 @@
                                   (ct/read reader body))
                        response (assoc response :body new-body)]
                    response))
-               (catch :default e
+               ;(catch :default e)
+               (catch Exception e
                  (log/warn "Transit decode failed! See https://book.fulcrologic.com/#warn-transit-decode-failed")
                  (assoc response :status-code 417 :status-text "body was either not transit or you have not installed the correct transit read/write handlers.")))
              response)))))))
