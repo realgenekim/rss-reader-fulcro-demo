@@ -21,6 +21,7 @@
     [com.fulcrologic.fulcro.mutations :as mutation]
     [com.fulcrologic.fulcro.components :as comp]
     [com.example.ui.stories-forms :as stories]
+    [com.example.membrane-ui.http-remote :as http]
     [com.example.model.mutations]))
     ;["mousetrap" :as mousetrap]))
 
@@ -45,10 +46,10 @@
 
 (comment
 
-  (def
-    (merge (rad-app/fulcro-rad-app {})
-      {:remotes {:remote (net/fulcro-http-remote {:url                "/api"
-                                                  :request-middleware (secured-request-middleware {:csrf-token token})})}}))
+  (def app
+    (assoc (rad-app/fulcro-rad-app {})
+      :remotes {:remote (http/fulcro-http-remote {:url                "/api"})}))
+                                                   ;:request-middleware (secured-request-middleware {:csrf-token token})})}}))
   (tap> (-> app))
 
 

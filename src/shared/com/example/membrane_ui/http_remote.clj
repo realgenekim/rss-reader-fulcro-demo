@@ -13,7 +13,9 @@
     [com.fulcrologic.guardrails.core :refer [>defn => >def]]
     ;[goog.events :as events]
     [taoensso.timbre :as log]
-    [com.fulcrologic.fulcro.algorithms.do-not-use :as futil]))
+    [com.fulcrologic.fulcro.algorithms.do-not-use :as futil])
+  (:import
+    (java.io ByteArrayInputStream ByteArrayOutputStream)))
   ;(:import [goog.net XhrIo EventType ErrorCode]))
 
 (>def ::method #{:post :get :delete :put :head :connect :options :trace :patch})
@@ -144,6 +146,8 @@
         [updated-body alt])
       [body :default])))
 
+;(def out (ByteArrayOutputStream. 4096))
+
 (defn wrap-fulcro-request
   "Client Remote Middleware to add transit encoding for normal Fulcro requests. Sets the content type and transforms an EDN
   body to a transit+json encoded body. addl-transit-handlers is a map from data type to transit handler (like
@@ -151,9 +155,10 @@
   into transit. transit-transformation is a function of one argument returning a transformed transit value (like you
   would pass using the `:transform` option of transit). See transit documentation for more details."
   ([handler addl-transit-handlers transit-transformation]
-   (let [writer (t/writer (cond-> {}
-                            addl-transit-handlers (assoc :handlers addl-transit-handlers)
-                            transit-transformation (assoc :transform transit-transformation)))]
+   (let [out (ByteArrayOutputStream. 4096)
+         writer (t/writer out (cond-> {}
+                                addl-transit-handlers (assoc :handlers addl-transit-handlers)
+                                transit-transformation (assoc :transform transit-transformation)))]
      (fn [{:keys [headers body] :as request}]
        (let [[body response-type] (desired-response-type request)
              body    (ct/write writer body)
@@ -184,8 +189,7 @@
   ([handler] (wrap-fulcro-response handler nil))
   ([handler addl-transit-handlers]
    (let [base-handlers {}
-         handlers      (if (map? addl-transit-handlers) (merge base-handlers addl-transit-handlers) base-handlers)
-         reader        (t/reader {:handlers handlers})]
+         handlers      (if (map? addl-transit-handlers) (merge base-handlers addl-transit-handlers) base-handlers)]
      (fn fulcro-response-handler [{:keys [body error outgoing-request] :as response}]
        (handler
          (let [{:keys [response-type]} outgoing-request]
@@ -194,8 +198,9 @@
                (if (= :network-error error)
                  response
                  (let [new-body (if (str/blank? body)
-                                  {}
-                                  (ct/read reader body))
+                                  {})
+                                  ;(ct/read reader body))
+                       reader        (t/reader body {:handlers handlers})
                        response (assoc response :body new-body)]
                    response))
                ;(catch :default e)
