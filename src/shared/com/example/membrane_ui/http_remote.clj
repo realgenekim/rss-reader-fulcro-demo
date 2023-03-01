@@ -2,6 +2,7 @@
 ;(ns com.fulcrologic.fulcro.networking.http-remote
   (:refer-clojure :exclude [send])
   (:require
+    [clj-http.client :as http]
     [clojure.spec.alpha :as s]
     [clojure.math :as math]
     [clojure.string :as str]
@@ -45,6 +46,10 @@
 (>def ::transmit! fn?)
 (>def ::abort! fn?)
 (>def ::fulcro-remote (s/keys :req-un [::transmit!] :opt-un [::abort!]))
+
+(comment
+  (http/get "http://localhost:3000")
+  0)
 
 #_(def xhrio-error-states {(.-NO_ERROR ^js ErrorCode)        :none
                            (.-EXCEPTION ^js ErrorCode)       :exception

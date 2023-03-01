@@ -4,7 +4,7 @@
 
  :deps    {
            ;org.clojure/clojure                    {:mvn/version "1.10.3"}
-           org.clojure/clojure                    {:mvn/version "1.11.0-alpha3"}
+           org.clojure/clojure                    {:mvn/version "1.11.1"}
            org.clojure/clojurescript              {:git/url "https://github.com/clojure/clojurescript"
                                                    :git/sha "89b4c19005cbeebb08649c3e60dc3e1524adccda"}
            com.fulcrologic/fulcro                 {:mvn/version "3.5.24"}
@@ -41,7 +41,10 @@
            org.slf4j/log4j-over-slf4j             {:mvn/version "1.7.30"} ; auto sends log4j to slf4j
            org.slf4j/jul-to-slf4j                 {:mvn/version "1.7.30"} ; auto sends java.util.logging to slf4j
            org.slf4j/jcl-over-slf4j               {:mvn/version "1.7.30"} ; auto-sends java.common.logging to slf4j
-           com.fzakaria/slf4j-timbre              {:mvn/version "0.3.19"}} ; hooks slf4j to timbre
+           com.fzakaria/slf4j-timbre              {:mvn/version "0.3.19"} ; hooks slf4j to timbre
+
+           ; membrane port
+           clj-http/clj-http {:mvn/version "3.12.3"}}
 
            ;org.clojure/clojurescript              {:mvn/version "1.10.866"}
 
