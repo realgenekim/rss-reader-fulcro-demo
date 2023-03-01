@@ -6,6 +6,7 @@
     [com.fulcrologic.fulcro.components :as comp]
     [com.fulcrologic.fulcro.mutations :as m]
     [com.fulcrologic.rad.application :as rad-app]
+    [com.fulcrologic.fulcro.raw.application :as rawapp]
     [com.fulcrologic.fulcro.data-fetch :as df]
     [com.fulcrologic.rad.report :as report]
     [com.fulcrologic.rad.authorization :as auth]
@@ -50,13 +51,21 @@
 
 (comment
   (def app
-    (assoc (rad-app/fulcro-rad-app {})
-      :remotes {:remote (http/fulcro-http-remote {:url                "/api"})}))
+    (rad-app/fulcro-rad-app
+      ;{})
+      {:remotes {:remote (http/fulcro-http-remote {:url "http://localhost:3000/api"})}}))
                                                    ;:request-middleware (secured-request-middleware {:csrf-token token})})}}))
 
+  (-> app :com.fulcrologic.fulcro.application/runtime-atom deref)
+  (-> app :com.fulcrologic.fulcro.application/runtime-atom deref :com.fulcrologic.fulcro.application/remotes)
+  (-> app :runtime-atom deref :remotes :remote)
+  (-> app :remotes :remote :transmit! type)
+  (-> app :remotes :remote :transmit! fn?)
+  ((-> app :remotes :remote :transmit!) {} {})
+
   (df/load! app :story/first-page-stories stories/Story
-    {:target        [:component/id ::StoriesMain :ui/all-stories]
-     :post-mutation 'com.example.model.mutations/create-prev-story-next-cache})
+    {:target        [:component/id ::StoriesMain :ui/all-stories]})
+     ;:post-mutation 'com.example.model.mutations/create-prev-story-next-cache})
   (tap> (-> app))
 
 

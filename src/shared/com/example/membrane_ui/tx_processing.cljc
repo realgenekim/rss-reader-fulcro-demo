@@ -138,6 +138,10 @@
        ::send-queue (into [] (concat active-nodes [combined-node] to-defer))}
       {::send-queue send-queue})))
 
+(defn arg-count [f]
+  {:pre [(instance? clojure.lang.AFunction f)]}
+  (-> f class .getDeclaredMethods first .getParameterTypes alength))
+
 (defn net-send!
   "Process the send against the user-defined remote. Catches exceptions and calls error handler with status code 500
   if the remote itself throws exceptions."
@@ -146,7 +150,13 @@
   (enc/if-let [remote    (get (app->remotes app) remote-name)
                transmit! (get remote :transmit!)]
     (try
-      (log/warn :net-send!/entering)
+      (log/warn :net-send!/entering :app-remotes
+        (-> app :remotes :remote)
+        (-> app :remotes :remote :transmit!))
+      (log/warn :net-send!/entering :transmit! transmit!)
+      (log/warn :net-send!/entering :arg-count (arg-count transmit!))
+      (log/warn :net-send!/entering :type (type transmit!))
+      (log/warn :net-send!/entering :send-node send-node)
       (inspect/ilet [tx (futil/ast->query (::ast send-node))]
         (inspect/send-started! app remote-name (::id send-node) tx))
       (transmit! remote send-node)

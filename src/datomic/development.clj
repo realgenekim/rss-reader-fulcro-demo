@@ -21,8 +21,10 @@
     [portal.api :as p]))
 
 (comment
-  (p/open)
-  (add-tap #'p/submit)
+  (do
+    (p/open)
+    (add-tap #'p/submit)
+    (tap> {:a 1}))
 
   (tap> gsr/srs)
 
