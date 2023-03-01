@@ -43,6 +43,17 @@
 (defonce app (rad-app/fulcro-rad-app {}))
 ; (defonce app (rad-app/fulcro-rad-app {:optimized-render! com.fulcrologic.fulcro.rendering.keyframe-render2/render!}))
 
+(comment
+
+  (def
+    (merge (rad-app/fulcro-rad-app {})
+      {:remotes {:remote (net/fulcro-http-remote {:url                "/api"
+                                                  :request-middleware (secured-request-middleware {:csrf-token token})})}}))
+  (tap> (-> app))
+
+
+  0)
+
 (defn refresh []
   ;; hot code reload of installed controls
   (log/info "Reinstalling controls")
