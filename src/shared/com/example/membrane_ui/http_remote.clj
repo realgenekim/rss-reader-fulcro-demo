@@ -51,6 +51,9 @@
 
 (comment
   (http/get "http://localhost:3000")
+  (http/get "http://localhost:3000/api"
+    {:content-type :transit+json
+     :body "[#:story{:first-page-stories [:story/id :story/author :story/title]}]"})
   0)
 
 #_(def xhrio-error-states {(.-NO_ERROR ^js ErrorCode)        :none
@@ -392,6 +395,7 @@
                                                     (catch Exception e
                                                       (log/error e "Error handler for remote" url "failed with an exception. See https://book.fulcrologic.com/#err-httpr-err-handler-exc"))))]
                            (if-let [real-request (try
+                                                   (log/warn :fulcro-http-remote :real-request :body edn :url url :method :post)
                                                    (request-middleware {:headers {} :body edn :url url :method :post})
                                                    ;(catch :default e)
                                                    (catch Exception e
@@ -423,8 +427,8 @@
                                ;                                                                         ::txn/aborted? true))
                                ;(events/listen xhrio (.-ERROR ^js EventType) (with-cleanup error-routine))
                                (log/warn :fulcro-http-remote/sending :url url :body body :headers headers)
-                               (let [retval (http/post "http://localhost:3000" {:body body
-                                                                                :headers headers})]
+                               (let [retval (http/post "http://localhost:3000/api" {:body body
+                                                                                    :headers headers})]
                                  (log/warn :fulcro-http-remote/post-results retval))
                                #_(http/post "http://localhost:3000" {:body body
                                                                      :headers headers}))

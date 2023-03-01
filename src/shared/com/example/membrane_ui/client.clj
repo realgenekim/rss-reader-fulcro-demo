@@ -43,18 +43,21 @@
   (rad-app/install-ui-controls! app sui/all-controls)
   (report/install-formatter! app :boolean :affirmation (fn [_ value] (if value "yes" "no"))))
 
-(defonce app
-  (assoc (rad-app/fulcro-rad-app {})
-    :remotes {:remote (http/fulcro-http-remote {:url                "/api"})}))
+(defn create-client
+  []
+  (rad-app/fulcro-rad-app
+    ;{})
+    {:remotes {:remote (http/fulcro-http-remote {:url "http://localhost:3000/api"})}}))
+
+(defonce app (create-client))
   ;(rad-app/fulcro-rad-app {}))
 ; (defonce app (rad-app/fulcro-rad-app {:optimized-render! com.fulcrologic.fulcro.rendering.keyframe-render2/render!}))
 
+
+
+
 (comment
-  (def app
-    (rad-app/fulcro-rad-app
-      ;{})
-      {:remotes {:remote (http/fulcro-http-remote {:url "http://localhost:3000/api"})}}))
-                                                   ;:request-middleware (secured-request-middleware {:csrf-token token})})}}))
+  (def app (create-client))
 
   (-> app :com.fulcrologic.fulcro.application/runtime-atom deref)
   (-> app :com.fulcrologic.fulcro.application/runtime-atom deref :com.fulcrologic.fulcro.application/remotes)
