@@ -351,17 +351,20 @@
                                                                        request-middleware  (wrap-fulcro-request)
                                                                        make-xhrio          make-xhrio} :as options}]
   [(s/keys :opt-un [::url ::request-middleware ::response-middleware ::make-xhrio]) => ::fulcro-remote]
+  (log/warn :fulcro-http-remote/entering)
   (merge options
     {:active-requests (atom {})
      :transmit!       (fn transmit! [{:keys [active-requests]} {::txn/keys [ast result-handler update-handler] :as send-node}]
                         (let [edn              (futil/ast->query ast)
                               ok-handler       (fn [result]
+                                                 (log/warn :fulcro-http-remote :ok-handler)
                                                  (try
                                                    (result-handler result)
                                                    ;(catch :default e)
                                                    (catch Exception e
                                                      (log/error e "Result handler for remote" url "failed with an exception. See https://book.fulcrologic.com/#err-httpr-result-handler-exc"))))
                               progress-handler (fn [update-msg]
+                                                 (log/warn :fulcro-http-remote :progress-handler)
                                                  (let [msg {:status-code      200
                                                             :raw-progress     (select-keys update-msg [:progress-phase :progress-event])
                                                             :overall-progress (progress% update-msg :overall)
@@ -374,6 +377,7 @@
                                                        (catch Exception e
                                                          (log/error e "Update handler for remote" url "failed with an exception. See https://book.fulcrologic.com/#err-httpr-update-handler-exc"))))))
                               error-handler    (fn [error-result]
+                                                 (log/warn :fulcro-http-remote :error-handler)
                                                  (try
                                                    (let [error (merge error-result {:status-code 500})]
                                                      (log/error (ex-info "Remote Error" error) "See https://book.fulcrologic.com/#err-httpr-remote-err")
@@ -411,6 +415,7 @@
                               ;(events/listen xhrio (.-ABORT ^js EventType) (with-cleanup #(ok-handler {:status-text   "Cancelled"
                               ;                                                                         ::txn/aborted? true))
                               ;(events/listen xhrio (.-ERROR ^js EventType) (with-cleanup error-routine))
+                              (log/warn :fulcro-http-remote/sending :body body :headers headers)
                               (http/post url {:body body
                                               :headers headers}))
                               ;(xhrio-send xhrio url http-verb body headers))

@@ -6,6 +6,7 @@
     [com.fulcrologic.fulcro.components :as comp]
     [com.fulcrologic.fulcro.mutations :as m]
     [com.fulcrologic.rad.application :as rad-app]
+    [com.fulcrologic.fulcro.data-fetch :as df]
     [com.fulcrologic.rad.report :as report]
     [com.fulcrologic.rad.authorization :as auth]
     [com.fulcrologic.rad.rendering.semantic-ui.semantic-ui-controls :as sui]
@@ -41,15 +42,21 @@
   (rad-app/install-ui-controls! app sui/all-controls)
   (report/install-formatter! app :boolean :affirmation (fn [_ value] (if value "yes" "no"))))
 
-(defonce app (rad-app/fulcro-rad-app {}))
+(defonce app
+  (assoc (rad-app/fulcro-rad-app {})
+    :remotes {:remote (http/fulcro-http-remote {:url                "/api"})}))
+  ;(rad-app/fulcro-rad-app {}))
 ; (defonce app (rad-app/fulcro-rad-app {:optimized-render! com.fulcrologic.fulcro.rendering.keyframe-render2/render!}))
 
 (comment
-
   (def app
     (assoc (rad-app/fulcro-rad-app {})
       :remotes {:remote (http/fulcro-http-remote {:url                "/api"})}))
                                                    ;:request-middleware (secured-request-middleware {:csrf-token token})})}}))
+
+  (df/load! app :story/first-page-stories stories/Story
+    {:target        [:component/id ::StoriesMain :ui/all-stories]
+     :post-mutation 'com.example.model.mutations/create-prev-story-next-cache})
   (tap> (-> app))
 
 
