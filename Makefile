@@ -25,7 +25,10 @@ uberjar:
 			:main-class com.example.components.server
 
 runuberjar:
-	PORT=3001 java -jar target/feedly-reader-standalone.jar	
+	PORT=3001 java -jar target/feedly-reader-standalone.jar
+
+runtests:
+	bin/kaocha --plugin notifier --watch
 
 # --machine-type=N1_HIGHCPU_8 \
 #--machine-type=N1_HIGHCPU_32 \

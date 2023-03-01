@@ -1,0 +1,2 @@
+#!/usr/bin/env sh
+clojure -A:datomic:test:dev:run-tests "$@"
