@@ -63,21 +63,29 @@
                            (.-TIMEOUT ^js ErrorCode)         :timeout})
 
 ;(defn make-xhrio [] (XhrIo.))
+(defn make-xhrio [] nil)
 ;(defn xhrio-dispose [^js xhrio] (.dispose xhrio))
+(defn xhrio-dispose [xhrio] nil)
 ;(defn xhrio-enable-progress-events [^js xhrio] (.setProgressEventsEnabled xhrio true))
 ;(defn xhrio-abort [^js xhrio] (.abort xhrio))
 ;(defn xhrio-send [^js xhrio url verb body headers] (.send xhrio url verb body (some-> headers clj->js)))
 ;(defn xhrio-status-code [^js xhrio] (.getStatus xhrio))
+(defn xhrio-status-code [xhrio] (-> xhrio :status))
 ;(defn xhrio-status-text [^js xhrio] (.getStatusText xhrio))
+(defn xhrio-status-text [xhrio] (-> xhrio :reason-phrase))
 ;(defn xhrio-raw-error [^js xhrio] (.getLastErrorCode xhrio))
 ;(defn xhrio-error-code [^js xhrio]
 ;  (let [status (xhrio-status-code xhrio)
 ;        error  (get xhrio-error-states (xhrio-raw-error xhrio) :unknown)
 ;        error  (if (and (= 0 status) (= error :http-error)) :network-error error)
 ;    error)
+(defn xhrio-error-code [xhrio] (keyword (xhrio-status-code xhrio)))
 ;(defn xhrio-error-text [^js xhrio] (.getLastError xhrio))
+(defn xhrio-error-text [xhrio] (keyword (xhrio-status-code xhrio)))
 ;(defn xhrio-response [^js xhrio] (.getResponse xhrio))
+(defn xhrio-response [xhrio] (-> xhrio :body))
 ;(defn xhrio-response-headers [^js xhrio] (js->clj (.getResponseHeaders xhrio)))
+(defn xhrio-response-headers [xhrio] (-> xhrio :headers))
 
 (defn xhrio-progress
   "Given an xhrio progress event, returns a map with keys :loaded and :total, where loaded is the
@@ -209,7 +217,8 @@
      :status-text          (xhrio-status-text xhrio)
      :error                (xhrio-error-code xhrio)
      :error-text           (xhrio-error-text xhrio)}
-    (catch :default e
+    ;(catch :default e)
+    (catch Exception e
       (log/error "Unable to extract response from XhrIO Object" e "See https://book.fulcrologic.com/#err-httpr-response-extract-fail")
       {:outgoing-request     request
        :original-transaction tx
@@ -240,7 +249,8 @@
     (let [r (extract-response edn real-request xhrio)]
       (try
         (response-middleware r)
-        (catch :default e
+        ;(catch :default e)
+        (catch Exception e
           (log/error "Client response middleware threw an exception. " e ". Defaulting to raw response. See https://book.fulcrologic.com/#err-httpr-resp-middleware-exc")
           (merge r {:error                (if (contains? #{nil :none} (:error r)) :middleware-failure (:error r))
                     :middleware-exception e}))))))
@@ -343,7 +353,8 @@
                               ok-handler       (fn [result]
                                                  (try
                                                    (result-handler result)
-                                                   (catch :default e
+                                                   ;(catch :default e)
+                                                   (catch Exception e
                                                      (log/error e "Result handler for remote" url "failed with an exception. See https://book.fulcrologic.com/#err-httpr-result-handler-exc"))))
                               progress-handler (fn [update-msg]
                                                  (let [msg {:status-code      200
@@ -354,18 +365,20 @@
                                                    (when update-handler
                                                      (try
                                                        (update-handler msg)
-                                                       (catch :default e
+                                                       ;(catch :default e)
+                                                       (catch Exception e
                                                          (log/error e "Update handler for remote" url "failed with an exception. See https://book.fulcrologic.com/#err-httpr-update-handler-exc"))))))
                               error-handler    (fn [error-result]
                                                  (try
                                                    (let [error (merge error-result {:status-code 500})]
                                                      (log/error (ex-info "Remote Error" error) "See https://book.fulcrologic.com/#err-httpr-remote-err")
                                                      (result-handler error))
-                                                   (catch :default e
+                                                   (catch Exception e
                                                      (log/error e "Error handler for remote" url "failed with an exception. See https://book.fulcrologic.com/#err-httpr-err-handler-exc"))))]
                           (if-let [real-request (try
                                                   (request-middleware {:headers {} :body edn :url url :method :post})
-                                                  (catch :default e
+                                                  ;(catch :default e)
+                                                  (catch Exception e
                                                     (log/error e "Send aborted due to middleware failure. See https://book.fulcrologic.com/#err-httpr-send-abort")
                                                     nil))]
                             (let [abort-id             (or
@@ -383,22 +396,24 @@
                                   with-cleanup         (fn [f] (fn [evt] (try (f evt) (finally (gc-network-resources)))))]
                               (when abort-id
                                 (swap! active-requests update abort-id (fnil conj #{}) xhrio))
-                              (when (and (legal-response-types response-type) (not= :default response-type))
-                                (.setResponseType ^js xhrio (get response-types response-type)))
-                              (when progress-handler
-                                (xhrio-enable-progress-events xhrio)
-                                (events/listen xhrio (.-DOWNLOAD_PROGRESS ^js EventType) #(progress-routine :receiving %))
-                                (events/listen xhrio (.-UPLOAD_PROGRESS ^js EventType) #(progress-routine :sending %)))
-                              (events/listen xhrio (.-SUCCESS ^js EventType) (with-cleanup ok-routine))
-                              (events/listen xhrio (.-ABORT ^js EventType) (with-cleanup #(ok-handler {:status-text   "Cancelled"
-                                                                                                       ::txn/aborted? true})))
-                              (events/listen xhrio (.-ERROR ^js EventType) (with-cleanup error-routine))
-                              (xhrio-send xhrio url http-verb body headers))
+                              ;(when (and (legal-response-types response-type) (not= :default response-type))
+                              ;  (.setResponseType ^js xhrio (get response-types response-type)))
+                              ;(when progress-handler
+                              ;  (xhrio-enable-progress-events xhrio)
+                              ;  (events/listen xhrio (.-DOWNLOAD_PROGRESS ^js EventType) #(progress-routine :receiving %))
+                              ;  (events/listen xhrio (.-UPLOAD_PROGRESS ^js EventType) #(progress-routine :sending %)))
+                              ;(events/listen xhrio (.-SUCCESS ^js EventType) (with-cleanup ok-routine))
+                              ;(events/listen xhrio (.-ABORT ^js EventType) (with-cleanup #(ok-handler {:status-text   "Cancelled"
+                              ;                                                                         ::txn/aborted? true))
+                              ;(events/listen xhrio (.-ERROR ^js EventType) (with-cleanup error-routine))
+                              (http/post url {:body body
+                                              :headers headers}))
+                              ;(xhrio-send xhrio url http-verb body headers))
                             (error-handler {:error :abort :error-text "Transmission was aborted because the request middleware returned nil or threw an exception"}))))
      :abort!          (fn abort! [this id]
                         (if-let [xhrios (get @(:active-requests this) id)]
-                          (doseq [xhrio xhrios]
-                            (xhrio-abort xhrio))
+                          #_(doseq [xhrio xhrios]
+                              (xhrio-abort xhrio))
                           (log/info "Unable to abort. No active request with abort id:" id)))}))
 
 (defn overall-progress
