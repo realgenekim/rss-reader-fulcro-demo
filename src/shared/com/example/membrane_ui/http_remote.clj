@@ -474,8 +474,7 @@
                               (reset! xhrio retval)
                               (let [f (with-cleanup ok-routine)]
                                 (f retval)))
-                            (with-cleanup #(ok-handler {:status-text   "Cancelled"
-                                                        ::txn/aborted? true})))]
+                            (with-cleanup error-routine))]
                (log/warn :fulcro-http-remote/post-results retval))
              #_(http/post "http://localhost:3000" {:body body}
                                  :headers headers))

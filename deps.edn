@@ -44,7 +44,9 @@
            com.fzakaria/slf4j-timbre              {:mvn/version "0.3.19"} ; hooks slf4j to timbre
 
            ; membrane port
-           clj-http/clj-http {:mvn/version "3.12.3"}}
+           clj-http/clj-http {:mvn/version "3.12.3"}
+           com.phronemophobic/membrane                        {:mvn/version "0.12.1-beta"}
+           com.phronemophobic.membrane/skialib-macosx-aarch64 {:mvn/version "0.12-beta"}}
 
            ;org.clojure/clojurescript              {:mvn/version "1.10.866"}
 
