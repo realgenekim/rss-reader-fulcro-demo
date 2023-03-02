@@ -21,8 +21,21 @@
              show-sync!]]
     [membrane.skia :as skia]))
 
+(defn dev-view
+  " helper: put anything you're working in here in dev
+    (for prod app, it'll just be another view, composing all your components "
+  []
+  (let [states nil]
+    (ui/label "hi")))
+    ;(selector (-> @*app-state :frame) (count states))
+    ;(render-view @*sim-state *app-state)
+    ;(mon/show-leaf-counter)))
 
 (comment
   c/app
+
+  (skia/run #'dev-view)
+
+
 
   0)
