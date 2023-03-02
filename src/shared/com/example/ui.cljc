@@ -42,15 +42,16 @@
 (defrouter MainRouter [this {:keys [current-state route-factory route-props]}]
   {:always-render-body? true
    :router-targets      [LandingPage
-                         stories/StoriesContainer
+                         ;stories/StoriesContainer
                           ;ItemForm InvoiceForm InvoiceList AccountList AccountForm AccountInvoices
                          ;sales-report/SalesReport InventoryReport
                          ;sales-report/RealSalesReport
                          ;dashboard/Dashboard
                          ;stories/StoriesListReport stories/StoryReport
-                         stories/StoriesMain stories/StoriesSearch
-                         stories/StoriesRAD
-                         stories/ModeTest1]}
+                         ;stories/StoriesMain stories/StoriesSearch
+                         ;stories/StoriesRAD
+                         com.example.membrane-ui.ui/StoriesRADMembrane]}
+                         ;stories/ModeTest1]}
 
                          ;buttons/ButtonTest1
                          ;buttons/ButtonTest1b

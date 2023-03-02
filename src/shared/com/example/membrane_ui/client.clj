@@ -58,6 +58,7 @@
 
 (comment
   (def app (create-client))
+  (setup-RAD app)
 
   (-> app :com.fulcrologic.fulcro.application/runtime-atom deref)
   (-> app :com.fulcrologic.fulcro.application/runtime-atom deref :com.fulcrologic.fulcro.application/remotes)
@@ -136,14 +137,18 @@
   (dr/initialize! app)
   (setup-RAD app)
   ;(dr/change-route! app ["landing-page"])
-  (history/install-route-history! app (html5-history))
+  ;(history/install-route-history! app (html5-history))
   ;(auth/start! app [LoginForm] {:after-session-check `fix-route})
   #_(init-keyboard-bindings)
-  (app/mount! app Root "app" {:initialize-state? false})
+  (app/mount! app Root "app" {:initialize-state? false}))
   ; when there's no auth, just call this to route to what URL bar says: (normally called in fix-route)
-  (hist5/restore-route! app stories/StoriesContainer {}))
+  ;(hist5/restore-route! app stories/StoriesContainer {}))
 
-(comment)
+(comment
+  (def app (create-client))
+  (init)
+
+  0)
 
 
 

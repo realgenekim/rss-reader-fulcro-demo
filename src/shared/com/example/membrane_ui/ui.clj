@@ -2,8 +2,11 @@
   (:require
     [com.fulcrologic.fulcro.application :as app]
     [com.example.membrane-ui.client :as c]
+    [com.example.ui.stories-forms :as stories]
     [com.example.model.story-list :as story-list]
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
+    [com.fulcrologic.fulcro.data-fetch :as df]
+    [com.fulcrologic.rad.control :as control]
     [com.fulcrologic.fulcro.mutations :refer [defmutation] :as mut]
     [com.fulcrologic.fulcro.algorithms.lookup :as ah]
     [com.fulcrologic.fulcro.algorithms.indexing :as indexing]
@@ -14,6 +17,7 @@
     [com.fulcrologic.fulcro.algorithms.tx-processing.synchronous-tx-processing :as stx]
     [com.fulcrologic.rad.report :as report]
     [com.fulcrologic.rad.report-options :as ro]
+    [com.fulcrologic.rad.routing :as rroute]
     [membrane.ui :as ui]
     [membrane.basic-components :as basic]
     membrane.component
@@ -32,7 +36,11 @@
                    {:keys [on-select selected]}]
   ; change all to :story/id
   {:query [:story/id :story/author :story/title :ui/number]
-   :ident :story/id})
+   :ident :story/id}
+  (ui/horizontal-layout
+    (let [text (format "%d. %s (%s)" number title author)]
+      (if (= id (:story/id selected))
+        (ui/label text)))))
   ;(dom/div :.item #_{:classes [(when (= id (:story/id selected))
   ;                               "right triangle icon")]}
   ;  {:id (str "story-" id)}
@@ -54,21 +62,22 @@
    ;ro/source-attribute :story/all-stories
    ro/source-attribute :story/first-page-stories
    ; this is a link query
-   ro/query-inclusions [
+   ;ro/query-inclusions [
                         ;{[:current-story '_] (comp/get-query FullStory)}
                         ;{[:ui/current-position '_] (comp/get-query CurrentPosition)}
-                        :ui/current-position]
+                        ;:ui/current-position
 
    ;ro/query-inclusions [{:current-story (comp/get-query FullStory)}]
    ro/row-pk           story-list/id
    ro/columns          [story-list/author story-list/title story-list/pos]
 
    ro/run-on-mount?    true
-   ro/route            "stories-rad"}
+   ro/route            "stories-rad2"}
   ;(let [state* @(->> com.example.client/app (:com.fulcrologic.fulcro.application/state-atom))])
   (ui/vertical-layout
-    (ui/label "hello from stories RAD report")))
-    ;(map ui-story current-rows)
+    (ui/label "hello from stories RAD report")
+    (ui/label (str current-rows))))
+    ;(map ui-story current-rows)))
     ;(map (fn [x]) current-rows)))
 
 #_(dom/div
@@ -104,8 +113,16 @@
   (type StoriesRADMembrane)
   (type ui-report)
   (component->view ui-report)
-  (component->view StoriesRADMembrane))
-0
+  (component->view StoriesRADMembrane)
+  (rroute/route-to! c/app StoriesRADMembrane {})
+  (report/start-report! c/app StoriesRADMembrane)
+  (report/run-report! c/app StoriesRADMembrane)
+  (report/run-report! c/app StoriesRADMembrane)
+
+  (df/load! c/app :story/first-page-stories stories/Story
+    {:target        [:component/id ::StoriesRADMembrane :ui/all-stories]})
+  (-> c/app :com.fulcrologic.fulcro.application/state-atom deref)
+  0)
 
 (defn dev-view
   " helper: put anything you're working in here in dev
