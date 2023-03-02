@@ -1,5 +1,4 @@
-(ns com.example.membrane-ui.membrane-fulcro
-;(ns membrane.fulcro
+(ns membrane.fulcro
   (:require  [com.fulcrologic.fulcro.application :as app]
              [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
              [com.fulcrologic.fulcro.mutations :refer [defmutation] :as mut]
