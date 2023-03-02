@@ -81,7 +81,12 @@
    ro/route            "stories-rad2"}
   ;(let [state* @(->> com.example.client/app (:com.fulcrologic.fulcro.application/state-atom))])
   (ui/vertical-layout
-    (ui/label "hello from stories RAD report 22")
+    (do
+      (def props props)
+      nil)
+    (ui/label "hello from stories RAD report 223")
+    (ui/label "my props: " (str props))
+
     (ui/label (str "my component current rows (this should match backdoor count): " (count current-rows)))
     (ui/label (str "my component current rows: " current-rows))
     (ui/label (str "backdoor report db: count: " (-> c/app :com.fulcrologic.fulcro.application/state-atom deref
@@ -164,6 +169,32 @@
   ()
   0)
 
+(comp/defsc FullStory [_ {:story/keys [id author title content published]
+                          :as props}]
+  {:query [:story/id :story/author :story/content :story/title :story/published]
+   :ident :story/id}
+  ;(println "FullStory: props: " props)
+  (ui/vertical-layout
+    (ui/label "props2: " (str props))
+    (ui/label "author: " author))
+  ;(println "FullStory: content: " content)
+  #_(dom/div :.ui.segment
+      (dom/h3 "Full Current Story: ")
+      ;(println "published: " published)
+      (dom/div :.list
+        (dom/div :.item (dom/b (str "Author: " author)))
+        (dom/div :.item (dom/b (str "Title: " title)))
+        (dom/div :.item (dom/b (str "Published: " (if published
+                                                    (datetime/inst->html-date (datetime/new-date published))
+                                                    "---")))))
+      (dom/p)
+      ; content has embedded html
+      ;    e.g., "<strong> hello! </strong"}})))
+      (dom/div {:dangerouslySetInnerHTML
+                {:__html content}})))
+
+(def ui-full-story (comp/factory FullStory {:keyfn :story/id}))
+
 (defn dev-view
   " helper: put anything you're working in here in dev
     (for prod app, it'll just be another view, composing all your components "
@@ -188,6 +219,9 @@
   c/app
 
   ;(def app (show! TodoList (comp/get-initial-state TodoList {:todo-list/id (uuid)})))
+
+  (def app2
+    (show-sync! FullStory {:story/id "K3Y7GLlRfaBDsUWYD0WuXjH/byGbQnwaMWp+PEBoUZw=_16f28df90a3:1084059:c84ffc39"}))
 
   (def app (show! StoriesRADMembrane (comp/get-initial-state StoriesRADMembrane {})))
   (def app (show! StoriesRADMembrane (comp/get-initial-state StoriesRADMembrane {})))
