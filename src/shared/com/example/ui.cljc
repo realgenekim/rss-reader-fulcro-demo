@@ -50,7 +50,7 @@
                          ;stories/StoriesListReport stories/StoryReport
                          ;stories/StoriesMain stories/StoriesSearch
                          ;stories/StoriesRAD
-                         com.example.membrane-ui.ui/StoriesRADMembrane]}
+                         stories/StoriesRADMembrane]}
                          ;stories/ModeTest1]}
 
                          ;buttons/ButtonTest1

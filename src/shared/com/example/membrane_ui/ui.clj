@@ -128,6 +128,8 @@
   (txd/tx-status! "" c/app)
 
   (-> c/app :com.fulcrologic.fulcro.application/state-atom deref)
+  (tap> (-> c/app :com.fulcrologic.fulcro.application/runtime-atom deref :com.fulcrologic.fulcro.algorithms.tx-processing/active-queue))
+  (-> c/app :com.fulcrologic.fulcro.application/runtime-atom deref :com.fulcrologic.fulcro.algorithms.tx-processing/active-queue)
   (-> c/app :com.fulcrologic.fulcro.application/runtime-atom deref :com.fulcrologic.fulcro.algorithms.tx-processing/active-queue
     count)
   (->> c/app :com.fulcrologic.fulcro.application/runtime-atom deref :com.fulcrologic.fulcro.algorithms.tx-processing/active-queue

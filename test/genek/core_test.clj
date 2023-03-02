@@ -22,7 +22,13 @@
     (let [retval (df/load! app :story/first-page-stories stories/Story
                    {:target        [:component/id ::StoriesMain :ui/all-stories]})]
 
-      (println retval)))
+      (Thread/sleep 1000)
+      (is (= 0
+            (-> app :com.fulcrologic.fulcro.application/runtime-atom deref :com.fulcrologic.fulcro.algorithms.tx-processing/active-queue
+                count)))))
+
+
+      ;(println retval)))
 
 
 
