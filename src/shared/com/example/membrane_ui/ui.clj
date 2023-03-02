@@ -76,8 +76,9 @@
   ;(let [state* @(->> com.example.client/app (:com.fulcrologic.fulcro.application/state-atom))])
   (ui/vertical-layout
     (ui/label "hello from stories RAD report")
-    (ui/label (str current-rows))))
-    ;(map ui-story current-rows)))
+    (ui/label (str current-rows))
+    (ui/label (str "count: " (count current-rows)))))
+;(map ui-story current-rows)))
     ;(map (fn [x]) current-rows)))
 
 #_(dom/div
@@ -115,9 +116,10 @@
   (component->view ui-report)
   (component->view StoriesRADMembrane)
   (rroute/route-to! c/app StoriesRADMembrane {})
+  (report/reload! c/app StoriesRADMembrane)
+
+  (report/run-report! c/app StoriesRADMembrane)
   (report/start-report! c/app StoriesRADMembrane)
-  (report/run-report! c/app StoriesRADMembrane)
-  (report/run-report! c/app StoriesRADMembrane)
 
   (df/load! c/app :story/first-page-stories stories/Story
     {:target        [:component/id ::StoriesRADMembrane :ui/all-stories]})
