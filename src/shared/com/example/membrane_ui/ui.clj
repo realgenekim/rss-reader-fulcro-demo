@@ -123,7 +123,6 @@
   (report/start-report! c/app StoriesRADMembrane)
 
   (com.fulcrologic.fulcro.algorithms.tx-processing/process-queue! c/app)
-  (com.fulcrologic.fulcro.algorithms.tx-processing/run-actions! c/app)
 
   (txd/tx-status! "" c/app)
 

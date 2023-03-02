@@ -4,6 +4,7 @@
     [com.example.ui.login-dialog :refer [LoginForm]]
     [com.fulcrologic.fulcro.application :as app]
     [com.fulcrologic.fulcro.components :as comp]
+    [com.fulcrologic.fulcro.algorithms.tx-processing.synchronous-tx-processing :as stx]
     [com.fulcrologic.fulcro.mutations :as m]
     [com.fulcrologic.rad.application :as rad-app]
     [com.fulcrologic.fulcro.raw.application :as rawapp]
@@ -45,9 +46,10 @@
 
 (defn create-client
   []
-  (rad-app/fulcro-rad-app
-    ;{})
-    {:remotes {:remote (http/fulcro-http-remote {:url "http://localhost:3000/api"})}}))
+  (stx/with-synchronous-transactions
+    (rad-app/fulcro-rad-app
+      ;{})
+      {:remotes {:remote (http/fulcro-http-remote {:url "http://localhost:3000/api"})}})))
 
 (defonce app (create-client))
   ;(rad-app/fulcro-rad-app {}))
@@ -67,10 +69,14 @@
   (-> app :remotes :remote :transmit! fn?)
   ((-> app :remotes :remote :transmit!) {} {})
 
+  ; run from here
   (def app (create-client))
   (df/load! app :story/first-page-stories stories/Story
     {:target        [:component/id ::StoriesMain :ui/all-stories]})
      ;:post-mutation 'com.example.model.mutations/create-prev-story-next-cache})
+  (-> app :com.fulcrologic.fulcro.application/runtime-atom deref :com.fulcrologic.fulcro.algorithms.tx-processing/active-queue
+    count)
+
   (tap> (-> app))
   (tap> {:b 3})
 
