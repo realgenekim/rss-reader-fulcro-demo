@@ -57,6 +57,11 @@
 
 (def ui-story (comp/computed-factory Story {:keyfn :story/id}))
 
+(defn tx-queue-size
+  []
+  (-> c/app :com.fulcrologic.fulcro.application/runtime-atom deref :com.fulcrologic.fulcro.algorithms.tx-processing/active-queue
+    count))
+
 (report/defsc-report StoriesRADMembrane [this {:ui/keys [current-rows parameters]
                                                :as props}]
   {ro/title            "Stories RAD Report"
@@ -76,10 +81,21 @@
    ro/route            "stories-rad2"}
   ;(let [state* @(->> com.example.client/app (:com.fulcrologic.fulcro.application/state-atom))])
   (ui/vertical-layout
-    (ui/label "hello from stories RAD report")
-    (ui/label (str current-rows))
-    (ui/label (str "count: " (count current-rows)))))
-;(map ui-story current-rows)))
+    (ui/label "hello from stories RAD report 22")
+    (ui/label (str "my component current rows (this should match backdoor count): " (count current-rows)))
+    (ui/label (str "my component current rows: " current-rows))
+    (ui/label (str "backdoor report db: count: " (-> c/app :com.fulcrologic.fulcro.application/state-atom deref
+                                                   :com.fulcrologic.rad.report/id :com.example.membrane-ui.ui/StoriesRADMembrane
+                                                   :ui/current-rows count)))
+
+
+    (ui/label "\n\nother stats:")
+    (ui/label (str "tx queue size: " (tx-queue-size)))))
+
+; adrian, I'm looking into database at 5m; backdoor
+; - 10m: establishing current state
+; - 12m: show! works, but show-sync! hangs
+  ;(map ui-story current-rows)))
     ;(map (fn [x]) current-rows)))
 
 #_(dom/div
@@ -116,15 +132,14 @@
   (type ui-report)
   (component->view ui-report)
   (component->view StoriesRADMembrane)
-  (rroute/route-to! c/app StoriesRADMembrane {})
   (report/reload! c/app StoriesRADMembrane)
 
-  (report/run-report! c/app StoriesRADMembrane)
-  (report/start-report! c/app StoriesRADMembrane)
+  (do
+    (report/run-report! c/app StoriesRADMembrane)
+    (report/start-report! c/app StoriesRADMembrane))
 
   (com.fulcrologic.fulcro.algorithms.tx-processing/process-queue! c/app)
 
-  (txd/tx-status! "" c/app)
 
   (-> c/app :com.fulcrologic.fulcro.application/state-atom deref)
   (tap> (-> c/app :com.fulcrologic.fulcro.application/runtime-atom deref :com.fulcrologic.fulcro.algorithms.tx-processing/active-queue))
@@ -143,6 +158,8 @@
   (app/schedule-render! c/app {:force-root? true})
   (app/render! c/app)
 
+  (tap> c/app)
+
   (com.fulcrologic.fulcro.algorithms.tx-processing/activate-submissions! c/app)
   ()
   0)
@@ -160,7 +177,21 @@
     ;(mon/show-leaf-counter)))
 
 (comment
+  ; Adrian, here's how to get the app bootstrapped.
+  (do
+    (c/adrian-init)
+    (report/run-report! c/app StoriesRADMembrane)
+    (report/start-report! c/app StoriesRADMembrane))
+
+
+  ; end
   c/app
+
+  ;(def app (show! TodoList (comp/get-initial-state TodoList {:todo-list/id (uuid)})))
+
+  (def app (show! StoriesRADMembrane (comp/get-initial-state StoriesRADMembrane {})))
+  (def app (show! StoriesRADMembrane (comp/get-initial-state StoriesRADMembrane {})))
+  (def app (show-sync! StoriesRADMembrane (comp/get-initial-state StoriesRADMembrane {})))
 
   (skia/run #'dev-view)
 

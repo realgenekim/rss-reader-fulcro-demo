@@ -56,6 +56,11 @@
 ; (defonce app (rad-app/fulcro-rad-app {:optimized-render! com.fulcrologic.fulcro.rendering.keyframe-render2/render!}))
 
 
+(defn adrian-init
+  []
+  (do
+    (def app (create-client))
+    (setup-RAD app)))
 
 
 (comment
@@ -70,7 +75,11 @@
   ((-> app :remotes :remote :transmit!) {} {})
 
   ; run from here
-  (def app (create-client))
+  (do
+    (def app (create-client))
+    (setup-RAD app))
+
+
   (df/load! app :story/first-page-stories stories/Story
     {:target        [:component/id ::StoriesMain :ui/all-stories]})
      ;:post-mutation 'com.example.model.mutations/create-prev-story-next-cache})

@@ -13,6 +13,9 @@
 (deftest client-http
 
   (let [app (client/create-client)]
+    ; setup machinery here
+    (client/setup-RAD app)
+
     (def app app)
 
     (is (fn?
