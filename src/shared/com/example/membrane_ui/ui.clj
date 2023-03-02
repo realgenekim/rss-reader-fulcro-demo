@@ -3,6 +3,10 @@
     [com.fulcrologic.fulcro.application :as app]
     [com.example.membrane-ui.client :as c]
     [com.example.ui.stories-forms :as stories]
+    [com.fulcrologic.fulcro.algorithms.denormalize :as fdn]
+    [com.fulcrologic.fulcro.algorithms.normalize :as fnorm]
+    [com.fulcrologic.fulcro.algorithms.server-render :as ssr]
+    [com.fulcrologic.fulcro.dom-server :as sdom]
     [com.example.model.story-list :as story-list]
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
     [com.fulcrologic.fulcro.data-fetch :as df]
@@ -25,7 +29,7 @@
     [membrane.fulcro :as mf
      :refer [uuid
              component->view
-             show!
+             ;show!
              show-sync!]]
     [membrane.skia :as skia]))
 
@@ -95,6 +99,8 @@
 
 
     (ui/label "\n\nother stats:")
+    (ui/label (str "story: " (-> c/app :com.fulcrologic.fulcro.application/state-atom deref
+                               :story/id (get-in "K3Y7GLlRfaBDsUWYD0WuXjH/byGbQnwaMWp+PEBoUZw=_16f28df90a3:1084059:c84ffc39"))))
     (ui/label (str "tx queue size: " (tx-queue-size)))))
 
 ; adrian, I'm looking into database at 5m; backdoor
@@ -172,7 +178,8 @@
 (comp/defsc FullStory [_ {:story/keys [id author title content published]
                           :as props}]
   {:query [:story/id :story/author :story/content :story/title :story/published]
-   :ident :story/id}
+   :ident :story/id
+   :initial-state {:story/id "K3Y7GLlRfaBDsUWYD0WuXjH/byGbQnwaMWp+PEBoUZw=_16f28df90a3:1084059:c84ffc39"}}
   ;(println "FullStory: props: " props)
   (ui/vertical-layout
     (ui/label "props2: " (str props))
@@ -194,6 +201,17 @@
                 {:__html content}})))
 
 (def ui-full-story (comp/factory FullStory {:keyfn :story/id}))
+;(defn ui-todo-item [props] (component->view (todo-item-factory props)))
+
+(defsc Root [this {:keys [story]}]
+  {:query         [{:story (comp/get-query FullStory)}]
+   :initial-state (fn [params] {:story (comp/get-initial-state FullStory {})})}
+  (ui/vertical-layout
+    (ui/label "hello22")
+    (component->view (ui-full-story {:story/id "K3Y7GLlRfaBDsUWYD0WuXjH/byGbQnwaMWp+PEBoUZw=_16f28df90a3:1084059:c84ffc39"}))))
+  ;(dom/div
+  ;  (ui-person-list friends)
+  ;  (ui-person-list enemies)})
 
 (defn dev-view
   " helper: put anything you're working in here in dev
@@ -207,6 +225,7 @@
     ;(render-view @*sim-state *app-state)
     ;(mon/show-leaf-counter)))
 
+
 (comment
   ; Adrian, here's how to get the app bootstrapped.
   (do
@@ -214,14 +233,29 @@
     (report/run-report! c/app StoriesRADMembrane)
     (report/start-report! c/app StoriesRADMembrane))
 
+  (-> c/app :com.fulcrologic.fulcro.application/state-atom deref
+    :story/id)
+    ;(get-in "K3Y7GLlRfaBDsUWYD0WuXjH/byGbQnwaMWp+PEBoUZw=_16f28df90a3:1084059:c84ffc39"))
+
 
   ; end
   c/app
+  (tap> c/app)
 
   ;(def app (show! TodoList (comp/get-initial-state TodoList {:todo-list/id (uuid)})))
 
+  ; questions
+  ; can we verify that component has some state loaded?
+  ; how do I get reloading of components working?
+  ; how can we get FullStory to "actualize itself" -- load its (initial) state, have it get passed its props, render those props
+
   (def app2
-    (show-sync! FullStory {:story/id "K3Y7GLlRfaBDsUWYD0WuXjH/byGbQnwaMWp+PEBoUZw=_16f28df90a3:1084059:c84ffc39"}))
+    (show! FullStory {:story/id "K3Y7GLlRfaBDsUWYD0WuXjH/byGbQnwaMWp+PEBoUZw=_16f28df90a3:1084059:c84ffc39"}))
+  (def app2
+    (show-sync! Root {}))
+
+  (comp/get-query FullStory)
+  (comp/get-query Root)
 
   (def app (show! StoriesRADMembrane (comp/get-initial-state StoriesRADMembrane {})))
   (def app (show! StoriesRADMembrane (comp/get-initial-state StoriesRADMembrane {})))
@@ -229,6 +263,97 @@
 
   (skia/run #'dev-view)
 
+  (def state-map (-> c/app :com.fulcrologic.fulcro.application/state-atom deref))
+  (comp/get-initial-state Root)
+  (comp/get-query Root)
+
+  (def normalized-db
+    (let [data-tree       (comp/get-initial-state Root)
+          normalized-tree (fnorm/tree->db Root data-tree true)]
+      normalized-tree))
+
+  (def root-factory (comp/factory Root))
+
+  (let [db (-> c/app :com.fulcrologic.fulcro.application/state-atom deref)
+        ;props                (fdn/db->tree (comp/get-query Root normalized-db) state-map state-map)
+        props                (fdn/db->tree (comp/get-query Root normalized-db) state-map state-map)
+        root-factory         (comp/factory Root)]
+    (binding [comp/*app* YOUR-APP] ; some APIs look for your fulcro-app in this bound var.
+      (sdom/render-to-str (root-factory props))))
+
+  (sdom/render-to-str (root-factory props))
+
+  (ui-full-story {:story/id "K3Y7GLlRfaBDsUWYD0WuXjH/byGbQnwaMWp+PEBoUZw=_16f28df90a3:1084059:c84ffc39"
+                  :story/author "Adrian"})
+
+  (ui-full-story state-map {:story/id "K3Y7GLlRfaBDsUWYD0WuXjH/byGbQnwaMWp+PEBoUZw=_16f28df90a3:1084059:c84ffc39"
+                            :story/author "Adrian"})
+
+
+
+
+  0)
+
+(defn mount!
+  ;([root]
+  ; (mount! root (atom nil))
+  ([root view-atom app]
+   (let [render-root! (fn [root _]
+                        (reset! view-atom
+                                (mf/fulcro-view
+                                 (partial mf/dispatch! root)
+                                 (component->view root))))
+         ;app (stx/with-synchronous-transactions
+         ;      (app/fulcro-app
+         ;       {:optimized-render! mf/membrane-optimized-render!
+         ;        :render-root! render-root!
+         root (mf/make-root root)
+         root-factory (comp/factory root)]
+     (do
+       ;(app/initialize-state! app root)
+
+       (swap! (::app/runtime-atom app) assoc
+              ;; ::mount-node dom-node
+              ::app/root-factory root-factory
+              ::app/root-class root)
+       ;; (merge/merge-component! app root initial-state)
+       ;; (let [child-ident (comp/ident root initial-state)]
+       ;;   (comp/transact! app [(list `set-child {:child-ident child-ident})]))
+
+       ;; (app/update-shared! app)
+       ;; not doing anything right now
+       ;; (indexing/index-root! app)
+
+       ;; (app/render! app {:force-root? true})
+
+       ;; (skia/run #(deref view-atom) {:draw nil})
+       {:app app
+        :view-atom view-atom}))))
+
+(defn show!
+  "Pop up a window of the component with the state"
+  ([root initial-state app]
+   (let [{:keys [app view-atom]} (mount! root (atom nil) app)]
+     (merge/merge-component! app root initial-state)
+     (let [child-ident (comp/ident root initial-state)]
+       (comp/transact! app [(mf/set-child {:child-ident child-ident})])
+
+       (app/render! app {:force-root? true})
+
+       (skia/run #(deref view-atom))
+       app))))
+
+
+(comment
+  (def app (show! StoriesRADMembrane (comp/get-initial-state StoriesRADMembrane {})))
+
+  (def app (show! StoriesRADMembrane (comp/get-initial-state StoriesRADMembrane {})))
+
+  (comp/get-initial-state FullStory)
+
+  (def app2
+    (show! FullStory {:story/id "K3Y7GLlRfaBDsUWYD0WuXjH/byGbQnwaMWp+PEBoUZw=_16f28df90a3:1084059:c84ffc39"}
+      c/app))
 
 
   0)

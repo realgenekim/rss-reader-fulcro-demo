@@ -24,8 +24,10 @@
     [com.fulcrologic.fulcro.mutations :as mutation]
     [com.fulcrologic.fulcro.components :as comp]
     [com.example.ui.stories-forms :as stories]
+    [membrane.fulcro :as mf]
     [com.example.membrane-ui.http-remote :as http]
     [com.example.model.mutations]))
+
     ;["mousetrap" :as mousetrap]))
 
 (defonce stats-accumulator
@@ -49,7 +51,9 @@
   (stx/with-synchronous-transactions
     (rad-app/fulcro-rad-app
       ;{})
-      {:remotes {:remote (http/fulcro-http-remote {:url "http://localhost:3000/api"})}})))
+      {:remotes {:remote (http/fulcro-http-remote {:url "http://localhost:3000/api"})}
+       :optimized-render! mf/membrane-optimized-render!
+       :render-root! mf/render-root!})))
 
 (defonce app (create-client))
   ;(rad-app/fulcro-rad-app {}))
