@@ -18,6 +18,7 @@
     [com.fulcrologic.rad.report :as report]
     [com.fulcrologic.rad.report-options :as ro]
     [com.fulcrologic.rad.routing :as rroute]
+    [com.fulcrologic.fulcro.algorithms.tx-processing-debug :as txd]
     [membrane.ui :as ui]
     [membrane.basic-components :as basic]
     membrane.component
@@ -121,9 +122,28 @@
   (report/run-report! c/app StoriesRADMembrane)
   (report/start-report! c/app StoriesRADMembrane)
 
+  (com.fulcrologic.fulcro.algorithms.tx-processing/process-queue! c/app)
+  (com.fulcrologic.fulcro.algorithms.tx-processing/run-actions! c/app)
+
+  (txd/tx-status! "" c/app)
+
+  (-> c/app :com.fulcrologic.fulcro.application/state-atom deref)
+  (-> c/app :com.fulcrologic.fulcro.application/runtime-atom deref :com.fulcrologic.fulcro.algorithms.tx-processing/active-queue
+    count)
+  (->> c/app :com.fulcrologic.fulcro.application/runtime-atom deref :com.fulcrologic.fulcro.algorithms.tx-processing/active-queue
+    first keys)
+  (->> c/app :com.fulcrologic.fulcro.application/runtime-atom deref :com.fulcrologic.fulcro.algorithms.tx-processing/active-queue
+    (map :com.fulcrologic.fulcro.algorithms.tx-processing/tx))
+
+
   (df/load! c/app :story/first-page-stories stories/Story
     {:target        [:component/id ::StoriesRADMembrane :ui/all-stories]})
-  (-> c/app :com.fulcrologic.fulcro.application/state-atom deref)
+
+  (app/schedule-render! c/app {:force-root? true})
+  (app/render! c/app)
+
+  (com.fulcrologic.fulcro.algorithms.tx-processing/activate-submissions! c/app)
+  ()
   0)
 
 (defn dev-view
