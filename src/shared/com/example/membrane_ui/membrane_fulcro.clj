@@ -13,6 +13,9 @@
              [membrane.basic-components :as basic]
              membrane.component
              [clojure.zip :as z]
+
+             [com.example.membrane-ui.http-remote :as http]
+             [com.fulcrologic.rad.application :as rad-app]
              [membrane.skia :as skia])
   (:gen-class))
 
@@ -141,18 +144,21 @@
     nil))
 
 (defn mount!
-  ([root]
-   (mount! root (atom nil)))
-  ([root view-atom]
+  ([root opts]
+   (mount! root (atom nil) opts))
+  ([root view-atom opts]
    (let [render-root! (fn [root _]
                         (reset! view-atom
                           (fulcro-view
                             (partial dispatch! root)
                             (component->view root))))
-         app (stx/with-synchronous-transactions
-               (app/fulcro-app
-                 {:optimized-render! membrane-optimized-render!
-                  :render-root! render-root!}))
+         args (merge opts
+                {:optimized-render! membrane-optimized-render!
+                 :render-root!      render-root!})
+         _    (println :args args)
+         app  (stx/with-synchronous-transactions
+                (rad-app/fulcro-rad-app args))
+
          root (make-root root)
          root-factory (comp/factory root)]
      (do
@@ -178,8 +184,8 @@
 
 (defn show!
   "Pop up a window of the component with the state"
-  ([root initial-state]
-   (let [{:keys [app view-atom]} (mount! root)]
+  ([root initial-state opts]
+   (let [{:keys [app view-atom]} (mount! root opts)]
      (merge/merge-component! app root initial-state)
      (let [child-ident (comp/ident root initial-state)]
        (comp/transact! app [(set-child {:child-ident child-ident})])

@@ -23,13 +23,14 @@
     [com.fulcrologic.rad.report-options :as ro]
     [com.fulcrologic.rad.routing :as rroute]
     [com.fulcrologic.fulcro.algorithms.tx-processing-debug :as txd]
+    [com.example.membrane-ui.http-remote :as http]
     [membrane.ui :as ui]
     [membrane.basic-components :as basic]
     membrane.component
     [membrane.fulcro :as mf
      :refer [uuid
              component->view
-             ;show!
+             show!
              show-sync!]]
     [membrane.skia :as skia]))
 
@@ -88,7 +89,7 @@
     (do
       (def props props)
       nil)
-    (ui/label "hello from stories RAD report 223")
+    (ui/label "hello from stories RAD report 223123")
     (ui/label "my props: " (str props))
 
     (ui/label (str "my component current rows (this should match backdoor count): " (count current-rows)))
@@ -96,6 +97,10 @@
     (ui/label (str "backdoor report db: count: " (-> c/app :com.fulcrologic.fulcro.application/state-atom deref
                                                    :com.fulcrologic.rad.report/id :com.example.membrane-ui.ui/StoriesRADMembrane
                                                    :ui/current-rows count)))
+
+    (ui/label "\n\n")
+    (ui/label (str (->> current-rows first)))
+    (ui/label (str (->> current-rows second)))
 
 
     (ui/label "\n\nother stats:")
@@ -294,66 +299,31 @@
 
   0)
 
-(defn mount!
-  ;([root]
-  ; (mount! root (atom nil))
-  ([root view-atom app]
-   (let [render-root! (fn [root _]
-                        (reset! view-atom
-                                (mf/fulcro-view
-                                 (partial mf/dispatch! root)
-                                 (component->view root))))
-         ;app (stx/with-synchronous-transactions
-         ;      (app/fulcro-app
-         ;       {:optimized-render! mf/membrane-optimized-render!
-         ;        :render-root! render-root!
-         root (mf/make-root root)
-         root-factory (comp/factory root)]
-     (do
-       ;(app/initialize-state! app root)
-
-       (swap! (::app/runtime-atom app) assoc
-              ;; ::mount-node dom-node
-              ::app/root-factory root-factory
-              ::app/root-class root)
-       ;; (merge/merge-component! app root initial-state)
-       ;; (let [child-ident (comp/ident root initial-state)]
-       ;;   (comp/transact! app [(list `set-child {:child-ident child-ident})]))
-
-       ;; (app/update-shared! app)
-       ;; not doing anything right now
-       ;; (indexing/index-root! app)
-
-       ;; (app/render! app {:force-root? true})
-
-       ;; (skia/run #(deref view-atom) {:draw nil})
-       {:app app
-        :view-atom view-atom}))))
-
-(defn show!
-  "Pop up a window of the component with the state"
-  ([root initial-state app]
-   (let [{:keys [app view-atom]} (mount! root (atom nil) app)]
-     (merge/merge-component! app root initial-state)
-     (let [child-ident (comp/ident root initial-state)]
-       (comp/transact! app [(mf/set-child {:child-ident child-ident})])
-
-       (app/render! app {:force-root? true})
-
-       (skia/run #(deref view-atom))
-       app))))
-
 
 (comment
-  (def app (show! StoriesRADMembrane (comp/get-initial-state StoriesRADMembrane {})))
+  (def app (mf/show! StoriesRADMembrane (comp/get-initial-state StoriesRADMembrane {})
+             {:remotes {:remote (http/fulcro-http-remote {:url "http://localhost:3000/api"})}}))
 
-  (def app (show! StoriesRADMembrane (comp/get-initial-state StoriesRADMembrane {})))
+  ;(tap> app)
+  ;
+  ;(def app (show! StoriesRADMembrane (comp/get-initial-state StoriesRADMembrane {})))
+  ;
+  ;(comp/get-initial-state FullStory)
+  ;
+  ;(def app2
+  ;  (show! FullStory {:story/id "K3Y7GLlRfaBDsUWYD0WuXjH/byGbQnwaMWp+PEBoUZw=_16f28df90a3:1084059:c84ffc39"}
+  ;    c/app)
 
-  (comp/get-initial-state FullStory)
 
-  (def app2
-    (show! FullStory {:story/id "K3Y7GLlRfaBDsUWYD0WuXjH/byGbQnwaMWp+PEBoUZw=_16f28df90a3:1084059:c84ffc39"}
-      c/app))
+
+  (do
+    ;(c/adrian-init)
+    (report/run-report! app StoriesRADMembrane)
+    (report/start-report! app StoriesRADMembrane))
+
+  (-> app :com.fulcrologic.fulcro.application/state-atom deref)
+    ;:story/id)
+  ;(get-in "K3Y7GLlRfaBDsUWYD0WuXjH/byGbQnwaMWp+PEBoUZw=_16f28df90a3:1084059:c84ffc39")
 
 
   0)

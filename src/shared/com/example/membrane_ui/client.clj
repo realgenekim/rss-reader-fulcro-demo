@@ -51,9 +51,9 @@
   (stx/with-synchronous-transactions
     (rad-app/fulcro-rad-app
       ;{})
-      {:remotes {:remote (http/fulcro-http-remote {:url "http://localhost:3000/api"})}
-       :optimized-render! mf/membrane-optimized-render!
-       :render-root! mf/render-root!})))
+      {:remotes {:remote (http/fulcro-http-remote {:url "http://localhost:3000/api"})}})))
+       ;:optimized-render! mf/membrane-optimized-render!
+       ;:render-root! mf/render-root!})))
 
 (defonce app (create-client))
   ;(rad-app/fulcro-rad-app {}))
