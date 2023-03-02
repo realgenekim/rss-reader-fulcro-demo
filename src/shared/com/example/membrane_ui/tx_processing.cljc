@@ -473,9 +473,13 @@
                          (schedule-queue-processing! app 0))
         ast            (get-in tx-node [::elements ele-idx ::transmitted-ast-nodes remote])
         handler        (fn result-handler* [result]
+                         (log/warn :add-send! :record-result!)
                          (record-result! app id ele-idx remote result)
+                         (log/warn :add-send! :remove-send!)
                          (remove-send! app remote id ele-idx)
+                         (log/warn :add-send! :schedule-sends!)
                          (schedule-sends! app 1)
+                         (log/warn :add-send! :schedule-queue-processing!)
                          (schedule-queue-processing! app 0))
         send-node      {::id             id
                         ::idx            ele-idx
@@ -486,6 +490,7 @@
                         ::update-handler update-handler}]
     (if ast
       (do
+        (log/warn :add-send! :swap!)
         (swap! runtime-atom update-in [::send-queues remote] (fnil conj []) send-node)
         send-node)
       (do

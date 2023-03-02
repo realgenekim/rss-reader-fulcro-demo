@@ -66,10 +66,24 @@
   (-> app :remotes :remote :transmit! fn?)
   ((-> app :remotes :remote :transmit!) {} {})
 
+  (def app (create-client))
   (df/load! app :story/first-page-stories stories/Story
     {:target        [:component/id ::StoriesMain :ui/all-stories]})
      ;:post-mutation 'com.example.model.mutations/create-prev-story-next-cache})
   (tap> (-> app))
+  (tap> {:b 3})
+
+  (-> app :com.fulcrologic.fulcro.application/state-atom deref)
+
+  ; this is what we expect to get populated
+
+  (defn get-list-by-id
+    [id]
+    (let [app (resolve 'com.example.client/app)
+          state (-> @app
+                  :com.fulcrologic.fulcro.application/state-atom,
+                  deref)]
+      (get-in state [:trello-list/id id])))
 
 
   0)
