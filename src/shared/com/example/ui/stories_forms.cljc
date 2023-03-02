@@ -17,6 +17,7 @@
     [com.fulcrologic.fulcro.raw.components :as rc]
     [com.fulcrologic.fulcro.mutations :as m]
     ;[com.example.ui.button-toys-form :as buttons]
+
     #?(:cljs [goog.string :as gstring])
     #?(:cljs [portal.web :as pw])))
 
@@ -107,7 +108,52 @@
    ro/route            "stories-rad"}
   ;(let [state* @(->> com.example.client/app (:com.fulcrologic.fulcro.application/state-atom))])
   #_(dom/div
-      (ui-current-position props)
+      (dom/p "hello3"))
+  (dom/div
+    ;(ui-current-position props)
+    ;(dom/div
+    ;  (println "StoriesCustom: state*: " state*)
+    ;  (dom/p "Current story: " (:ui/current-position state*)))
+    (dom/div
+      ;(println current-rows)
+      ;(println "current story: " (:current-story props))
+      (println "StoriesCustom: props: " props))
+    ;(println (keys props))
+
+    (div :.eight.wide.column
+      (dom/ul :.ui.segment
+        (map ui-story current-rows)))
+
+    #_(dom/div :.ui.grid
+               (div :.row
+                    (div :.eight.wide.column
+                         (dom/ul :.ui.segment
+                                 (map ui-story current-rows)))
+                    (div :.eight.wide.column
+                         (ui-full-story (:current-story props)))))))
+
+(report/defsc-report StoriesRADMembrane [this {:ui/keys [current-rows parameters]
+                                               :as props}]
+  {ro/title            "Stories RAD Report"
+   ;ro/source-attribute :story/all-stories
+   ro/source-attribute :story/first-page-stories
+   ; this is a link query
+   ro/query-inclusions [
+                        ;{[:current-story '_] (comp/get-query FullStory)}
+                        ;{[:ui/current-position '_] (comp/get-query CurrentPosition)}
+                        :ui/current-position]
+
+   ;ro/query-inclusions [{:current-story (comp/get-query FullStory)}]
+   ro/row-pk           story-list/id
+   ro/columns          [story-list/author story-list/title story-list/pos]
+
+   ro/run-on-mount?    true
+   ro/route            "stories-rad"}
+  ;(let [state* @(->> com.example.client/app (:com.fulcrologic.fulcro.application/state-atom))])
+  (dom/div
+    (dom/p "hello3"))
+  #_(dom/div
+      ;(ui-current-position props)
       ;(dom/div
       ;  (println "StoriesCustom: state*: " state*)
       ;  (dom/p "Current story: " (:ui/current-position state*)))
@@ -117,13 +163,17 @@
         (println "StoriesCustom: props: " props))
       ;(println (keys props))
 
-      (dom/div :.ui.grid
-               (div :.row
-                    (div :.eight.wide.column
-                         (dom/ul :.ui.segment
-                                 (map ui-story current-rows)))
-                    (div :.eight.wide.column
-                         (ui-full-story (:current-story props)))))))
+      (div :.eight.wide.column
+        (dom/ul :.ui.segment
+          (map ui-story current-rows)))
+
+      #_(dom/div :.ui.grid
+          (div :.row
+            (div :.eight.wide.column
+              (dom/ul :.ui.segment
+                (map ui-story current-rows)))
+            (div :.eight.wide.column
+              (ui-full-story (:current-story props)))))))
 
 (comp/defsc StoryNum
   [this {:ui/keys [all-stories current-story]
