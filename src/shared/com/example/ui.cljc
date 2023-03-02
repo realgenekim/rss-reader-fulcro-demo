@@ -49,6 +49,7 @@
                          ;dashboard/Dashboard
                          ;stories/StoriesListReport stories/StoryReport
                          stories/StoriesMain stories/StoriesSearch
+                         stories/StoriesRAD
                          stories/ModeTest1]}
 
                          ;buttons/ButtonTest1
@@ -122,6 +123,7 @@
                    (ui-dropdown-item {:onClick (fn [] (rroute/route-to! this stories/StoriesMain {}))} "Stories Main")
                    (ui-dropdown-item {:onClick (fn [] (rroute/route-to! this stories/StoriesSearch {}))} "Stories Searched")
                    (ui-dropdown-item {:onClick (fn [] (rroute/route-to! this stories/StoriesContainer {}))} "Stories Container")
+                   (ui-dropdown-item {:onClick (fn [] (rroute/route-to! this stories/StoriesRAD {}))} "Stories RAD")
                    (ui-dropdown-item {:onClick (fn [] (rroute/route-to! this stories/ModeTest1 {}))} "Mode Test"))))))
 
 
@@ -136,7 +138,8 @@
               (div :.ui.item
                 (dom/button :.ui.button {:onClick (fn []
                                                     ;; TODO: check if we can change routes...
-                                                    (rroute/route-to! this stories/StoriesContainer {})
+                                                    (rroute/route-to! this stories/StoriesRAD {})
+                                                    ;(rroute/route-to! this stories/StoriesContainer {})
                                                     (auth/logout! this :local))}
                   "Logout")))
             (div :.ui.item))))

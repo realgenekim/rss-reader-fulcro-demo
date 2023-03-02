@@ -88,24 +88,25 @@
 
 (def ui-current-position (comp/factory CurrentPosition))
 
-#_(report/defsc-report StoriesCustom [this {:ui/keys [current-rows parameters]
-                                            :as props}]
-    {ro/title            "Stories List"
-     ro/source-attribute :story/all-stories
-     ; this is a link query
-     ro/query-inclusions [
-                          ;{[:current-story '_] (comp/get-query FullStory)}
-                          ;{[:ui/current-position '_] (comp/get-query CurrentPosition)}
-                          :ui/current-position]
+(report/defsc-report StoriesRAD [this {:ui/keys [current-rows parameters]
+                                       :as props}]
+  {ro/title            "Stories RAD Report"
+   ;ro/source-attribute :story/all-stories
+   ro/source-attribute :story/first-page-stories
+   ; this is a link query
+   ro/query-inclusions [
+                        ;{[:current-story '_] (comp/get-query FullStory)}
+                        ;{[:ui/current-position '_] (comp/get-query CurrentPosition)}
+                        :ui/current-position]
 
-     ;ro/query-inclusions [{:current-story (comp/get-query FullStory)}]
-     ro/row-pk           story-list/id
-     ro/columns          [story-list/id story-list/author story-list/title story-list/pos]
+   ;ro/query-inclusions [{:current-story (comp/get-query FullStory)}]
+   ro/row-pk           story-list/id
+   ro/columns          [story-list/author story-list/title story-list/pos]
 
-     ro/run-on-mount?    true
-     ro/route            "stories"}
-    ;(let [state* @(->> com.example.client/app (:com.fulcrologic.fulcro.application/state-atom))])
-    (dom/div
+   ro/run-on-mount?    true
+   ro/route            "stories-rad"}
+  ;(let [state* @(->> com.example.client/app (:com.fulcrologic.fulcro.application/state-atom))])
+  #_(dom/div
       (ui-current-position props)
       ;(dom/div
       ;  (println "StoriesCustom: state*: " state*)
