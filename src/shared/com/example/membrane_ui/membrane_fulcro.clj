@@ -196,8 +196,8 @@
        app))))
 
 (defn show-sync!
-  ([root initial-state]
-   (let [{:keys [app view-atom]} (mount! root)]
+  ([root initial-state opts]
+   (let [{:keys [app view-atom]} (mount! root opts)]
      (merge/merge-component! app root initial-state)
      (let [child-ident (comp/ident root initial-state)]
        (comp/transact! app [(set-child {:child-ident child-ident})])

@@ -89,7 +89,7 @@
     (do
       (def props props)
       nil)
-    (ui/label "hello from stories RAD report 223123")
+    (ui/label "hello from stories RAD report ii-----331123")
     (ui/label "my props: " (str props))
 
     (ui/label (str "my component current rows (this should match backdoor count): " (count current-rows)))
@@ -172,7 +172,7 @@
     {:target        [:component/id ::StoriesRADMembrane :ui/all-stories]})
 
   (app/schedule-render! c/app {:force-root? true})
-  (app/render! c/app)
+  (app/render! app)
 
   (tap> c/app)
 
@@ -303,6 +303,12 @@
 (comment
   (def app (mf/show! StoriesRADMembrane (comp/get-initial-state StoriesRADMembrane {})
              {:remotes {:remote (http/fulcro-http-remote {:url "http://localhost:3000/api"})}}))
+  (def app (mf/show! StoriesRADMembrane {}
+             {:remotes {:remote (http/fulcro-http-remote {:url "http://localhost:3000/api"})}}))
+  (def app (mf/show-sync! StoriesRADMembrane (comp/get-initial-state StoriesRADMembrane {})
+             {:remotes {:remote (http/fulcro-http-remote {:url "http://localhost:3000/api"})}}))
+
+  (app/render! app {:force-root? true})
 
   ;(tap> app)
   ;
@@ -325,5 +331,14 @@
     ;:story/id)
   ;(get-in "K3Y7GLlRfaBDsUWYD0WuXjH/byGbQnwaMWp+PEBoUZw=_16f28df90a3:1084059:c84ffc39")
 
+  (app/mount! app StoriesRADMembrane "app")
 
   0)
+
+#_(defn refresh []
+    ;; hot code reload of installed controls
+    (log/info "Reinstalling controls")
+    ;(setup-RAD app)
+    (comp/refresh-dynamic-queries! app)
+    (app/mount! app Root "app"))
+
