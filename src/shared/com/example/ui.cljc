@@ -93,31 +93,31 @@
         (when true ;logged-in?
           #?(:cljs
              (comp/fragment
-               (ui-dropdown {:className "item" :text "Account"}
-                 (ui-dropdown-menu {}
-                   (ui-dropdown-item {:onClick (fn [] (rroute/route-to! this AccountList {}))} "View All")
-                   (ui-dropdown-item {:onClick (fn [] (form/create! this AccountForm))} "New")))
-               (ui-dropdown {:className "item" :text "Inventory"}
-                 (ui-dropdown-menu {}
-                   (ui-dropdown-item {:onClick (fn [] (rroute/route-to! this InventoryReport {}))} "View All")
-                   (ui-dropdown-item {:onClick (fn [] (form/create! this ItemForm))} "New")))
-               (ui-dropdown {:className "item" :text "Invoices"}
-                 (ui-dropdown-menu {}
-                   (ui-dropdown-item {:onClick (fn [] (rroute/route-to! this InvoiceList {}))} "View All")
-                   (ui-dropdown-item {:onClick (fn [] (form/create! this InvoiceForm))} "New")
-                   (ui-dropdown-item {:onClick (fn [] (rroute/route-to! this AccountInvoices {:account/id (new-uuid 101)}))} "Invoices for Account 101")))
-               (ui-dropdown {:className "item" :text "Reports"}
-                 (ui-dropdown-menu {}
-                   (ui-dropdown-item {:onClick (fn [] (rroute/route-to! this dashboard/Dashboard {}))} "Dashboard")
-                   (ui-dropdown-item {:onClick (fn [] (rroute/route-to! this sales-report/RealSalesReport {}))} "Sales Report")
-                   (ui-dropdown-item {:onClick (fn [] (rroute/route-to! this mdetail/AccountList {}))} "Master Detail")))
-               (ui-dropdown {:className "item" :text "Button Toys"}
-                 (ui-dropdown-menu {}
-                   (ui-dropdown-item {:onClick (fn [] (dr/change-route! this ["button-test-1"] {}))} "Button Test 1")
-                   (ui-dropdown-item {:onClick (fn [] (rroute/route-to! this buttons/ButtonTest1b {}))} "Button Test 1b")
-                   (ui-dropdown-item {:onClick (fn [] (rroute/route-to! this buttons/ButtonTest2 {}))} "Button Test 2")
-                   (ui-dropdown-item {:onClick (fn [] (rroute/route-to! this buttons/ButtonTest3 {}))} "Button Test 3")
-                   (ui-dropdown-item {:onClick (fn [] (rroute/route-to! this buttons/ButtonTest3 {:ui/number2 (:ui/number2 props)}))} "Button Test 3a")))
+               #_(ui-dropdown {:className "item" :text "Account"}
+                   (ui-dropdown-menu {}
+                     (ui-dropdown-item {:onClick (fn [] (rroute/route-to! this AccountList {}))} "View All")
+                     (ui-dropdown-item {:onClick (fn [] (form/create! this AccountForm))} "New")))
+               #_(ui-dropdown {:className "item" :text "Inventory"}
+                   (ui-dropdown-menu {}
+                     (ui-dropdown-item {:onClick (fn [] (rroute/route-to! this InventoryReport {}))} "View All")
+                     (ui-dropdown-item {:onClick (fn [] (form/create! this ItemForm))} "New")))
+               #_(ui-dropdown {:className "item" :text "Invoices"}
+                   (ui-dropdown-menu {}
+                     (ui-dropdown-item {:onClick (fn [] (rroute/route-to! this InvoiceList {}))} "View All")
+                     (ui-dropdown-item {:onClick (fn [] (form/create! this InvoiceForm))} "New")
+                     (ui-dropdown-item {:onClick (fn [] (rroute/route-to! this AccountInvoices {:account/id (new-uuid 101)}))} "Invoices for Account 101")))
+               #_(ui-dropdown {:className "item" :text "Reports"}
+                   (ui-dropdown-menu {}
+                     (ui-dropdown-item {:onClick (fn [] (rroute/route-to! this dashboard/Dashboard {}))} "Dashboard")
+                     (ui-dropdown-item {:onClick (fn [] (rroute/route-to! this sales-report/RealSalesReport {}))} "Sales Report")
+                     (ui-dropdown-item {:onClick (fn [] (rroute/route-to! this mdetail/AccountList {}))} "Master Detail")))
+               #_(ui-dropdown {:className "item" :text "Button Toys"}
+                   (ui-dropdown-menu {}
+                     (ui-dropdown-item {:onClick (fn [] (dr/change-route! this ["button-test-1"] {}))} "Button Test 1")
+                     (ui-dropdown-item {:onClick (fn [] (rroute/route-to! this buttons/ButtonTest1b {}))} "Button Test 1b")
+                     (ui-dropdown-item {:onClick (fn [] (rroute/route-to! this buttons/ButtonTest2 {}))} "Button Test 2")
+                     (ui-dropdown-item {:onClick (fn [] (rroute/route-to! this buttons/ButtonTest3 {}))} "Button Test 3")
+                     (ui-dropdown-item {:onClick (fn [] (rroute/route-to! this buttons/ButtonTest3 {:ui/number2 (:ui/number2 props)}))} "Button Test 3a")))
                (ui-dropdown {:className "item" :text "Gene"}
                  (ui-dropdown-menu {}
                    (ui-dropdown-item {:onClick (fn [] (rroute/route-to! this stories/StoriesMain {}))} "Stories Main")
