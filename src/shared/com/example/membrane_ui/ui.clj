@@ -26,6 +26,7 @@
     [com.fulcrologic.fulcro.raw.application :as raw-app]
     [com.example.membrane-ui.http-remote :as http]
     [membrane.ui :as ui]
+    [com.fulcrologic.fulcro.ui-state-machines :as uism]
     [membrane.basic-components :as basic]
     membrane.component
     [membrane.fulcro :as mf
@@ -87,6 +88,7 @@
   {ro/title            "Stories RAD Report"
    ;ro/source-attribute :story/all-stories
    ro/source-attribute :story/first-page-stories
+   ro/paginate?           true
    ro/page-size 10
    ; this is a link query
    ro/query-inclusions    [:ui/loaded-data :ui/parameters
@@ -371,6 +373,10 @@
     ;(c/adrian-init)
     (report/run-report! app StoriesRADMembrane)
     (report/start-report! app StoriesRADMembrane))
+
+  (uism/trigger! app StoriesRADMembrane :event/run)
+  (uism/trigger! app (comp/get-ident (comp/registry-key->class :com.example.ui.trello-cards-report/ListCards)
+                       {}) :event/run)
 
   ;(rroute/route-to! this StoriesRADMembrane {})
   0)
