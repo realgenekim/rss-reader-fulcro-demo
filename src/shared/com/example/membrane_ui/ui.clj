@@ -374,9 +374,8 @@
     (report/run-report! app StoriesRADMembrane)
     (report/start-report! app StoriesRADMembrane))
 
-  (uism/trigger! app StoriesRADMembrane :event/run)
-  (uism/trigger! app (comp/get-ident (comp/registry-key->class :com.example.ui.trello-cards-report/ListCards)
-                       {}) :event/run)
+  (uism/trigger! app (comp/get-ident StoriesRADMembrane {}) :event/run)
+  (uism/trigger! app (comp/get-ident StoriesRADMembrane {}) :event/goto-page {:page 3})
 
   ;(rroute/route-to! this StoriesRADMembrane {})
   0)
