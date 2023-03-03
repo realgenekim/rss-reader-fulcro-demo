@@ -252,8 +252,8 @@
 
      (println :reload! :root root-class)
      ;(merge/merge-component! app root-class state)
-     (render-fn! root-class nil)
-     (println :reload! :render-fn render-fn!)
+     ;(render-fn! root-class nil)
+     ;(println :reload! :render-fn render-fn!)
 
      (def view-atom view-atom)
      (app/render! app {:force-root? true})

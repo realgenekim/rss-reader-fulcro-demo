@@ -41,17 +41,18 @@
 
 (comp/defsc Story [this {:story/keys [id author title]
                          :ui/keys [number]
-                         :as params}
+                         :as params}]
                    ; computed-factory: adds third argument
                    ; otherwise, component will disappear if you don't re-render parent
-                   {:keys [on-select selected]}]
+                   ;{:keys [on-select selected]}]
   ; change all to :story/id
   {:query [:story/id :story/author :story/title :ui/number]
    :ident :story/id}
   (ui/horizontal-layout
-    (let [text (format "%d. %s (%s)" number title author)]
-      (if (= id (:story/id selected))
-        (ui/label text)))))
+    (println :Story :params params)
+    (let [text (format "%d. %s (%s)" 0 title author)]
+      ;(if (= id (:story/id selected))
+      (ui/label text))))
   ;(dom/div :.item #_{:classes [(when (= id (:story/id selected))
   ;                               "right triangle icon")]}
   ;  {:id (str "story-" id)}
@@ -65,7 +66,8 @@
     ;      (dom/strong text)
     ;      text)))))
 
-(def ui-story (comp/computed-factory Story {:keyfn :story/id}))
+;(def ui-story (comp/computed-factory Story {:keyfn :story/id}))
+(def ui-story (comp/factory Story {:keyfn :story/id}))
 
 (defn tx-queue-size
   []
@@ -94,24 +96,49 @@
     (do
       (def props props)
       nil)
-    (ui/label "hello from stories RAD report  jdkfjkdXXXXX -----331123")
-    (ui/label "my props: " (str props))
+    (ui/label "RAD report")
 
-    (ui/label (str "my component current rows (this should match backdoor count): " (count current-rows)))
-    (ui/label (str "my component current rows: " current-rows))
-    (ui/label (str "backdoor report db: count: " (-> c/app :com.fulcrologic.fulcro.application/state-atom deref
-                                                   :com.fulcrologic.rad.report/id :com.example.membrane-ui.ui/StoriesRADMembrane
-                                                   :ui/current-rows count)))
+    ;(ui/label (str "my component current rows (this should match backdoor count): " (count current-rows)))
+    ;(ui/label (str "my component current rows: " current-rows))
+    ;(ui/label (str "backdoor report db: count: " (-> c/app :com.fulcrologic.fulcro.application/state-atom deref
+    ;                                               :com.fulcrologic.rad.report/id :com.example.membrane-ui.ui/StoriesRADMembrane
+    ;                                               :ui/current-rows count)
 
     (ui/label "\n\n")
-    (ui/label (str (->> current-rows first)))
-    (ui/label (str (->> current-rows second)))
+    ;(ui/label (str (->> current-rows first)))
+    ;(ui/label (str (->> current-rows second)))
+    ;
+    ;(println (first current-rows))
+
+    ;(def current-rows current-rows)
+
+    ;(ui/vertical-layout
+    ;  (ui-story (first current-rows)))
+    ;(for [s (->> current-rows (take 5))]
+    ; Adrian: 13m mark: nested component is rendering!!
+    ; 17m: got rows rendering
+    ;(component->view (ui-story (first current-rows)))
+
+
+    (apply
+      ui/vertical-layout
+      (->> (for [s (->> current-rows)]
+             (component->view (ui-story s)))
+           vec))
+
+
+
 
 
     (ui/label "\n\nother stats:")
     (ui/label (str "story: " (-> c/app :com.fulcrologic.fulcro.application/state-atom deref
                                :story/id (get-in "K3Y7GLlRfaBDsUWYD0WuXjH/byGbQnwaMWp+PEBoUZw=_16f28df90a3:1084059:c84ffc39"))))
     (ui/label (str "tx queue size: " (tx-queue-size)))))
+
+(comment
+  (first current-rows)
+  (ui-story (first current-rows))
+  0)
 
 ; adrian, I'm looking into database at 5m; backdoor
 ; - 10m: establishing current state
@@ -359,10 +386,13 @@
 
   0)
 
-#_(defn refresh []
-    ;; hot code reload of installed controls
-    (log/info "Reinstalling controls")
-    ;(setup-RAD app)
-    (comp/refresh-dynamic-queries! app)
-    (app/mount! app Root "app"))
+(defn refresh []
+  ;; hot code reload of installed controls
+  ;(log/info "Reinstalling controls")
+  ;(setup-RAD app)
+  ;(comp/refresh-dynamic-queries! app)
+  (mf/reload! app StoriesRADMembrane))
+  ;(app/mount! app Root "app"))
+
+(refresh)
 
