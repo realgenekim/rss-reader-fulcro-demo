@@ -75,17 +75,19 @@
   (-> c/app :com.fulcrologic.fulcro.application/runtime-atom deref :com.fulcrologic.fulcro.algorithms.tx-processing/active-queue
     count))
 
+(declare app)
+
 (defn get-report-state []
-  (-> app :com.fulcrologic.fulcro.application/state-atom deref :com.fulcrologic.fulcro.ui-state-machines/asm-id
+  (some-> app :com.fulcrologic.fulcro.application/state-atom deref :com.fulcrologic.fulcro.ui-state-machines/asm-id
     (get [:com.fulcrologic.rad.report/id :com.example.membrane-ui.ui/StoriesRADMembrane])
     :com.fulcrologic.fulcro.ui-state-machines/active-state))
 
 (report/defsc-report StoriesRADMembrane [this {:ui/keys [current-rows loaded-data parameters]
                                                :as props}]
   {ro/title            "Stories RAD Report"
-   ro/source-attribute :story/all-stories
+   ;ro/source-attribute :story/all-stories
+   ro/source-attribute :story/first-page-stories
    ro/page-size 10
-   ;ro/source-attribute :story/first-page-stories
    ; this is a link query
    ro/query-inclusions    [:ui/loaded-data :ui/parameters
                            ;:ui/sort-by :ui/show-word-cloud?
@@ -187,9 +189,11 @@
 
   (do
     (report/run-report! app StoriesRADMembrane)
-    (report/start-report! app StoriesRADMembrane))
+    (report/start-report! app StoriesRADMembrane)
+    nil)
 
   (com.fulcrologic.fulcro.algorithms.tx-processing/process-queue! c/app)
+  (report/reload!)
 
 
   (-> c/app :com.fulcrologic.fulcro.application/state-atom deref)
@@ -345,8 +349,6 @@
   #_(def app (mf/show-sync! StoriesRADMembrane (comp/get-initial-state StoriesRADMembrane {})
                {:remotes {:remote (http/fulcro-http-remote {:url "http://localhost:3000/api"})}}))
 
-  (app/render! app {:force-root? true})
-
   ; why is report not paginating?  stuck in gathering-parameters
 
   (-> app :com.fulcrologic.fulcro.application/state-atom deref :com.fulcrologic.fulcro.ui-state-machines/asm-id
@@ -380,7 +382,8 @@
   ;(log/info "Reinstalling controls")
   ;(setup-RAD app)
   ;(comp/refresh-dynamic-queries! app)
-  (mf/reload! app StoriesRADMembrane))
+  (if app
+    (mf/reload! app StoriesRADMembrane)))
   ;(app/mount! app Root "app"))
 
 (refresh)
