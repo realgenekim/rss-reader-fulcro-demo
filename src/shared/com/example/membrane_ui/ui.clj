@@ -23,6 +23,7 @@
     [com.fulcrologic.rad.report-options :as ro]
     [com.fulcrologic.rad.routing :as rroute]
     [com.fulcrologic.fulcro.algorithms.tx-processing-debug :as txd]
+    [com.fulcrologic.fulcro.raw.application :as raw-app]
     [com.example.membrane-ui.http-remote :as http]
     [membrane.ui :as ui]
     [membrane.basic-components :as basic]
@@ -33,6 +34,10 @@
              show!
              show-sync!]]
     [membrane.skia :as skia]))
+
+(comment
+  (raw-app/render! app {:force-root? true})
+  0)
 
 (comp/defsc Story [this {:story/keys [id author title]
                          :ui/keys [number]
@@ -89,7 +94,7 @@
     (do
       (def props props)
       nil)
-    (ui/label "hello from stories RAD report ii-----331123")
+    (ui/label "hello from stories RAD report  jdkfjkdXXXXX -----331123")
     (ui/label "my props: " (str props))
 
     (ui/label (str "my component current rows (this should match backdoor count): " (count current-rows)))
@@ -173,6 +178,7 @@
 
   (app/schedule-render! c/app {:force-root? true})
   (app/render! app)
+  (app/render! app {:force-root? true})
 
   (tap> c/app)
 
@@ -327,11 +333,29 @@
     (report/run-report! app StoriesRADMembrane)
     (report/start-report! app StoriesRADMembrane))
 
+  (-> mf/view-atom)
+  (app/remount! app StoriesRADMembrane)
+  (rawapp)
+
   (-> app :com.fulcrologic.fulcro.application/state-atom deref)
     ;:story/id)
   ;(get-in "K3Y7GLlRfaBDsUWYD0WuXjH/byGbQnwaMWp+PEBoUZw=_16f28df90a3:1084059:c84ffc39")
 
   (app/mount! app StoriesRADMembrane "app")
+  (mf/reload! app StoriesRADMembrane)
+
+  (comp/get-ident StoriesRADMembrane)
+  (merge/merge-component! app StoriesRADMembrane (-> app :com.fulcrologic.fulcro.application/state-atom deref))
+  (app/render! app)
+  (app/render! app {:force-root? true})
+
+  (-> StoriesRADMembrane :fulcro$options :render)
+  (-> app)
+  (tap> app)
+
+  (def render!
+    (-> app :com.fulcrologic.fulcro.application/algorithms :com.fulcrologic.fulcro.algorithm/render-root!))
+  (render! StoriesRADMembrane nil)
 
   0)
 

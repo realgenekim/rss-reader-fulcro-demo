@@ -16,6 +16,7 @@
 
              [com.example.membrane-ui.http-remote :as http]
              [com.fulcrologic.rad.application :as rad-app]
+             [com.fulcrologic.fulcro.raw.application :as raw-app]
              [membrane.skia :as skia])
   (:gen-class))
 
@@ -187,6 +188,9 @@
   ([root initial-state opts]
    (let [{:keys [app view-atom]} (mount! root opts)]
      (merge/merge-component! app root initial-state)
+
+     (def view-atom view-atom)
+
      (let [child-ident (comp/ident root initial-state)]
        (comp/transact! app [(set-child {:child-ident child-ident})])
 
@@ -194,6 +198,39 @@
 
        (skia/run #(deref view-atom))
        app))))
+
+
+
+(defn reload!
+  "Pop up a window of the component with the state"
+  ([app]
+   (let [state (-> app :com.fulcrologic.fulcro.application/state-atom deref)
+         {:com.fulcrologic.fulcro.application/keys [runtime-atom state-atom]} app
+         {:com.fulcrologic.fulcro.application/keys [root-factory root-class mount-node]} @runtime-atom
+         render-fn!
+            (-> app :com.fulcrologic.fulcro.application/algorithms :com.fulcrologic.fulcro.algorithm/render-root!)]
+         ;{::app/keys [root-class]} app]
+         ;{:keys [app view-atom]} (mount! root opts)]
+
+         ;(def render!
+         ;  (-> app :com.fulcrologic.fulcro.application/algorithms :com.fulcrologic.fulcro.algorithm/render-root!)
+
+     (println :reload! :root root-class)
+     ;(merge/merge-component! app root-class state)
+     (render-fn! root-class nil)
+     (println :reload! :render-fn render-fn!)
+
+     (def view-atom view-atom)
+     (app/render! app {:force-root? true})
+
+
+     #_(let [child-ident (comp/ident root initial-state)]
+         (comp/transact! app [(set-child {:child-ident child-ident})])
+
+         (app/render! app {:force-root? true})
+
+         (skia/run #(deref view-atom))
+         app))))
 
 (defn show-sync!
   ([root initial-state opts]
@@ -206,6 +243,28 @@
 
        (skia/run-sync #(deref view-atom))
        app))))
+
+
+
+
+#_(defn reload!
+    [app]
+    (let [{::app/keys [root]} app]
+          ;{:keys [app view-atom]} (mount! root opts)]
+      (println :reload! :root root)
+      (merge/merge-component! app root initial-state)
+
+      (def view-atom view-atom)
+
+      (let [child-ident (comp/ident root initial-state)]
+        (comp/transact! app [(set-child {:child-ident child-ident})])
+
+        (app/render! app {:force-root? true})
+
+        (skia/run #(deref view-atom))
+        app))
+
+    0)
 
 
 
