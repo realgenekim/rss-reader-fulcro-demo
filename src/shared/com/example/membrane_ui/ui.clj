@@ -40,21 +40,22 @@
   (raw-app/render! app {:force-root? true})
   0)
 
-(comp/defsc Story [this {:story/keys [id author title]
+(comp/defsc Story [this {:story/keys [id author title content]
                          ;:ui/keys [number]
                          :as params}
                    ; computed-factory: adds third argument
                    ; otherwise, component will disappear if you don't re-render parent
                    {:keys [on-select selected number]}]
   ; change all to :story/id
-  {:query [:story/id :story/author :story/title :ui/number]
+  {:query [:story/id :story/author :story/title :story/content :ui/number]
    :ident :story/id}
   (ui/horizontal-layout
     ;(println :Story :number number)
     ;(println :Story :params params)
     (let [text (format "%d. %s (%s)" number title author)]
-      ;(if (= id (:story/id selected))
-      (ui/label text))))
+    ;(let [text (format "%d. %s (%s): %.80s" number title author content)]
+     ;(if (= id (:story/id selected))
+     (ui/label text))))
   ;(dom/div :.item #_{:classes [(when (= id (:story/id selected))
   ;                               "right triangle icon")]}
   ;  {:id (str "story-" id)}
@@ -86,10 +87,10 @@
 (report/defsc-report StoriesRADMembrane [this {:ui/keys [current-rows loaded-data parameters]
                                                :as props}]
   {ro/title            "Stories RAD Report"
-   ro/source-attribute :story/all-stories
-   ;ro/source-attribute :story/first-page-stories
+   ;ro/source-attribute :story/all-stories
+   ro/source-attribute :story/first-page-stories
    ro/paginate?           true
-   ro/page-size 10
+   ro/page-size 30
    ; this is a link query
    ro/query-inclusions    [:ui/loaded-data :ui/parameters
                            ;:ui/sort-by :ui/show-word-cloud?
@@ -101,7 +102,7 @@
 
    ;ro/query-inclusions [{:current-story (comp/get-query FullStory)}]
    ro/row-pk           story-list/id
-   ro/columns          [story-list/author story-list/title story-list/pos]
+   ro/columns          [story-list/author story-list/title story-list/pos story-list/content]
 
    ro/run-on-mount?    true
    ro/route            "stories-rad2"}
@@ -110,7 +111,7 @@
     (do
       (def props props)
       nil)
-    (ui/label "RAD report 2")
+    (ui/label "RAD report 3 ------")
     (ui/label (str "Report State: " (get-report-state)))
 
     ;(ui/label (str "my component current rows (this should match backdoor count): " (count current-rows)))
@@ -357,6 +358,9 @@
     (get [:com.fulcrologic.rad.report/id :com.example.membrane-ui.ui/StoriesRADMembrane])
     :com.fulcrologic.fulcro.ui-state-machines/active-state)
 
+  (-> app :com.fulcrologic.fulcro.application/state-atom deref
+    :story/id first)
+
   ;(tap> app)
   ;
   ;(def app (show! StoriesRADMembrane (comp/get-initial-state StoriesRADMembrane {})))
@@ -372,7 +376,8 @@
   (do
     ;(c/adrian-init)
     (report/run-report! app StoriesRADMembrane)
-    (report/start-report! app StoriesRADMembrane))
+    (report/start-report! app StoriesRADMembrane)
+    nil)
 
   (uism/trigger! app (comp/get-ident StoriesRADMembrane {}) :event/run)
   (uism/trigger! app (comp/get-ident StoriesRADMembrane {}) :event/goto-page {:page 3})
