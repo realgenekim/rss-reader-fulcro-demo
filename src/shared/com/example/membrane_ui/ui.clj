@@ -86,8 +86,8 @@
 (report/defsc-report StoriesRADMembrane [this {:ui/keys [current-rows loaded-data parameters]
                                                :as props}]
   {ro/title            "Stories RAD Report"
-   ;ro/source-attribute :story/all-stories
-   ro/source-attribute :story/first-page-stories
+   ro/source-attribute :story/all-stories
+   ;ro/source-attribute :story/first-page-stories
    ro/paginate?           true
    ro/page-size 10
    ; this is a link query
@@ -376,6 +376,8 @@
 
   (uism/trigger! app (comp/get-ident StoriesRADMembrane {}) :event/run)
   (uism/trigger! app (comp/get-ident StoriesRADMembrane {}) :event/goto-page {:page 3})
+  (uism/trigger! app (comp/get-ident StoriesRADMembrane {}) :event/next-page)
+  (uism/trigger! app (comp/get-ident StoriesRADMembrane {}) :event/prior-page)
 
   ;(rroute/route-to! this StoriesRADMembrane {})
   0)
