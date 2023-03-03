@@ -75,6 +75,11 @@
   (-> c/app :com.fulcrologic.fulcro.application/runtime-atom deref :com.fulcrologic.fulcro.algorithms.tx-processing/active-queue
     count))
 
+(defn get-report-state []
+  (-> app :com.fulcrologic.fulcro.application/state-atom deref :com.fulcrologic.fulcro.ui-state-machines/asm-id
+    (get [:com.fulcrologic.rad.report/id :com.example.membrane-ui.ui/StoriesRADMembrane])
+    :com.fulcrologic.fulcro.ui-state-machines/active-state))
+
 (report/defsc-report StoriesRADMembrane [this {:ui/keys [current-rows loaded-data parameters]
                                                :as props}]
   {ro/title            "Stories RAD Report"
@@ -102,6 +107,7 @@
       (def props props)
       nil)
     (ui/label "RAD report 2")
+    (ui/label (str "Report State: " (get-report-state)))
 
     ;(ui/label (str "my component current rows (this should match backdoor count): " (count current-rows)))
     ;(ui/label (str "my component current rows: " current-rows))
@@ -180,8 +186,8 @@
   (report/reload! c/app StoriesRADMembrane)
 
   (do
-    (report/run-report! c/app StoriesRADMembrane)
-    (report/start-report! c/app StoriesRADMembrane))
+    (report/run-report! app StoriesRADMembrane)
+    (report/start-report! app StoriesRADMembrane))
 
   (com.fulcrologic.fulcro.algorithms.tx-processing/process-queue! c/app)
 
@@ -334,12 +340,18 @@
 (comment
   (def app (mf/show! StoriesRADMembrane (comp/get-initial-state StoriesRADMembrane {})
              {:remotes {:remote (http/fulcro-http-remote {:url "http://localhost:3000/api"})}}))
-  (def app (mf/show! StoriesRADMembrane {}
-             {:remotes {:remote (http/fulcro-http-remote {:url "http://localhost:3000/api"})}}))
-  (def app (mf/show-sync! StoriesRADMembrane (comp/get-initial-state StoriesRADMembrane {})
-             {:remotes {:remote (http/fulcro-http-remote {:url "http://localhost:3000/api"})}}))
+  #_(def app (mf/show! StoriesRADMembrane {}
+               {:remotes {:remote (http/fulcro-http-remote {:url "http://localhost:3000/api"})}}))
+  #_(def app (mf/show-sync! StoriesRADMembrane (comp/get-initial-state StoriesRADMembrane {})
+               {:remotes {:remote (http/fulcro-http-remote {:url "http://localhost:3000/api"})}}))
 
   (app/render! app {:force-root? true})
+
+  ; why is report not paginating?  stuck in gathering-parameters
+
+  (-> app :com.fulcrologic.fulcro.application/state-atom deref :com.fulcrologic.fulcro.ui-state-machines/asm-id
+    (get [:com.fulcrologic.rad.report/id :com.example.membrane-ui.ui/StoriesRADMembrane])
+    :com.fulcrologic.fulcro.ui-state-machines/active-state)
 
   ;(tap> app)
   ;
@@ -358,30 +370,7 @@
     (report/run-report! app StoriesRADMembrane)
     (report/start-report! app StoriesRADMembrane))
 
-  (-> mf/view-atom)
-  (app/remount! app StoriesRADMembrane)
-  (rawapp)
-
-  (-> app :com.fulcrologic.fulcro.application/state-atom deref)
-    ;:story/id)
-  ;(get-in "K3Y7GLlRfaBDsUWYD0WuXjH/byGbQnwaMWp+PEBoUZw=_16f28df90a3:1084059:c84ffc39")
-
-  (app/mount! app StoriesRADMembrane "app")
-  (mf/reload! app StoriesRADMembrane)
-
-  (comp/get-ident StoriesRADMembrane)
-  (merge/merge-component! app StoriesRADMembrane (-> app :com.fulcrologic.fulcro.application/state-atom deref))
-  (app/render! app)
-  (app/render! app {:force-root? true})
-
-  (-> StoriesRADMembrane :fulcro$options :render)
-  (-> app)
-  (tap> app)
-
-  (def render!
-    (-> app :com.fulcrologic.fulcro.application/algorithms :com.fulcrologic.fulcro.algorithm/render-root!))
-  (render! StoriesRADMembrane nil)
-
+  ;(rroute/route-to! this StoriesRADMembrane {})
   0)
 
 (defonce app nil)
