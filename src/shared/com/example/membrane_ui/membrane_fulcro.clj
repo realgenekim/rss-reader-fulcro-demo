@@ -199,21 +199,56 @@
        (skia/run #(deref view-atom))
        app))))
 
+(defn remount!
+  ([app root]
+   (let [
+         ;render-root! (fn [root _]
+         ;               (reset! view-atom
+         ;                 (fulcro-view
+         ;                   (partial dispatch! root)
+         ;                   (component->view root)
+         ;args (merge opts
+         ;       {:optimized-render! membrane-optimized-render!
+         ;        :render-root!      render-root!
+         ;_    (println :args args)
+         ;app  (stx/with-synchronous-transactions
+         ;       (rad-app/fulcro-rad-app args)
+         ;
+         root (make-root root)
+         root-factory (comp/factory root)]
+     (do
+       ;(app/initialize-state! app root)
 
+       (swap! (::app/runtime-atom app) assoc
+         ;; ::mount-node dom-node
+         ::app/root-factory root-factory
+         ::app/root-class root)))))
+       ;; (merge/merge-component! app root initial-state)
+       ;; (let [child-ident (comp/ident root initial-state)]
+       ;;   (comp/transact! app [(list `set-child {:child-ident child-ident})]))
+
+       ;; (app/update-shared! app)
+       ;; not doing anything right now
+       ;; (indexing/index-root! app)
+
+       ;; (app/render! app {:force-root? true})
+
+       ;; (skia/run #(deref view-atom) {:draw nil})
+       ;{:app app
+       ; :view-atom view-atom)))))
 
 (defn reload!
   "Pop up a window of the component with the state"
-  ([app]
+  ([app root]
+
+   (remount! app root)
+
    (let [state (-> app :com.fulcrologic.fulcro.application/state-atom deref)
          {:com.fulcrologic.fulcro.application/keys [runtime-atom state-atom]} app
          {:com.fulcrologic.fulcro.application/keys [root-factory root-class mount-node]} @runtime-atom
          render-fn!
             (-> app :com.fulcrologic.fulcro.application/algorithms :com.fulcrologic.fulcro.algorithm/render-root!)]
-         ;{::app/keys [root-class]} app]
-         ;{:keys [app view-atom]} (mount! root opts)]
 
-         ;(def render!
-         ;  (-> app :com.fulcrologic.fulcro.application/algorithms :com.fulcrologic.fulcro.algorithm/render-root!)
 
      (println :reload! :root root-class)
      ;(merge/merge-component! app root-class state)
