@@ -40,17 +40,18 @@
   0)
 
 (comp/defsc Story [this {:story/keys [id author title]
-                         :ui/keys [number]
-                         :as params}]
+                         ;:ui/keys [number]
+                         :as params}
                    ; computed-factory: adds third argument
                    ; otherwise, component will disappear if you don't re-render parent
-                   ;{:keys [on-select selected]}]
+                   {:keys [on-select selected number]}]
   ; change all to :story/id
   {:query [:story/id :story/author :story/title :ui/number]
    :ident :story/id}
   (ui/horizontal-layout
-    (println :Story :params params)
-    (let [text (format "%d. %s (%s)" 0 title author)]
+    ;(println :Story :number number)
+    ;(println :Story :params params)
+    (let [text (format "%d. %s (%s)" number title author)]
       ;(if (= id (:story/id selected))
       (ui/label text))))
   ;(dom/div :.item #_{:classes [(when (= id (:story/id selected))
@@ -66,20 +67,24 @@
     ;      (dom/strong text)
     ;      text)))))
 
-;(def ui-story (comp/computed-factory Story {:keyfn :story/id}))
-(def ui-story (comp/factory Story {:keyfn :story/id}))
+(def ui-story (comp/computed-factory Story {:keyfn :story/id}))
+;(def ui-story (comp/factory Story {:keyfn :story/id}))
 
 (defn tx-queue-size
   []
   (-> c/app :com.fulcrologic.fulcro.application/runtime-atom deref :com.fulcrologic.fulcro.algorithms.tx-processing/active-queue
     count))
 
-(report/defsc-report StoriesRADMembrane [this {:ui/keys [current-rows parameters]
+(report/defsc-report StoriesRADMembrane [this {:ui/keys [current-rows loaded-data parameters]
                                                :as props}]
   {ro/title            "Stories RAD Report"
-   ;ro/source-attribute :story/all-stories
-   ro/source-attribute :story/first-page-stories
+   ro/source-attribute :story/all-stories
+   ro/page-size 10
+   ;ro/source-attribute :story/first-page-stories
    ; this is a link query
+   ro/query-inclusions    [:ui/loaded-data :ui/parameters
+                           ;:ui/sort-by :ui/show-word-cloud?
+                           :ui/cache [:ui/cache :filtered-rows]]
    ;ro/query-inclusions [
                         ;{[:current-story '_] (comp/get-query FullStory)}
                         ;{[:ui/current-position '_] (comp/get-query CurrentPosition)}
@@ -96,7 +101,7 @@
     (do
       (def props props)
       nil)
-    (ui/label "RAD report")
+    (ui/label "RAD report 2")
 
     ;(ui/label (str "my component current rows (this should match backdoor count): " (count current-rows)))
     ;(ui/label (str "my component current rows: " current-rows))
@@ -105,29 +110,21 @@
     ;                                               :ui/current-rows count)
 
     (ui/label "\n\n")
-    ;(ui/label (str (->> current-rows first)))
-    ;(ui/label (str (->> current-rows second)))
-    ;
-    ;(println (first current-rows))
-
-    ;(def current-rows current-rows)
-
-    ;(ui/vertical-layout
-    ;  (ui-story (first current-rows)))
-    ;(for [s (->> current-rows (take 5))]
     ; Adrian: 13m mark: nested component is rendering!!
     ; 17m: got rows rendering
+    ; 23m: got row numbers working
+    ; 27m: rendering all 7000 stories!
     ;(component->view (ui-story (first current-rows)))
+
+    (println :StoriesRADMembrane :counts (count current-rows) (count loaded-data))
 
 
     (apply
       ui/vertical-layout
-      (->> (for [s (->> current-rows)]
-             (component->view (ui-story s)))
-           vec))
-
-
-
+      (->> current-rows
+        (map-indexed (fn [idx itm]
+                       (let [m (assoc itm :story/number idx)]
+                         (component->view (ui-story m {:number idx})))))))
 
 
     (ui/label "\n\nother stats:")
@@ -207,7 +204,7 @@
   (app/render! app)
   (app/render! app {:force-root? true})
 
-  (tap> c/app)
+  (tap> app)
 
   (com.fulcrologic.fulcro.algorithms.tx-processing/activate-submissions! c/app)
   ()
@@ -267,9 +264,9 @@
 (comment
   ; Adrian, here's how to get the app bootstrapped.
   (do
-    (c/adrian-init)
-    (report/run-report! c/app StoriesRADMembrane)
-    (report/start-report! c/app StoriesRADMembrane))
+    ;(c/adrian-init)
+    (report/run-report! app StoriesRADMembrane)
+    (report/start-report! app StoriesRADMembrane))
 
   (-> c/app :com.fulcrologic.fulcro.application/state-atom deref
     :story/id)
@@ -278,7 +275,7 @@
 
   ; end
   c/app
-  (tap> c/app)
+  (tap> app)
 
   ;(def app (show! TodoList (comp/get-initial-state TodoList {:todo-list/id (uuid)})))
 
@@ -302,6 +299,7 @@
   (skia/run #'dev-view)
 
   (def state-map (-> c/app :com.fulcrologic.fulcro.application/state-atom deref))
+  (-> app :com.fulcrologic.fulcro.application/state-atom deref :story/id count)
   (comp/get-initial-state Root)
   (comp/get-query Root)
 
@@ -385,6 +383,8 @@
   (render! StoriesRADMembrane nil)
 
   0)
+
+(defonce app nil)
 
 (defn refresh []
   ;; hot code reload of installed controls
