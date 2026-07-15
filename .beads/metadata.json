@@ -1,0 +1,7 @@
+{
+  "database": "dolt",
+  "backend": "dolt",
+  "dolt_mode": "embedded",
+  "dolt_database": "feedly_fulcro",
+  "project_id": "4fbd696d-8907-4262-b1d3-6389db3fa157"
+}
